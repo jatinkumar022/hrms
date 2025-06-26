@@ -15,10 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "antd";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LuDownload } from "react-icons/lu";
-import { FaEye, FaPen, FaClockRotateLeft } from "react-icons/fa6";
 import {
   flexRender,
   getCoreRowModel,

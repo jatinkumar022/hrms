@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-const menus: Record<string, { label: string; slug: string }[] | null> = {
+export const menus: Record<string, { label: string; slug: string }[] | null> = {
   Personal: [
     { label: "Basic Info", slug: "basic" },
     { label: "Family Info", slug: "family" },
