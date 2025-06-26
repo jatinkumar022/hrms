@@ -204,7 +204,7 @@ const ApplyLeavePage = () => {
       <div className="flex justify-between p-3 px-4 items-center border-b">
         <div className="flex gap-2">
           <div className="min-w-9">
-            <img
+            <Image
               src="https://thumbor.superworks.com/unsafe/48x48/filters:quality(80)/https://files.superworks.com/profileImages/8lFl0kUNHz.jpeg"
               alt=""
               className="rounded-full w-9"

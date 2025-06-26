@@ -2,6 +2,7 @@ import { Bell } from "@geist-ui/icons";
 
 import { ThemeToggle } from "../ui/darkmode";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Navbar() {
   return (
@@ -21,7 +22,7 @@ export default function Navbar() {
             className="relative w-10 h-10 rounded-full bg-green-500 p-[1px] cursor-pointer"
           >
             <div className="w-full h-full dark:bg-black bg-white rounded-full p-[2px]">
-              <img
+              <Image
                 src="https://i.pravatar.cc/300"
                 alt="Profile"
                 className="w-full h-full object-cover rounded-full"
