@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -22,6 +22,7 @@ import { signupUser } from "@/redux/slices/signupSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import ButtonLoader from "@/components/loaders/ButtonLoader";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { useTheme } from "next-themes";
 const schema = z.object({
   username: z.string().min(1, "Username is required"),
   email: z.string().min(1, "Email is required").email(),
@@ -35,7 +36,11 @@ export default function SignupPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setTheme } = useTheme();
 
+  useEffect(() => {
+    setTheme("light"); // Force light theme
+  }, []);
   const {
     register,
     handleSubmit,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -22,6 +22,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { loginUser } from "@/redux/slices/loginSlice";
 import ButtonLoader from "@/components/loaders/ButtonLoader";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { useTheme } from "next-themes";
 
 const schema = z.object({
   email: z.string().min(1, "Email is required").email(),
@@ -33,7 +34,11 @@ type FormData = z.infer<typeof schema>;
 export default function LoginPage() {
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector((state) => state.login);
+  const { setTheme } = useTheme();
 
+  useEffect(() => {
+    setTheme("light"); // Force light theme
+  }, []);
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -62,7 +67,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row">
+    <div className=" min-h-screen w-full flex flex-col lg:flex-row">
       <div className="relative w-full lg:w-[40%] lg:min-w-md  text-white flex flex-col justify-between p-10 lg:p-4 ">
         <Image
           src={backgroundImage}

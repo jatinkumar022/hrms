@@ -8,6 +8,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Avatar from "@/assets/AVATAR.jpg";
+
 export const menus: Record<string, { label: string; slug: string }[] | null> = {
   Personal: [
     { label: "Basic Info", slug: "basic" },
@@ -46,13 +48,11 @@ export default function Sidebar({
         </div>
         <div className="flex flex-col items-center mt-10 ">
           <Image
-            src="https://thumbor.superworks.com/unsafe/96x96/filters:quality(80)/https://files.superworks.com/profileImages/Z5fsQo8K1d.jpeg"
+            src={Avatar}
             alt="Profile"
             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm p-1 z-20"
           />
-          <h2 className="font-semibold text-xl text-zinc-800">
-            Anil Prajapati
-          </h2>
+          <h2 className="font-semibold text-xl text-zinc-800">Jatin Ramani</h2>
           <span className="text-xs text-zinc-500">
             Software Engineer | React Developer
           </span>

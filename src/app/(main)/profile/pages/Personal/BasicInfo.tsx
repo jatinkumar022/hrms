@@ -75,7 +75,7 @@ export default function BasicInfo() {
   });
   useEffect(() => {
     dispatch(fetchPersonalInfo());
-  });
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -83,7 +83,8 @@ export default function BasicInfo() {
       reset(fetchedData);
     }
     setLoading(false);
-  }, [fetchedData, reset]);
+  }, [fetchedData]);
+
   const onSubmit = async (formData: PersonalInfoFormData) => {
     setLoading(true);
 
