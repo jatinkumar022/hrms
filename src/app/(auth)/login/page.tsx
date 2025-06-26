@@ -55,7 +55,7 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     const toastId = toast.loading("Signing in…");
     try {
-      const result = await dispatch(loginUser(data)).unwrap();
+      await dispatch(loginUser(data)).unwrap();
       toast.success("Logged in!", { id: toastId });
       router.push("/");
     } catch (err: any) {
