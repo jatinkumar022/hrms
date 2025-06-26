@@ -171,4 +171,6 @@ const MyEarlyOut: React.FC<EarlyOutTableProps> = ({
   );
 };
 
-export default MyEarlyOut;
+export default function Page() {
+  return <MyEarlyOut />;
+}
