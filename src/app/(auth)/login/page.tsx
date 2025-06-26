@@ -57,9 +57,6 @@ export default function LoginPage() {
     try {
       const result = await dispatch(loginUser(data)).unwrap();
       toast.success("Logged in!", { id: toastId });
-
-      console.log("result", result);
-
       router.push("/");
     } catch (err: any) {
       toast.error(err || "Login failed", { id: toastId });

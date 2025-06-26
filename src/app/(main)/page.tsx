@@ -16,7 +16,7 @@ import DashboardOverview from "@/components/Dashboard/DashboardOverview";
 import DashboardDetails from "@/components/Dashboard/DashboardDetails";
 import { useEffect, useState } from "react";
 import type { AttendanceStatus, DashboardData } from "@/lib/types";
-
+import Avatar from "@/assets/AVATAR.jpg";
 const timeEntries = [
   {
     label: "Clock In",
@@ -242,7 +242,7 @@ export default function Dashboard() {
             <div className="relative z-10 flex flex-col items-center pt-10">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white ">
                 <Image
-                  src="https://files.superworks.com/profileImages/8lFl0kUNHz.jpeg"
+                  src={Avatar}
                   alt="Jatin Ramani"
                   className="w-full h-full object-cover"
                 />

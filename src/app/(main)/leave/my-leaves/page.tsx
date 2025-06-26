@@ -30,7 +30,7 @@ import Navratri from "@/assets/Events/NavRatriIcon";
 import DiwaliIcon from "@/assets/Events/DiwaliIcon";
 import Link from "next/link";
 import { hexToRGBA } from "@/lib/utils";
-
+import Avatar from "@/assets/AVATAR.jpg";
 const LeaveCard = ({
   title,
   id,
@@ -204,11 +204,7 @@ export default function ApplyLeavePage() {
       <div className="flex justify-between p-3 px-4 items-center border-b">
         <div className="flex gap-2">
           <div className="min-w-9">
-            <Image
-              src="https://thumbor.superworks.com/unsafe/48x48/filters:quality(80)/https://files.superworks.com/profileImages/8lFl0kUNHz.jpeg"
-              alt=""
-              className="rounded-full w-9"
-            />
+            <Image src={Avatar} alt="" className="rounded-full w-9" />
           </div>
           <div>
             <div className="font-semibold text-sm">Jatin Ramani</div>

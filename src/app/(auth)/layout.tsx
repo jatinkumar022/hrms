@@ -1,21 +1,27 @@
+import type { Metadata } from "next";
 import "../globals.css";
-import { ThemeProvider } from "next-themes";
-import { Toaster } from "@/components/ui/sonner";
 import ReduxProvider from "@/lib/redux-provider";
+import { Toaster } from "@/components/ui/sonner";
 
-export default function AuthLayout({
+export const metadata: Metadata = {
+  title: "Your App Title",
+  description: "Your app description",
+};
+
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <ReduxProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <main className="flex items-center justify-center min-h-screen ">
+    <html lang="en" className="h-full">
+      <body className="h-full">
+        <ReduxProvider>
+          {/* Your app UI here */}
           {children}
-        </main>
-        <Toaster richColors />
-      </ThemeProvider>
-    </ReduxProvider>
+          <Toaster richColors />
+        </ReduxProvider>
+      </body>
+    </html>
   );
 }
