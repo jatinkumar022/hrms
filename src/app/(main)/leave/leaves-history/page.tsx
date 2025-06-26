@@ -29,9 +29,6 @@ import {
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 
-/* ------------------------------------------------------------------ */
-/* 1️⃣  Mock data                                                       */
-/* ------------------------------------------------------------------ */
 export interface LeaveRow {
   id: number;
   type: string;
@@ -40,7 +37,7 @@ export interface LeaveRow {
   days: string;
   added: string;
   reason: string;
-  actionBy: string; // "Name\nDateTime"
+  actionBy: string;
   status: "Approved" | "Pending" | "Rejected";
 }
 
@@ -102,9 +99,6 @@ export const leaveRows: LeaveRow[] = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/* 2️⃣  Column definition                                               */
-/* ------------------------------------------------------------------ */
 import { ColumnDef } from "@tanstack/react-table";
 
 export const leaveColumns: ColumnDef<LeaveRow>[] = [
@@ -183,9 +177,6 @@ export const leaveColumns: ColumnDef<LeaveRow>[] = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/* 3️⃣  Helper utils                                                    */
-/* ------------------------------------------------------------------ */
 const csvOf = (rows: LeaveRow[]) => {
   if (!rows.length) return "";
   const header = Object.keys(rows[0])
@@ -200,9 +191,6 @@ const csvOf = (rows: LeaveRow[]) => {
   return [header, ...lines].join("\n");
 };
 
-/* ------------------------------------------------------------------ */
-/* 4️⃣  Component                                                       */
-/* ------------------------------------------------------------------ */
 export default function LeaveHistoryTable() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("2025");

@@ -1,7 +1,5 @@
 import React from "react";
 
-const MyStatusReport = () => {
+export default function MyStatusReport() {
   return <div>MyStatusReport</div>;
-};
-
-export default MyStatusReport;
+}

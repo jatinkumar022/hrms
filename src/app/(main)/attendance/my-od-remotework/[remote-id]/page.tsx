@@ -9,15 +9,7 @@ import { Label } from "@/components/ui/label";
 import { DatePickerWithLabel } from "@/components/ui/datepicker";
 import Image from "next/image";
 
-/**
- * RemoteRequest – Remote / WFH request form
- *
- * Behaviour
- * 1. By default it shows a single‑day, full‑day request (screenshot‑1)
- * 2. Ticking ➜ “hourly request” switches the row to Start / End time & live duration (screenshot‑2)
- * 3. Clicking “MORE THAN ONE DAY?” toggles an extra **To Date** input
- */
-const RemoteRequest: React.FC = () => {
+export default function RemoteRequest() {
   const [isHourly, setIsHourly] = useState(false);
   const [multiDay, setMultiDay] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -223,6 +215,4 @@ const RemoteRequest: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default RemoteRequest;
+}

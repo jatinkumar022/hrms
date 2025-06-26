@@ -9,7 +9,7 @@ import { attendanceData } from "../components/data";
 import TimesheetDrawer from "../components/TimeSheetDrawer/TimesheetDrawer";
 const { RangePicker } = DatePicker;
 import type { DatePresetItem } from "@/lib/types";
-const MyAttendance = () => {
+export default function MyAttendance() {
   const [openDrawer, setOpenDrawer] = useState<any>(undefined); // or a specific type like `Attendance | null`
   const [selectedRange, setSelectedRange] = useState<any>(null);
 
@@ -90,6 +90,4 @@ const MyAttendance = () => {
       <TimesheetDrawer open={openDrawer} onClose={() => setOpenDrawer(false)} />
     </div>
   );
-};
-
-export default MyAttendance;
+}

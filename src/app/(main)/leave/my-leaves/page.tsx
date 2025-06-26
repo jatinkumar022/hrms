@@ -193,7 +193,7 @@ const leaveCards = [
   },
 ];
 
-const ApplyLeavePage = () => {
+export default function ApplyLeavePage() {
   const onChange = (value: string) => {
     console.log(`selected ${value}`);
   };
@@ -293,6 +293,4 @@ const ApplyLeavePage = () => {
       </div>
     </div>
   );
-};
-
-export default ApplyLeavePage;
+}

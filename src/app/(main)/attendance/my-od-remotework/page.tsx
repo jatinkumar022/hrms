@@ -10,7 +10,7 @@ import { DatePresetItem, RemoteRequest } from "@/lib/types";
 import type { DateRange } from "react-day-picker";
 const { RangePicker } = DatePicker;
 
-const MyRemoteWork = () => {
+export default function MyRemoteWork() {
   const [selectedRange, setSelectedRange] = useState<DateRange | null>(null);
   const [isActive, setIsActive] = useState<string | undefined>(undefined);
   const route = useRouter();
@@ -89,6 +89,4 @@ const MyRemoteWork = () => {
       </div>
     </div>
   );
-};
-
-export default MyRemoteWork;
+}

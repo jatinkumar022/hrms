@@ -179,4 +179,6 @@ const MyLateIn: React.FC<LateInTableProps> = ({
   );
 };
 
-export default MyLateIn;
+export default function Page() {
+  return <MyLateIn />;
+}
