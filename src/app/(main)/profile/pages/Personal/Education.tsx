@@ -5,6 +5,14 @@ import Input from "@/components/ui/meterialInput";
 import { Button } from "@/components/ui/button";
 import { IoMdAdd } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
+type EducationField =
+  | "degree"
+  | "university"
+  | "board"
+  | "passingYear"
+  | "percentage"
+  | "remarks";
+
 export default function EducationInfo() {
   const [educations, setEducations] = useState([
     {
@@ -35,7 +43,7 @@ export default function EducationInfo() {
     setEducations(educations.filter((_, i) => i !== index));
   };
 
-  const updateField = (index: number, field: string, value: string) => {
+  const updateField = (index: number, field: EducationField, value: string) => {
     const updated = [...educations];
     updated[index][field] = value;
     setEducations(updated);

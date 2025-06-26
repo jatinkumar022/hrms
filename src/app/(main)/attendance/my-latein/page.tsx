@@ -45,8 +45,7 @@ const MyLateIn: React.FC<LateInTableProps> = ({
   onView = () => {},
 }) => {
   const [selectedRange, setSelectedRange] = useState<any[]>([]);
-  const [isActive, setIsActive] = useState<string>("");
-
+  const [isActive, setIsActive] = useState<string | undefined>(undefined);
   const handlePresetClick = (preset: any) => {
     setIsActive(preset.label);
     setSelectedRange(preset.value);

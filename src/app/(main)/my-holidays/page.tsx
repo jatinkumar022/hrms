@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Card } from "@/components/ui/card";
 import { useState } from "react";
 import Raxabandhan from "@/assets/Events/RaxabandhanIcon";
 import Round from "@/assets/Events/RoundIcon";

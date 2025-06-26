@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -32,25 +32,21 @@ type FormData = z.infer<typeof schema>;
 
 export default function LoginPage() {
   const dispatch = useAppDispatch();
-  const { isLoading, isError, errorMessage } = useAppSelector(
-    (state) => state.login
-  );
+  const { isLoading } = useAppSelector((state) => state.login);
 
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-  // --- 2) Setup RHF with Zod
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    mode: "onChange", // <-- add this
+    mode: "onChange",
     reValidateMode: "onChange",
   });
 
-  // --- 3) Submit handler
   const onSubmit = async (data: FormData) => {
     const toastId = toast.loading("Signing in…");
     try {
@@ -67,14 +63,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row">
-      {/* Left Side */}
       <div className="relative w-full lg:w-[40%] lg:min-w-md  text-white flex flex-col justify-between p-10 lg:p-4 ">
         <Image
           src={backgroundImage}
           alt=""
           className="absolute top-0 left-0 bg-accent-foreground w-full h-full object-cover -z-10"
         ></Image>
-        {/* Welcome + logo */}
         <div className="text-center lg:pt-8">
           <Image
             src={mainIcon}
@@ -98,10 +92,10 @@ export default function LoginPage() {
               cy="50"
               r="48"
               fill="none"
-              stroke="#6B7280" // Tailwind's gray-500
+              stroke="#6B7280"
               strokeWidth="0.5"
-              strokeDasharray="2,1" // Longer dash + more spacing
-              transform="rotate(-90 50 50)" // Starts top center
+              strokeDasharray="2,1"
+              transform="rotate(-90 50 50)"
             />
           </svg>
           <div className="absolute inset-0 orbit-spin z-10 ">

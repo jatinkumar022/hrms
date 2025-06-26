@@ -73,14 +73,13 @@ export default function ApplyLeavePage() {
   const [multiDay, setMultiDay] = useState(false);
   const [fromDate, setFromDate] = useState<Date | null>(new Date());
   const [toDate, setToDate] = useState<Date | null>(null);
-  const [slot, setSlot] = useState<"FULL" | "HALF">("FULL");
   const [slotsPerDay, setSlotsPerDay] = useState<
     Record<string, "FULL" | "HALF">
   >({});
 
   useEffect(() => {
     if (routeLeave !== leaveType) router.replace(`/apply-leave/${leaveType}`);
-  }, [leaveType]);
+  }, [leaveType, routeLeave, router]);
   const leaveOpts = Object.entries(leaveCatalog).map(([key, v]) => ({
     label: v.name,
     value: key,
@@ -121,7 +120,7 @@ export default function ApplyLeavePage() {
       [date]: slot,
     }));
   };
-  const currentLeave = leaveCatalog[leaveType];
+
   return (
     <div>
       {/* =============================== LEFT FORM =============================== */}

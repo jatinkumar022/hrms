@@ -12,6 +12,12 @@ import BasicInfo from "./pages/Personal/BasicInfo";
 import { useState } from "react";
 import { pageComponents } from "./pageComponents";
 import { CgMathPlus } from "react-icons/cg";
+
+interface SharedProps {
+  dialogOpen?: boolean;
+  setDialogOpen?: (open: boolean) => void;
+}
+
 export default function ProfilePage() {
   const [selectedPage, setSelectedPage] = useState("basic");
   const [dialogOpen, setDialogOpen] = useState<Record<string, boolean>>({
@@ -27,7 +33,7 @@ export default function ProfilePage() {
     }, {});
 
   const SelectedComponent = pageComponents[selectedPage] ?? BasicInfo;
-  const sharedProps: Record<string, any> = {};
+  const sharedProps: SharedProps = {};
   const pagesWithAdd = ["personaldocuments", "officialdocuments"];
   const showAddButton = pagesWithAdd.includes(selectedPage);
 

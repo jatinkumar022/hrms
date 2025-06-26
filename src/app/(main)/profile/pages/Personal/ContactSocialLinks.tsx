@@ -13,8 +13,8 @@ export default function ContactSocialLinks() {
       <section>
         <h2 className="font-semibold text-lg mb-4">Contact Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <MobileInput label="Personal Mobile" />
-          <MobileInput label="Emergency Contact" />
+          <MobileInput label="Personal Mobile" id="personal" />
+          <MobileInput label="Emergency Contact" id="emergency" />
           <Input label="Personal Email" type="email" />
           <Input
             label="Official Email"

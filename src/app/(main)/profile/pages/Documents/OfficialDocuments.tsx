@@ -1,6 +1,5 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,28 +18,22 @@ import {
 } from "@/components/ui/select";
 import { FaPaperclip, FaEdit } from "react-icons/fa";
 import FileUpload from "@/components/ui/FileUpload";
-
+import Image from "next/image";
 type Props = {
-  dialogOpen: boolean;
-  setDialogOpen: (open: boolean) => void;
+  dialogOpen?: boolean;
+  setDialogOpen?: (open: boolean) => void;
 };
-
 export default function OfficialDocuments({
   dialogOpen,
   setDialogOpen,
 }: Props) {
-  /** Master state */
   const [documents, setDocuments] = useState<
     { name: string; number: string; file: File | null }[]
   >([]);
-
-  /** Form state */
   const [docType, setDocType] = useState("");
   const [docNumber, setDocNumber] = useState("");
   const [docFile, setDocFile] = useState<File | null>(null);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-
-  /** Label mapping */
   const docLabel: Record<string, string> = {
     offer: "Offer Letter",
     experience: "Experience Letter",
@@ -48,21 +41,16 @@ export default function OfficialDocuments({
     relieving: "Relieving Letter",
     idcard: "Employee ID Card",
   };
-
   const labelToKey = (label: string): string =>
     Object.entries(docLabel).find(([, val]) => val === label)?.[0] || label;
-
-  /** Form submit handler */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!docType || !docNumber) return;
-
     const newDoc = {
       name: docLabel[docType] ?? docType,
       number: docNumber,
       file: docFile,
     };
-
     if (editIndex !== null) {
       const updated = [...documents];
       updated[editIndex] = newDoc;
@@ -70,15 +58,12 @@ export default function OfficialDocuments({
     } else {
       setDocuments((prev) => [...prev, newDoc]);
     }
-
-    // Reset form
     setDocType("");
     setDocNumber("");
     setDocFile(null);
     setEditIndex(null);
-    setDialogOpen(false);
+    setDialogOpen?.(false);
   };
-
   /** Open edit dialog with values */
   const handleEdit = (index: number) => {
     const doc = documents[index];
@@ -86,9 +71,8 @@ export default function OfficialDocuments({
     setDocNumber(doc.number);
     setDocFile(doc.file);
     setEditIndex(index);
-    setDialogOpen(true);
+    setDialogOpen?.(true);
   };
-
   return (
     <div>
       {/* ===== Table ===== */}
@@ -116,7 +100,7 @@ export default function OfficialDocuments({
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <img
+                          <Image
                             src={URL.createObjectURL(d.file)}
                             alt={d.file.name}
                             className="w-10 h-10 rounded object-cover border"
@@ -153,7 +137,6 @@ export default function OfficialDocuments({
           </tbody>
         </table>
       </div>
-
       {/* ===== Dialog Form ===== */}
       <Dialog
         open={dialogOpen}
@@ -164,7 +147,7 @@ export default function OfficialDocuments({
             setDocFile(null);
             setEditIndex(null);
           }
-          setDialogOpen(open);
+          setDialogOpen?.(open);
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -173,7 +156,6 @@ export default function OfficialDocuments({
               {editIndex !== null ? "Edit Document" : "Add Official Document"}
             </DialogTitle>
           </DialogHeader>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
               <Label>Document Type</Label>
@@ -190,7 +172,6 @@ export default function OfficialDocuments({
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-1">
               <Label>Reference / Number</Label>
               <Input
@@ -200,7 +181,6 @@ export default function OfficialDocuments({
                 onChange={(e) => setDocNumber(e.target.value)}
               />
             </div>
-
             <div className="space-y-1">
               <Label>Attachment</Label>
               <FileUpload file={docFile} onChange={setDocFile} />
@@ -208,13 +188,12 @@ export default function OfficialDocuments({
                 Supported: JPG, PNG, PDF
               </p>
             </div>
-
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setDialogOpen(false);
+                  setDialogOpen?.(false);
                   setEditIndex(null);
                 }}
               >

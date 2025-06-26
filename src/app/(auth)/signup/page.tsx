@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -18,7 +17,6 @@ import mainIcon2 from "@/assets/auth/u3fyyxlm.png";
 import backgroundImage from "@/assets/auth/bg.svg";
 import { RiCheckDoubleFill } from "react-icons/ri";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { loginUser } from "@/redux/slices/loginSlice";
 import { signupUser } from "@/redux/slices/signupSlice";
 import { useAppDispatch } from "@/lib/hooks";
@@ -54,7 +52,7 @@ export default function SignupPage() {
       await dispatch(signupUser(data)).unwrap();
       toast.success("Account created!", { id: toastId });
 
-      const loginResult = await dispatch(
+      await dispatch(
         loginUser({ email: data.email, password: data.password })
       ).unwrap();
 
@@ -286,7 +284,7 @@ export default function SignupPage() {
             <h2 className="text-2xl font-semibold text-gray-700">Sign Up</h2>
             <div className="w-7 h-1 bg-orange-400 my-2 rounded" />
             <p className="text-base text-gray-500">
-              Let's get started with your free account.
+              Let&apos;s get started with your free account.
             </p>
           </div>
 

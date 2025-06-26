@@ -1,8 +1,5 @@
 "use client";
 
-// ---------------------------------------------------------------------------
-// Dashboard – pixel‑perfect cards with static icons & dark‑mode support
-// ---------------------------------------------------------------------------
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FaHandshakeAngle, FaPersonWalkingLuggage } from "react-icons/fa6";
 import { LuStethoscope } from "react-icons/lu";
@@ -25,16 +22,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import React from "react";
 import DailyTimeChart from "./Chart";
 import Link from "next/link";
-/* -------------------------------------------------------------------------- */
-/*                               Data contracts                               */
-/* -------------------------------------------------------------------------- */
+import { AttendanceStatus } from "@/lib/types";
+import type { DashboardData } from "@/lib/types";
+
 export interface LateArrival {
   /** e.g. "00 H : 03 M" */
   duration: string;
@@ -43,50 +38,22 @@ export interface LateArrival {
 }
 
 export interface AttendanceItem {
-  label: string; // Present | Absent | Late In | Early Out | Penalty
+  label: string;
   value: number | string;
 }
 
 export interface LeaveItem {
-  label: string; // Leave without pay | Earn leave | …
+  label: string;
   balance: number | string;
   booked: number | string;
 }
-export interface DashboardData {
-  lateArrivals: LateArrival[];
-  attendance: AttendanceItem[];
-  leaves: LeaveItem[];
-  upcomingHolidays: string[];
-  attendanceRecords: AttendanceRecord[]; // ✅ Add this
-}
 
-/* -------------------------------------------------------------------------- */
-/*                             Static icon mapper                             */
-/* -------------------------------------------------------------------------- */
 const leaveIconMap = {
   "Leave without pay": <RiFlightTakeoffFill className="text-green-600" />,
   "Earn leave": <FaHandshakeAngle className="text-green-600" />,
   "Sick leave": <LuStethoscope className="text-yellow-600" />,
   "Casual leave": <FaPersonWalkingLuggage className="text-rose-600" />,
 };
-
-/* -------------------------------------------------------------------------- */
-/*                               Main component                               */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Every possible attendance status we support.
- */
-export type AttendanceStatus =
-  | "present"
-  | "holiday"
-  | "absent"
-  | "leave"
-  | "remote-work"
-  | "missing-clock-out"
-  | "late-in"
-  | "early-out"
-  | "weekend";
 
 /**
  * One attendance record for a single calendar day.
@@ -96,14 +63,6 @@ export interface AttendanceRecord {
   date: string;
   /** One or more statuses applicable to the day. */
   statuses: AttendanceStatus[];
-}
-
-interface AttendanceCalendarProps {
-  /** Any date inside the month you want to render. */
-  month: Date;
-  /** Raw attendance data for the month. */
-  records: AttendanceRecord[];
-  /** Whether to show the small “?” legend icon in the header. */
 }
 
 const statusStyles: Record<AttendanceStatus, string> = {
@@ -138,7 +97,7 @@ const weekdayLabels = [
   "Sat",
 ] as const;
 export default function DashboardOverview({ data }: { data: DashboardData }) {
-  const month = new Date(); // Or pass it as a prop if dynamic
+  const month = new Date();
 
   const recordMap = React.useMemo(() => {
     const map: Record<string, AttendanceStatus[]> = {};
@@ -414,7 +373,7 @@ export default function DashboardOverview({ data }: { data: DashboardData }) {
                   {/* Icon + Label */}
                   <div className="flex items-center gap-4">
                     <div className="text-2xl text-green-600">
-                      {leaveIconMap[item.label] ?? <RiFlightTakeoffFill />}
+                      {leaveIconMap[item.label as keyof typeof leaveIconMap]}
                     </div>
                     <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
                       {item.label}

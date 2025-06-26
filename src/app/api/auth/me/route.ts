@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const decoded = verify(token, process.env.JWT_SECRET!);
+    const decoded = verify(token, process.env.TOKEN_SECRET!);
     return NextResponse.json({ user: decoded });
   } catch (err) {
     console.error("JWT verification failed:", err); // 👈 see this in terminal

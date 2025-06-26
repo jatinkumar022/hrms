@@ -10,19 +10,19 @@ import BankDetails from "./pages/Bank Info/BankInfo";
 import PersonalDocuments from "./pages/Documents/PersonalDocuments";
 import OfficialDocuments from "./pages/Documents/OfficialDocuments";
 
-/** slug → React component */
-export const pageComponents: Record<string, React.FC<any>> = {
+interface Props {
+  dialogOpen?: boolean;
+  setDialogOpen?: (open: boolean) => void;
+}
+
+export const pageComponents: Record<string, React.FC<Props>> = {
   basic: BasicInfo,
   family: FamilyInfo,
   contact: ContactSocialLinks,
   address: Address,
   education: Education,
-
-  /* ‑ Job group ‑ */
   jobinfo: JobInfo,
-
   bankinfo: BankDetails,
-
   personaldocuments: PersonalDocuments,
   officialdocuments: OfficialDocuments,
 };

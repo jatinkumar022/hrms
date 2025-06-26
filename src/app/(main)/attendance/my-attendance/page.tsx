@@ -1,5 +1,4 @@
 "use client";
-
 import DatePreset from "@/lib/DatePreset";
 import { DatePicker, Select } from "antd";
 import { useState } from "react";
@@ -9,12 +8,13 @@ import { columns } from "../components/table/columns";
 import { attendanceData } from "../components/data";
 import TimesheetDrawer from "../components/TimeSheetDrawer/TimesheetDrawer";
 const { RangePicker } = DatePicker;
-
+import type { DatePresetItem } from "@/lib/types";
 const MyAttendance = () => {
-  const [openDrawer, setOpenDrawer] = useState();
-  const [selectedRange, setSelectedRange] = useState([]);
-  const [isActive, setIsActive] = useState("");
-  const handlePresetClick = (preset) => {
+  const [openDrawer, setOpenDrawer] = useState<any>(undefined); // or a specific type like `Attendance | null`
+  const [selectedRange, setSelectedRange] = useState<any>(null);
+
+  const [isActive, setIsActive] = useState<string | undefined>(undefined);
+  const handlePresetClick = (preset: DatePresetItem) => {
     setIsActive(preset.label);
     setSelectedRange(preset.value);
   };
@@ -83,7 +83,7 @@ const MyAttendance = () => {
           columns={columns}
           data={attendanceData}
           meta={{
-            handleView: (row) => setOpenDrawer(row),
+            handleView: (row: any) => setOpenDrawer(row),
           }}
         />
       </div>

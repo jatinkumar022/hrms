@@ -15,6 +15,8 @@ import {
 import DashboardOverview from "@/components/Dashboard/DashboardOverview";
 import DashboardDetails from "@/components/Dashboard/DashboardDetails";
 import { useEffect, useState } from "react";
+import type { AttendanceStatus, DashboardData } from "@/lib/types";
+
 const timeEntries = [
   {
     label: "Clock In",
@@ -41,8 +43,7 @@ const timeEntries = [
     rightIcon: <IoLaptopOutline size={19} />,
   },
 ];
-
-const DashboardData = {
+const DashboardData: DashboardData = {
   lateArrivals: [{ duration: "00 H : 03 M", date: "05 Jun, 2025" }],
   attendance: [
     { label: "Present", value: 11 },
@@ -72,27 +73,55 @@ const DashboardData = {
     "Raksha Bandhan – 19 Aug, 2025",
   ],
   attendanceRecords: [
-    { date: "2025-06-02", statuses: ["present"] },
-    { date: "2025-06-03", statuses: ["present", "early-out"] },
-    { date: "2025-06-04", statuses: ["present", "late-in"] },
-    { date: "2025-06-05", statuses: ["present", "late-in", "early-out"] },
-    { date: "2025-06-06", statuses: ["remote-work"] },
-    { date: "2025-06-09", statuses: ["holiday"] },
-    { date: "2025-06-10", statuses: ["absent"] },
-    { date: "2025-06-11", statuses: ["leave"] },
-    { date: "2025-06-12", statuses: ["missing-clock-out"] },
-    { date: "2025-06-13", statuses: ["present"] },
-    { date: "2025-06-14", statuses: ["present", "early-out"] },
-    { date: "2025-06-15", statuses: ["present", "late-in"] },
-    { date: "2025-06-16", statuses: ["holiday"] },
-    { date: "2025-06-17", statuses: ["absent"] },
-    { date: "2025-06-18", statuses: ["leave"] },
-    { date: "2025-06-19", statuses: ["remote-work"] },
-    { date: "2025-06-20", statuses: ["present"] },
-    { date: "2025-06-23", statuses: ["missing-clock-out"] },
-    { date: "2025-06-24", statuses: ["present", "late-in"] },
-    { date: "2025-06-25", statuses: ["present", "early-out"] },
+    { date: "2025-06-02", statuses: ["present"] as AttendanceStatus[] },
+    {
+      date: "2025-06-03",
+      statuses: ["present", "early-out"] as AttendanceStatus[],
+    },
+    {
+      date: "2025-06-04",
+      statuses: ["present", "late-in"] as AttendanceStatus[],
+    },
+    {
+      date: "2025-06-05",
+      statuses: ["present", "late-in", "early-out"] as AttendanceStatus[],
+    },
+    { date: "2025-06-06", statuses: ["remote-work"] as AttendanceStatus[] },
+    { date: "2025-06-09", statuses: ["holiday"] as AttendanceStatus[] },
+    { date: "2025-06-10", statuses: ["absent"] as AttendanceStatus[] },
+    { date: "2025-06-11", statuses: ["leave"] as AttendanceStatus[] },
+    {
+      date: "2025-06-12",
+      statuses: ["missing-clock-out"] as AttendanceStatus[],
+    },
+    { date: "2025-06-13", statuses: ["present"] as AttendanceStatus[] },
+    {
+      date: "2025-06-14",
+      statuses: ["present", "early-out"] as AttendanceStatus[],
+    },
+    {
+      date: "2025-06-15",
+      statuses: ["present", "late-in"] as AttendanceStatus[],
+    },
+    { date: "2025-06-16", statuses: ["holiday"] as AttendanceStatus[] },
+    { date: "2025-06-17", statuses: ["absent"] as AttendanceStatus[] },
+    { date: "2025-06-18", statuses: ["leave"] as AttendanceStatus[] },
+    { date: "2025-06-19", statuses: ["remote-work"] as AttendanceStatus[] },
+    { date: "2025-06-20", statuses: ["present"] as AttendanceStatus[] },
+    {
+      date: "2025-06-23",
+      statuses: ["missing-clock-out"] as AttendanceStatus[],
+    },
+    {
+      date: "2025-06-24",
+      statuses: ["present", "late-in"] as AttendanceStatus[],
+    },
+    {
+      date: "2025-06-25",
+      statuses: ["present", "early-out"] as AttendanceStatus[],
+    },
   ],
+
   chartData: [
     { date: "1", beforeBreak: 0, break: 0, afterBreak: 0, missing: 0 },
     { date: "2", beforeBreak: 0, break: 0, afterBreak: 0, missing: 0 },
@@ -212,7 +241,7 @@ export default function Dashboard() {
 
             <div className="relative z-10 flex flex-col items-center pt-10">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white ">
-                <img
+                <Image
                   src="https://files.superworks.com/profileImages/8lFl0kUNHz.jpeg"
                   alt="Jatin Ramani"
                   className="w-full h-full object-cover"

@@ -17,7 +17,6 @@ import {
 import { Input } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { LuDownload } from "react-icons/lu";
 import { FaEye, FaPen, FaClockRotateLeft } from "react-icons/fa6";
 import {
@@ -166,7 +165,7 @@ export const leaveColumns: ColumnDef<LeaveRow>[] = [
     header: "Status",
     accessorKey: "status",
     cell: ({ getValue }) => (
-      <Badge variant="success" className="capitalize">
+      <Badge variant="default" className="capitalize">
         {getValue() as string}
       </Badge>
     ),

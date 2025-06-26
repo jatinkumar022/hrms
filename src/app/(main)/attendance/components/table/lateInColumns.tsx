@@ -1,9 +1,9 @@
 "use client";
-
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { BsThreeDots } from "react-icons/bs";
 import { FaEye } from "react-icons/fa6";
+import { CellContext } from "@tanstack/react-table";
 
 export type LateIn = {
   date: string;
@@ -19,7 +19,7 @@ export const lateInColumns: ColumnDef<LateIn>[] = [
   {
     accessorKey: "lateInTime",
     header: "Late In Time",
-    cell: ({ row }) => (
+    cell: ({ row }: CellContext<LateIn, unknown>) => (
       <span
         className={`text-[11px] font-medium ${
           row.getValue<string>("lateInTime")?.startsWith("00 H : 00")

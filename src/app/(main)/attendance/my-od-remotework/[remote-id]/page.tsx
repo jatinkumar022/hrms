@@ -7,6 +7,7 @@ import { FloatingSelect } from "@/components/ui/floatingSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { DatePickerWithLabel } from "@/components/ui/datepicker";
+import Image from "next/image";
 
 /**
  * RemoteRequest – Remote / WFH request form
@@ -19,14 +20,14 @@ import { DatePickerWithLabel } from "@/components/ui/datepicker";
 const RemoteRequest: React.FC = () => {
   const [isHourly, setIsHourly] = useState(false);
   const [multiDay, setMultiDay] = useState(false);
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fromDate, setFromDate] = useState<Date | null>(new Date());
-  const [toDate, setToDate] = useState<Date | null>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [toDate, setToDate] = useState<Date | undefined>(undefined);
   const [startTime, setStartTime] = useState<string>("00:00");
   const [endTime, setEndTime] = useState<string>("00:00");
 
-  // ⏱️ work‑hours diff helper ⚠️ works only when isHourly === true
   const diffLabel = useMemo(() => {
     if (!isHourly || !startTime || !endTime) return "";
     if (isHourly) setMultiDay(false);
@@ -66,9 +67,10 @@ const RemoteRequest: React.FC = () => {
             value="Jatin Ramani"
             readOnly
             icon={
-              <img
+              <Image
                 src="https://office.dvijinfotech.com/uploads/staff_profile_images/67/small_WhatsApp%20Image%202024-09-02%20at%2021.15.52_0a414dd2.jpg"
                 className="w-6 h-6 rounded-full -ml-1"
+                alt=""
               />
             }
           />
@@ -102,8 +104,7 @@ const RemoteRequest: React.FC = () => {
           <div className="md:w-1/3  min-w-80 w-full">
             <DatePickerWithLabel
               label="From Date"
-              value={fromDate}
-              onChange={setFromDate}
+              value={fromDate ?? undefined}
             />
           </div>
 
@@ -111,8 +112,7 @@ const RemoteRequest: React.FC = () => {
             <div className="md:w-1/3  min-w-80 w-full">
               <DatePickerWithLabel
                 label="To Date"
-                value={toDate}
-                onChange={setToDate}
+                value={toDate ?? undefined}
               />
             </div>
           )}

@@ -1,5 +1,3 @@
-// data.ts
-import { date } from "zod";
 import { Attendance } from "./table/columns";
 
 export const attendanceData: Attendance[] = [

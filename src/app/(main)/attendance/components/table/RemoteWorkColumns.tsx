@@ -1,27 +1,11 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { BsThreeDots } from "react-icons/bs";
 import { FaEye, FaCheck, FaTimes } from "react-icons/fa";
-
-// Remote work type
-export type RemoteRequest = {
-  id: string;
-  name: string;
-  image: string;
-  type: string;
-  country: string;
-  state: string;
-  from: string;
-  to: string;
-  nuOfDaysHours: string;
-  status: "approved" | "pending" | "rejected";
-  requestedOn: string;
-  reason: string;
-  actionBy: string;
-};
+import { RemoteRequest, RemoteTableMeta } from "@/lib/types";
 
 export const remoteColumns: ColumnDef<RemoteRequest>[] = [
   {
@@ -32,12 +16,13 @@ export const remoteColumns: ColumnDef<RemoteRequest>[] = [
       const image = row.original.image;
       return (
         <div className="flex items-center gap-2">
-          <img
+          <Image
             src={image}
             alt={name}
             width={32}
             height={32}
             className="rounded-full object-cover"
+            unoptimized
           />
           <span className="font-medium">{name}</span>
         </div>
@@ -50,7 +35,7 @@ export const remoteColumns: ColumnDef<RemoteRequest>[] = [
   {
     accessorKey: "nuOfDaysHours",
     header: "Days",
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<RemoteRequest> }) => (
       <div className="text-center">{row.original.nuOfDaysHours}</div>
     ),
   },
@@ -58,7 +43,7 @@ export const remoteColumns: ColumnDef<RemoteRequest>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.original.status;
+      const status = row.original.status?.toLowerCase() || "pending";
       const color =
         status === "approved"
           ? "bg-green-50 text-green-600"
@@ -67,7 +52,7 @@ export const remoteColumns: ColumnDef<RemoteRequest>[] = [
           : "bg-red-50 text-red-600";
       return (
         <Badge variant="outline" className={`border-none text-xs ${color}`}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
+          {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
         </Badge>
       );
     },
@@ -76,7 +61,7 @@ export const remoteColumns: ColumnDef<RemoteRequest>[] = [
   {
     accessorKey: "reason",
     header: "Reason",
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<RemoteRequest> }) => (
       <div className="text-xs text-muted-foreground max-w-xs truncate">
         {row.original.reason}
       </div>
@@ -85,7 +70,7 @@ export const remoteColumns: ColumnDef<RemoteRequest>[] = [
   {
     accessorKey: "actionBy",
     header: "Action By",
-    cell: ({ row }) => (
+    cell: ({ row }: { row: Row<RemoteRequest> }) => (
       <span className="text-xs text-muted-foreground">
         {row.original.actionBy}
       </span>
@@ -95,38 +80,31 @@ export const remoteColumns: ColumnDef<RemoteRequest>[] = [
     id: "actions",
     header: "",
     cell: ({ row, table }) => {
-      const view = (
-        table.options.meta as { onView: (r: RemoteRequest) => void }
-      )?.onView;
-      const approve = (
-        table.options.meta as { onApprove: (r: RemoteRequest) => void }
-      )?.onApprove;
-      const reject = (
-        table.options.meta as { onReject: (r: RemoteRequest) => void }
-      )?.onReject;
+      const { onView, onApprove, onReject } = table.options
+        .meta as RemoteTableMeta;
 
       return (
         <div className="flex justify-end pr-3 group w-[100px] relative">
-          <div className="absolute group-hover:hidden  transition-opacity duration-200 group-hover:pointer-events-none  ">
+          <div className="absolute group-hover:hidden transition-opacity duration-200 group-hover:pointer-events-none">
             <button className="text-gray-500 hover:text-black">
               <BsThreeDots />
             </button>
           </div>
           <div className="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity duration-200">
             <button
-              onClick={() => view?.(row.original)}
+              onClick={() => onView?.(row.original)}
               className="cursor-pointer text-muted-foreground p-1"
             >
               <FaEye size={14} />
             </button>
             <button
-              onClick={() => approve?.(row.original)}
+              onClick={() => onApprove?.(row.original)}
               className="cursor-pointer text-green-600 p-1"
             >
               <FaCheck size={14} />
             </button>
             <button
-              onClick={() => reject?.(row.original)}
+              onClick={() => onReject?.(row.original)}
               className="cursor-pointer text-red-500 p-1"
             >
               <FaTimes size={14} />

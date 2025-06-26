@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PlusIcon } from "lucide-react";
 import { DatePicker } from "antd";
 import {
@@ -77,7 +77,7 @@ const LeaveCard = ({
           }
           `}
         >
-          0
+          {balance}
         </div>
       </div>
       <div className="h-10  border" />
@@ -94,7 +94,7 @@ const LeaveCard = ({
               : "text-[#73788b]"
           }`}
         >
-          0.5
+          {booked}
           <Tooltip>
             <TooltipTrigger>
               <MdInfo className="text-[#73788b]" />
@@ -229,7 +229,10 @@ const ApplyLeavePage = () => {
         <Carousel opts={{ align: "start" }} className="w-full">
           <CarouselContent className="-ml-1">
             {leaveCards.map((card, idx) => (
-              <CarouselItem className="pl-1 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 ">
+              <CarouselItem
+                className="pl-1 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 "
+                key={idx}
+              >
                 <div className="p-1">
                   <LeaveCard {...card} />
                 </div>

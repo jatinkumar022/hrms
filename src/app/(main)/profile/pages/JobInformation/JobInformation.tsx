@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Input from "@/components/ui/meterialInput";
 import { DatePickerWithLabel } from "@/components/ui/datepicker";
 import { FloatingSelect } from "@/components/ui/floatingSelect";
-import { IoMdAdd, IoMdTrash } from "react-icons/io";
+import { IoMdAdd } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 
 export default function JobInformation() {
@@ -28,7 +28,11 @@ export default function JobInformation() {
     },
   ]);
 
-  const handleChange = (index: number, field: string, value: string) => {
+  const handleChange = (
+    index: number,
+    field: keyof (typeof jobs)[number],
+    value: string
+  ) => {
     const updated = [...jobs];
     updated[index][field] = value;
     setJobs(updated);
@@ -70,7 +74,9 @@ export default function JobInformation() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <DatePickerWithLabel
               label="Effective Date"
-              onChange={(val) => handleChange(index, "effectiveDate", val)}
+              onChange={(val) =>
+                handleChange(index, "effectiveDate", val?.toISOString() ?? "")
+              }
             />
             <Input
               label="Location"
@@ -102,7 +108,7 @@ export default function JobInformation() {
             <FloatingSelect
               label="Category"
               value={job.category}
-              onChange={(val) => handleChange(index, "category", val)}
+              onChange={(val) => handleChange(index, "category", val ?? "")}
               options={[
                 { label: "Employee", value: "Employee" },
                 { label: "Contractor", value: "Contractor" },
@@ -146,7 +152,9 @@ export default function JobInformation() {
             <FloatingSelect
               label="Employment Status"
               value={job.employmentStatus}
-              onChange={(val) => handleChange(index, "employmentStatus", val)}
+              onChange={(val) =>
+                handleChange(index, "employmentStatus", val ?? "")
+              }
               options={[
                 { label: "Full Time", value: "Full Time" },
                 { label: "Part Time", value: "Part Time" },

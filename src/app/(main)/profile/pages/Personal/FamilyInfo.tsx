@@ -1,19 +1,10 @@
 "use client";
-
 import { useState } from "react";
 import Input from "@/components/ui/meterialInput";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon } from "lucide-react";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 import MobileInput from "@/components/ui/mobilenumber";
-import { DatePicker, DatePickerWithLabel } from "@/components/ui/datepicker";
+import { DatePickerWithLabel } from "@/components/ui/datepicker";
 import { FloatingSelect } from "@/components/ui/floatingSelect";
 
 export default function FamilyInfo() {
@@ -69,7 +60,7 @@ export default function FamilyInfo() {
                 />
 
                 <Input label="Occupation" defaultValue="Farming" />
-                <MobileInput />
+                <MobileInput label="Mobile Number" id="mobile" />
                 <Input label="Aadhaar Card (UID)" />
               </>
             )}
@@ -117,7 +108,7 @@ export default function FamilyInfo() {
                   onChange={(val) => console.log(val)}
                 />
                 <Input label="Occupation" />
-                <MobileInput />
+                <MobileInput label="Mobile Number" id="mobile" />
                 <Input label="Aadhaar Card (UID)" />
               </>
             )}

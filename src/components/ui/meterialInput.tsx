@@ -13,11 +13,11 @@ const MaterialTextField = forwardRef<HTMLInputElement, MaterialTextFieldProps>(
     { label, type = "text", id, icon, readOnly = false, placeholder, ...props },
     ref
   ) => {
+    MaterialTextField.displayName = "Input";
+
     const [active, setActive] = useState(false);
-    const [hasValue, setHasValue] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // merge forwarded ref and local ref
     useEffect(() => {
       if (!ref) return;
       const element = inputRef.current;
@@ -29,29 +29,23 @@ const MaterialTextField = forwardRef<HTMLInputElement, MaterialTextFieldProps>(
       }
     }, [ref]);
 
-    // initialize hasValue on mount
-    useEffect(() => {
-      const current = inputRef.current;
-      if (current) {
-        setHasValue(current.value !== "");
-      }
-    }, []);
+    const hasValue =
+      props.value !== undefined
+        ? props.value !== ""
+        : inputRef.current?.value !== "";
 
     const handleFocus = () => setActive(true);
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       setActive(false);
-      const current = inputRef.current;
-      if (current) setHasValue(current.value !== "");
       props.onBlur?.(e);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setHasValue(e.target.value !== "");
       props.onChange?.(e);
     };
 
     return (
-      <div className="relative mt-6">
+      <div className="relative">
         <input
           {...props}
           id={id}
@@ -108,5 +102,4 @@ const MaterialTextField = forwardRef<HTMLInputElement, MaterialTextFieldProps>(
     );
   }
 );
-
 export default MaterialTextField;

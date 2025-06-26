@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Drawer,
   DrawerContent,
@@ -7,18 +6,16 @@ import {
   DrawerTitle,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { FaPen } from "react-icons/fa";
 import { BsClock } from "react-icons/bs";
 import { CalendarIcon } from "lucide-react";
 import { DatePickerWithLabel } from "@/components/ui/datepicker";
 import { RxCross2 } from "react-icons/rx";
 import Input from "@/components/ui/meterialInput";
-import Image from "next/image";
-import dayjs from "dayjs";
 import { FiPlus } from "react-icons/fi";
 import { IoIosAlarm } from "react-icons/io";
 import { MdFreeBreakfast } from "react-icons/md";
+import Image from "next/image";
 type TimesheetRow = {
   clockIn: string;
   clockOut: string;
@@ -77,9 +74,10 @@ export default function TimesheetDrawer({
                   label="Employee"
                   value="Jatin Ramani"
                   icon={
-                    <img
+                    <Image
                       src="https://office.dvijinfotech.com/uploads/staff_profile_images/67/small_WhatsApp%20Image%202024-09-02%20at%2021.15.52_0a414dd2.jpg"
                       className="w-6 rounded-full -ml-1 "
+                      alt=""
                     />
                   }
                   readOnly={true}

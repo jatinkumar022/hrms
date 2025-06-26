@@ -6,13 +6,16 @@ import { DataTable } from "../components/table/DataTable";
 import { RemoteData } from "../components/data";
 import { remoteColumns } from "../components/table/RemoteWorkColumns";
 import { useRouter } from "next/navigation";
+import { DatePresetItem, RemoteRequest } from "@/lib/types";
+import type { DateRange } from "react-day-picker";
 const { RangePicker } = DatePicker;
 
 const MyRemoteWork = () => {
-  const [selectedRange, setSelectedRange] = useState([]);
-  const [isActive, setIsActive] = useState("");
+  const [selectedRange, setSelectedRange] = useState<DateRange | null>(null);
+  const [isActive, setIsActive] = useState<string | undefined>(undefined);
   const route = useRouter();
-  const handlePresetClick = (preset) => {
+  const handlePresetClick = (preset: DatePresetItem) => {
+    if (!preset.label || !preset.value) return;
     setIsActive(preset.label);
     setSelectedRange(preset.value);
   };
@@ -73,14 +76,14 @@ const MyRemoteWork = () => {
       </div>
 
       <div>
-        <DataTable
+        <DataTable<RemoteRequest, unknown>
           columns={remoteColumns}
           data={RemoteData}
           meta={{
-            onView: (row) =>
+            onView: (row: any) =>
               route.push(`/attendance/my-od-remotework/${row.id}`),
-            onApprove: (row) => console.log("Approve", row),
-            onReject: (row) => console.log("Reject", row),
+            onApprove: (row: any) => console.log("Approve", row),
+            onReject: (row: any) => console.log("Reject", row),
           }}
         />
       </div>

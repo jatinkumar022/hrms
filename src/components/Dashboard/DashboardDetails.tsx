@@ -11,6 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ReactNode } from "react";
+
+interface SectionProps {
+  title: string;
+  count?: number;
+  children: ReactNode;
+  rightControl?: ReactNode;
+}
+
 const onLeave = [
   {
     name: "Jagdish Koladiya",
@@ -209,12 +218,16 @@ const getLeaveBadge = (type: string) => {
   return null;
 };
 
-const Section = ({ title, count, children, rightControl }) => (
+const Section = ({ title, count, children, rightControl }: SectionProps) => (
   <Card className="rounded-xl  dark:bg-[#070707] bg-white group">
     <CardHeader className="flex flex-row items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800 ">
       <CardTitle className="text-sm font-semibold text-zinc-800 dark:text-white flex items-center gap-1">
-        {title}{" "}
-        {count !== undefined && <span className="font-normal">({count})</span>}
+        {title}
+        {count !== undefined ? (
+          <span className="font-normal">({count})</span>
+        ) : (
+          ""
+        )}
       </CardTitle>
       {rightControl}
     </CardHeader>
@@ -224,11 +237,25 @@ const Section = ({ title, count, children, rightControl }) => (
   </Card>
 );
 
-const ListRow = ({ avatar, initials, name, meta, right, leave }) => (
+const ListRow = ({
+  avatar,
+  initials,
+  name,
+  meta,
+  right,
+  leave,
+}: {
+  avatar?: string;
+  initials?: string;
+  name: string;
+  meta?: string;
+  right?: string;
+  leave?: string;
+}) => (
   <div className="flex items-center justify-between dark:hover:bg-[#0f0f0f] hover:bg-[#f3f3f3] p-1.5 rounded-md cursor-pointer ">
     <div className="flex items-center gap-3 ">
       {avatar ? (
-        <img
+        <Image
           src={avatar}
           alt={name}
           className="w-10 h-10 rounded-full object-cover"
@@ -276,9 +303,9 @@ export default function DashboardDetails() {
         }
       >
         {onLeave.length > 0 ? (
-          onLeave.map((p) => (
+          onLeave.map((p, index) => (
             <ListRow
-              key={p.name}
+              key={index}
               leave={p.leave}
               avatar={p.avatar}
               name={p.name}
@@ -313,9 +340,9 @@ export default function DashboardDetails() {
         count={absentToday.length}
       >
         {absentToday.length > 0 ? (
-          absentToday.map((p) => (
+          absentToday.map((p, index) => (
             <ListRow
-              key={p.name}
+              key={index}
               avatar={p.avatar}
               name={p.name}
               meta={p.role}
@@ -348,9 +375,9 @@ export default function DashboardDetails() {
         count={upcomingBirthdays.length}
       >
         {upcomingBirthdays.length > 0 ? (
-          upcomingBirthdays.map((p) => (
+          upcomingBirthdays.map((p, index) => (
             <ListRow
-              key={p.name}
+              key={index}
               avatar={p.avatar}
               name={p.name}
               meta={p.role}
@@ -423,9 +450,9 @@ export default function DashboardDetails() {
         count={workAnniversary.length}
       >
         {workAnniversary.length > 0 ? (
-          workAnniversary.map((p) => (
+          workAnniversary.map((p, index) => (
             <ListRow
-              key={p.name}
+              key={index}
               avatar={undefined}
               initials={p.name
                 .split(" ")
@@ -502,9 +529,9 @@ export default function DashboardDetails() {
         }
       >
         {remoteWork.length > 0 ? (
-          remoteWork.map((p) => (
+          remoteWork.map((p, index) => (
             <ListRow
-              key={p.name}
+              key={index}
               avatar={p.avatar}
               name={p.name}
               meta={p.role}

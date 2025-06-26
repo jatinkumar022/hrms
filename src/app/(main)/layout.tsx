@@ -6,8 +6,6 @@ import Navbar from "@/components/custom/Navbar";
 import Sidebar from "@/components/custom/Sidebar";
 import { ThemeProvider } from "next-themes";
 import ReduxProvider from "@/lib/redux-provider";
-import RouteEventsListener from "@/components/loaders/RouteEventsListener";
-import RouteChangeLoader from "@/components/loaders/RouteChangeLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,8 +33,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
         <ReduxProvider>
-          <RouteEventsListener />
-          <RouteChangeLoader />
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             {/* Full height flex layout */}
             <div className="flex h-screen overflow-hidden">

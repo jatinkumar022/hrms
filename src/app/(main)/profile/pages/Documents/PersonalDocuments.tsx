@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/select";
 import { FaPaperclip, FaEdit } from "react-icons/fa";
 import FileUpload from "@/components/ui/FileUpload";
+import Image from "next/image";
 
 type Props = {
-  dialogOpen: boolean;
-  setDialogOpen: (open: boolean) => void;
+  dialogOpen?: boolean;
+  setDialogOpen?: (open: boolean) => void;
 };
 
 export default function PersonalDocuments({
@@ -97,7 +98,7 @@ export default function PersonalDocuments({
     setDocNumber("");
     setDocFile(null);
     setEditIndex(null);
-    setDialogOpen(false);
+    setDialogOpen?.(false);
   };
 
   /** open edit dialog with values */
@@ -107,7 +108,7 @@ export default function PersonalDocuments({
     setDocNumber(doc.number);
     setDocFile(doc.file);
     setEditIndex(index);
-    setDialogOpen(true);
+    setDialogOpen?.(true);
   };
 
   return (
@@ -133,7 +134,7 @@ export default function PersonalDocuments({
                     <div className="flex items-center gap-2">
                       {d.file.type.startsWith("image/") ? (
                         <a href={URL.createObjectURL(d.file)} target="_blank">
-                          <img
+                          <Image
                             src={URL.createObjectURL(d.file)}
                             alt={d.file.name}
                             className="w-10 h-10 rounded object-cover border"
@@ -180,7 +181,7 @@ export default function PersonalDocuments({
             setDocFile(null);
             setEditIndex(null);
           }
-          setDialogOpen(open);
+          setDialogOpen?.(open);
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -228,7 +229,7 @@ export default function PersonalDocuments({
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setDialogOpen(false);
+                  setDialogOpen?.(false);
                   setEditIndex(null);
                 }}
               >

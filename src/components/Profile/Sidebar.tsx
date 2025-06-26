@@ -49,7 +49,7 @@ export default function Sidebar({
           <Image src={ProfileBg} alt="" className="w-full h-[108px]" />
         </div>
         <div className="flex flex-col items-center mt-10 ">
-          <img
+          <Image
             src="https://thumbor.superworks.com/unsafe/96x96/filters:quality(80)/https://files.superworks.com/profileImages/Z5fsQo8K1d.jpeg"
             alt="Profile"
             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm p-1 z-20"

@@ -1,34 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 interface MaterialTextFieldProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
+  label: string;
 }
 
-function MobileInput({ id, ...props }: MaterialTextFieldProps) {
+function MobileInput({
+  id,
+  label = "Mobile Number",
+  ...props
+}: MaterialTextFieldProps) {
   const ref = useRef<HTMLInputElement>(null);
   const [active, setActive] = useState(false);
-  const [hasValue, setHasValue] = useState(false);
   const [value, setValue] = useState("");
-  const label = "Mobile Number";
-  useEffect(() => {
-    if (ref.current) {
-      setHasValue(ref.current.value !== "");
-    }
-  }, []);
 
   const handleFocus = () => setActive(true);
 
   const handleBlur = () => {
     setActive(false);
-    if (ref.current) setHasValue(ref.current.value !== "");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let raw = e.target.value.replace(/\D/g, ""); // Remove non-digits
-    raw = raw.slice(0, 10); // Max 10 digits
+    let raw = e.target.value.replace(/\D/g, "");
+    raw = raw.slice(0, 10);
 
     // Insert space after 5 digits
     let formatted = raw;
@@ -40,7 +37,7 @@ function MobileInput({ id, ...props }: MaterialTextFieldProps) {
   };
 
   return (
-    <div className="relative mt-6">
+    <div className="relative">
       <span
         className={`absolute inset-y-0 left-0 flex items-center pl-3 text-sm select-none ${
           active ? "" : " text-muted-foreground"

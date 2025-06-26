@@ -36,7 +36,8 @@ export const columns: ColumnDef<Attendance>[] = [
     accessorKey: "dayStatus",
     header: "Day Status",
     cell: ({ row }) => {
-      const status = row.getValue("dayStatus");
+      const status = row.getValue("dayStatus") as Attendance["dayStatus"];
+
       const color =
         status === "FD"
           ? "bg-green-50 text-[#47c947]"
@@ -52,7 +53,10 @@ export const columns: ColumnDef<Attendance>[] = [
     accessorKey: "attendanceStatus",
     header: "Attendance Status",
     cell: ({ row }) => {
-      const status = row.getValue("attendanceStatus");
+      const status = row.getValue(
+        "attendanceStatus"
+      ) as Attendance["attendanceStatus"];
+
       return (
         <Badge
           variant="outline"
@@ -67,7 +71,8 @@ export const columns: ColumnDef<Attendance>[] = [
     accessorKey: "action",
     header: "Attendance Action",
     cell: ({ row }) => {
-      const action = row.getValue("action");
+      const action = row.getValue("action") as Attendance["action"];
+
       return (
         <div className="border text-[11px] flex  items-center gap-2 px-2 py-2 text-[#8d8d8d]">
           <HiTicket className="text-blue-400" /> {action}
@@ -79,7 +84,8 @@ export const columns: ColumnDef<Attendance>[] = [
     accessorKey: "clockIn",
     header: "Clock IN",
     cell: ({ row }) => {
-      const clockIn = row.getValue("clockIn");
+      const clockIn = row.getValue("clockIn") as Attendance["clockIn"];
+
       return (
         <div className=" text-[11px] flex  items-center gap-1  text-[#8d8d8d]">
           {clockIn}
@@ -103,7 +109,8 @@ export const columns: ColumnDef<Attendance>[] = [
     accessorKey: "clockOut",
     header: "Clock OUT",
     cell: ({ row }) => {
-      const clockOut = row.getValue("clockOut");
+      const clockOut = row.getValue("clockOut") as Attendance["clockOut"];
+
       return (
         <div className=" text-[11px] flex  items-center gap-1  text-[#8d8d8d]">
           {clockOut}
@@ -130,7 +137,8 @@ export const columns: ColumnDef<Attendance>[] = [
     accessorKey: "extraTime",
     header: "Extra Time",
     cell: ({ row }) => {
-      const extraTime = row.getValue("extraTime");
+      const extraTime = row.getValue("extraTime") as Attendance["extraTime"];
+
       return <div className=" text-sidebar-primary">{extraTime}</div>;
     },
   },

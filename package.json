@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+     "typecheck": "tsc --noEmit",
+  "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@geist-ui/icons": "^1.0.2",
@@ -37,7 +39,9 @@
     "embla-carousel-react": "^8.6.0",
     "highcharts": "^12.2.0",
     "highcharts-react-official": "^3.2.2",
+    "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.515.0",
     "mongoose": "^8.15.2",
     "motion": "^12.18.1",
@@ -62,6 +66,7 @@
     "@eslint/eslintrc": "^3",
     "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
+    "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "^19",

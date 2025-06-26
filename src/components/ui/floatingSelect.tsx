@@ -15,6 +15,7 @@ interface FloatingSelectProps {
   options: { label: string; value: string }[];
   value?: string;
   onChange?: (value: string | undefined) => void;
+  className?: string;
 }
 
 export function FloatingSelect({
@@ -40,11 +41,11 @@ export function FloatingSelect({
   const clearSelection = () => {
     setSelected(undefined);
     onChange?.(undefined);
+    setOpen(false);
     setKey((prev) => prev + 1); // 👈 Force re-render to fully reset select
   };
 
   const isActive = open;
-  const isSelected = selected !== undefined;
 
   return (
     <div className={`relative  w-full ${className}`} key={key}>
@@ -81,27 +82,21 @@ export function FloatingSelect({
         </SelectContent>
       </Select>
 
-      {/* Floating Label */}
       <label
         className={`absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200
-            ${
-              isActive || isSelected
-                ? "-translate-y-6 scale-75"
-                : "translate-y-0 scale-100 -ml-2"
-            }
-            ${
-              isActive
-                ? "text-sidebar-primary"
-                : "text-zinc-500 dark:text-zinc-400"
-            }
-        `}
+    ${
+      isActive || selected
+        ? "-translate-y-6 scale-75"
+        : "translate-y-0 scale-100 -ml-2"
+    }
+    ${isActive ? "text-sidebar-primary" : "text-zinc-500 dark:text-zinc-400"}
+`}
       >
         <span
           className={`${
-            label === "" || null || undefined
-              ? "bg-transparent"
-              : "bg-white px-2 dark:bg-black"
-          }`}
+            !label ? "bg-transparent" : "bg-white px-2 dark:bg-black"
+          }  
+          `}
         >
           {label}
         </span>

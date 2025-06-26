@@ -1,127 +1,76 @@
 "use client";
-
-import * as React from "react";
-import { X } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { useEffect, useState } from "react";
+import { DatePicker } from "antd";
+import dayjs from "dayjs";
+import type { DatePickerProps } from "antd";
+import "antd/dist/reset.css";
 
 interface DatePickerWithLabelProps {
   label: string;
-  value?: Date;
-  onChange?: (date: Date | undefined) => void;
+  value?: Date | null;
+  onChange?: (date: Date | null) => void;
   readOnly?: boolean;
+  className?: string;
 }
-
 export function DatePickerWithLabel({
   label,
   value,
   onChange,
-  className,
   readOnly = false,
+  className = "h-fit",
 }: DatePickerWithLabelProps) {
-  const [date, setDate] = React.useState<Date | undefined>(value);
-  const [hoverDate, setHover] = React.useState<Date | undefined>();
-  const [open, setOpen] = React.useState(false);
-  const [focused, setFoc] = React.useState(false);
+  const [date, setDate] = useState<Date | null | undefined>(value);
+  const [tempDate, setTempDate] = useState<Date | null | undefined>(value);
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
 
-  // ───────────────────── Helpers ─────────────────────
-  const display = hoverDate ?? date;
-  const isActive = open || focused;
-  const isDate = date !== undefined || null;
-  const clear = () => {
-    setDate(undefined);
-    setHover(undefined);
-    onChange?.(undefined);
-  };
+  useEffect(() => {
+    setDate(value);
+    setTempDate(value);
+  }, [value]);
 
-  const pick = (d?: Date) => {
-    // ignore “un‑select” clicks that return undefined
-    if (!d) return;
-    setDate(d);
-    onChange?.(d);
-    setOpen(false);
+  const handleDaySelect: DatePickerProps["onChange"] = (d) => {
+    const selected = d?.toDate() ?? null;
+    setTempDate(selected);
+    onChange?.(selected); // <-- call passed prop directly
   };
+  const isActive = focused;
+  const isDate = date !== undefined || null || "";
   return (
-    <div className={`relative  w-full ${className}`}>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            onClick={() => !readOnly && setOpen(true)}
-            onFocusCapture={() => !readOnly && setFoc(true)}
-            onBlurCapture={() => {
-              setFoc(false);
-              setHover(undefined);
-              if (!readOnly) {
-                setFoc(false);
-                setHover(undefined);
-              }
-            }}
-            disabled={readOnly}
-            tabIndex={readOnly ? -1 : 0}
-            onMouseDown={readOnly ? (e) => e.preventDefault() : undefined}
-            className={`
-              w-full h-[50px] text-left p-3 rounded-[5px] bg-transparent border relative
-              transition-colors duration-200 appearance-none
-              ${
-                isActive
-                  ? "border-sidebar-primary text-sidebar-primary"
-                  : "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700"
-              }
-              focus:outline-none
-            `}
-          >
-            {display ? display.toLocaleDateString() : " "}
-          </button>
-        </PopoverTrigger>
-
-        <PopoverContent
-          className="w-auto overflow-hidden p-0 z-50"
-          align="start"
-          sideOffset={4}
-        >
-          <Calendar
-            mode="single"
-            selected={date}
-            captionLayout="dropdown"
-            // <- use onDayClick so we get a defined Date every time
-            onDayClick={pick}
-            onDayMouseEnter={setHover}
-            onDayMouseLeave={() => setHover(undefined)}
-          />
-        </PopoverContent>
-      </Popover>
-
-      {!readOnly && date && (
-        <button
-          type="button"
-          onClick={clear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-zinc-400 hover:text-zinc-600 focus:outline-none cursor-pointer"
-        >
-          <X size={16} />
-        </button>
-      )}
+    <div className={`relative w-full ${className}`}>
+      <DatePicker
+        open={open}
+        onOpenChange={setOpen}
+        value={tempDate ? dayjs(tempDate) : null}
+        onChange={handleDaySelect}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        disabled={readOnly}
+        format="DD/MM/YYYY"
+        allowClear={true} // disable default clear button
+        className={`w-full h-[44.6px] rounded-[5px] border pl-3 pr-10  font-medium
+          ${
+            isActive || isDate
+              ? "border-sidebar-primary text-sidebar-primary"
+              : "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700"
+          }`}
+        placeholder=" "
+        style={{ background: "transparent" }}
+      />
 
       {/* Floating label */}
       <label
-        className={`
-          absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200
-          ${
-            isActive || isDate
-              ? "-translate-y-6 scale-75 "
-              : "translate-y-0 scale-100  -ml-2"
-          }
-
-          ${
-            isActive
-              ? "text-sidebar-primary "
-              : "text-zinc-500 dark:text-zinc-400"
-          }
-        `}
+        className={`absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200
+        ${
+          isActive || isDate
+            ? "-translate-y-6 scale-75"
+            : "translate-y-0 scale-100 -ml-2"
+        }
+        ${
+          isActive || isDate
+            ? "text-sidebar-primary"
+            : "text-zinc-500 dark:text-zinc-400"
+        }`}
       >
         <span className="bg-white px-2 dark:bg-black">{label}</span>
       </label>

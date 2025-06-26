@@ -2,10 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   devIndicators: {
-    buildActivityPosition: "bottom-right", // <-- this also helps
+    position: "bottom-right", // <-- this also helps
   },
   images: {
     domains: ["randomuser.me"],
+  },
+  env: {
+    TOKEN_SECRET: process.env.TOKEN_SECRET, // 👈 expose the token secret to the app
   },
 };
 
