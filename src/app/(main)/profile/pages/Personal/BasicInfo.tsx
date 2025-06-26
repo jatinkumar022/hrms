@@ -77,8 +77,6 @@ export default function BasicInfo() {
     reset,
     control,
     formState: { isDirty },
-    getValues,
-    setValue,
   } = useForm<PersonalInfoFormData>({
     defaultValues: {
       companyName: "",
