@@ -14,9 +14,10 @@ import {
   updatePersonalInfo,
 } from "@/redux/slices/personalInfoSlice";
 import { toast } from "sonner";
-import { Controller } from "react-hook-form";
+import { Controller, useFieldArray } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
+
 interface LanguageCardProps {
   language: string;
   reading: string;
@@ -25,6 +26,19 @@ interface LanguageCardProps {
   understanding: string;
   Title: string;
 }
+
+interface LanguageSkill {
+  reading: string;
+  speaking: string;
+  writing: string;
+  understanding: string;
+}
+
+interface KnownLanguage {
+  language: string;
+  skill: LanguageSkill;
+}
+
 interface PersonalInfoFormData {
   companyName: string;
   legalEntityCompany: string;
@@ -41,19 +55,30 @@ interface PersonalInfoFormData {
   placeOfBirth: string;
   nationality: string;
   displayName: string;
+  knownLanguages: KnownLanguage[];
 }
+
 export default function BasicInfo() {
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
   const { data: fetchedData, isLoading } = useAppSelector(
     (state) => state.personalInfo
   );
+  const [languageModalOpen, setLanguageModalOpen] = useState(false);
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [languageDraft, setLanguageDraft] = useState<KnownLanguage>({
+    language: "",
+    skill: { reading: "", speaking: "", writing: "", understanding: "" },
+  });
+
   const {
     register,
     handleSubmit,
     reset,
     control,
     formState: { isDirty },
+    getValues,
+    setValue,
   } = useForm<PersonalInfoFormData>({
     defaultValues: {
       companyName: "",
@@ -71,8 +96,15 @@ export default function BasicInfo() {
       placeOfBirth: "",
       nationality: "",
       displayName: "",
+      knownLanguages: [],
     },
   });
+
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "knownLanguages",
+  });
+
   useEffect(() => {
     dispatch(fetchPersonalInfo());
   }, []);
@@ -184,31 +216,47 @@ export default function BasicInfo() {
         </div>
 
         {/* Languages */}
-        <div className="flex gap-4">
-          <LanguageCard
-            Title="Known Language"
-            language="English"
-            reading="Excellent"
-            speaking="Poor"
-            writing="Excellent"
-            understanding="Excellent"
-          />
-          <LanguageCard
-            Title="Known Language"
-            language="Gujarati"
-            reading="Excellent"
-            speaking="Excellent"
-            writing="Good"
-            understanding="Excellent"
-          />
+        <div className="flex gap-4 flex-wrap">
+          {fields.map((field, idx) => (
+            <LanguageCard
+              key={field.id}
+              Title="Known Language"
+              language={field.language}
+              reading={field.skill.reading}
+              speaking={field.skill.speaking}
+              writing={field.skill.writing}
+              understanding={field.skill.understanding}
+              onEdit={() => {
+                setEditIdx(idx);
+                setLanguageDraft(field);
+                setLanguageModalOpen(true);
+              }}
+              onDelete={() => remove(idx)}
+            />
+          ))}
+          <button
+            type="button"
+            className="border border-dashed border-gray-300 w-fit px-4 py-2 rounded hover:border-black cursor-pointer group flex items-center gap-1"
+            onClick={() => {
+              setEditIdx(null);
+              setLanguageDraft({
+                language: "",
+                skill: {
+                  reading: "",
+                  speaking: "",
+                  writing: "",
+                  understanding: "",
+                },
+              });
+              setLanguageModalOpen(true);
+            }}
+          >
+            <span className="group-hover:text-sidebar-primary">
+              <FiPlus />
+            </span>{" "}
+            Add New
+          </button>
         </div>
-
-        <button className="border border-dashed border-gray-300 w-fit px-4 py-2 rounded hover:border-black cursor-pointer group flex items-center gap-1">
-          <span className="group-hover:text-sidebar-primary">
-            <FiPlus />
-          </span>{" "}
-          Add New
-        </button>
 
         {isDirty && (
           <Button type="submit" className="mt-6">
@@ -216,51 +264,203 @@ export default function BasicInfo() {
           </Button>
         )}
       </form>
+
+      {languageModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">
+              {editIdx === null ? "Add Language" : "Edit Language"}
+            </h3>
+            <div className="space-y-3">
+              <Input
+                label="Language"
+                value={languageDraft.language}
+                onChange={(e) =>
+                  setLanguageDraft({
+                    ...languageDraft,
+                    language: e.target.value,
+                  })
+                }
+              />
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Reading
+                </label>
+                <select
+                  className="w-full border rounded px-3 py-2"
+                  value={languageDraft.skill.reading}
+                  onChange={(e) =>
+                    setLanguageDraft({
+                      ...languageDraft,
+                      skill: {
+                        ...languageDraft.skill,
+                        reading: e.target.value,
+                      },
+                    })
+                  }
+                >
+                  <option value="">Select</option>
+                  <option value="Excellent">Excellent</option>
+                  <option value="Good">Good</option>
+                  <option value="Average">Average</option>
+                  <option value="Poor">Poor</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Speaking
+                </label>
+                <select
+                  className="w-full border rounded px-3 py-2"
+                  value={languageDraft.skill.speaking}
+                  onChange={(e) =>
+                    setLanguageDraft({
+                      ...languageDraft,
+                      skill: {
+                        ...languageDraft.skill,
+                        speaking: e.target.value,
+                      },
+                    })
+                  }
+                >
+                  <option value="">Select</option>
+                  <option value="Excellent">Excellent</option>
+                  <option value="Good">Good</option>
+                  <option value="Average">Average</option>
+                  <option value="Poor">Poor</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Writing
+                </label>
+                <select
+                  className="w-full border rounded px-3 py-2"
+                  value={languageDraft.skill.writing}
+                  onChange={(e) =>
+                    setLanguageDraft({
+                      ...languageDraft,
+                      skill: {
+                        ...languageDraft.skill,
+                        writing: e.target.value,
+                      },
+                    })
+                  }
+                >
+                  <option value="">Select</option>
+                  <option value="Excellent">Excellent</option>
+                  <option value="Good">Good</option>
+                  <option value="Average">Average</option>
+                  <option value="Poor">Poor</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Understanding
+                </label>
+                <select
+                  className="w-full border rounded px-3 py-2"
+                  value={languageDraft.skill.understanding}
+                  onChange={(e) =>
+                    setLanguageDraft({
+                      ...languageDraft,
+                      skill: {
+                        ...languageDraft.skill,
+                        understanding: e.target.value,
+                      },
+                    })
+                  }
+                >
+                  <option value="">Select</option>
+                  <option value="Excellent">Excellent</option>
+                  <option value="Good">Good</option>
+                  <option value="Average">Average</option>
+                  <option value="Poor">Poor</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setLanguageModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  if (editIdx === null) {
+                    append(languageDraft);
+                  } else {
+                    update(editIdx, languageDraft);
+                  }
+                  setLanguageModalOpen(false);
+                }}
+              >
+                {editIdx === null ? "Add" : "Update"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
-const LanguageCard: React.FC<LanguageCardProps> = ({
+
+const LanguageCard: React.FC<
+  LanguageCardProps & {
+    onEdit?: () => void;
+    onDelete?: () => void;
+  }
+> = ({
   language,
   reading,
   speaking,
   writing,
   understanding,
   Title,
-}) => {
-  return (
-    <div className="border rounded-[5px] p-4 space-y-2 relative w-fit">
-      <label className="absolute left-4 top-3 text-sm text-zinc-500 -translate-y-6 scale-75">
-        <span className="bg-white px-2 dark:bg-black">{Title}</span>
-      </label>
-      <div className="flex justify-between">
-        <div className="text-[18px] font-medium">{language}</div>
-        <div className="flex items-center gap-2">
-          <div className="hover:bg-[#5096db66] text-sidebar-primary p-1.5 rounded-full cursor-pointer border">
-            <BiSolidPencil />
-          </div>
-          <div className="hover:bg-[#5096db66] text-sidebar-primary p-1.5 rounded-full cursor-pointer border">
-            <RiDeleteBin6Fill />
-          </div>
+  onEdit,
+  onDelete,
+}) => (
+  <div className="border rounded-[5px] p-4 space-y-2 relative w-fit">
+    <label className="absolute left-4 top-3 text-sm text-zinc-500 -translate-y-6 scale-75">
+      <span className="bg-white px-2 dark:bg-black">{Title}</span>
+    </label>
+    <div className="flex justify-between">
+      <div className="text-[18px] font-medium">{language}</div>
+      <div className="flex items-center gap-2">
+        <div
+          className="hover:bg-[#5096db66] text-sidebar-primary p-1.5 rounded-full cursor-pointer border"
+          onClick={onEdit}
+        >
+          <BiSolidPencil />
         </div>
-      </div>
-      <div className="flex gap-8">
-        <div className="flex flex-col">
-          <span>Reading</span>
-          <span className="text-sm text-[#4e525f]">{reading}</span>
-        </div>
-        <div className="flex flex-col">
-          <span>Speaking</span>
-          <span className="text-sm text-[#4e525f]">{speaking}</span>
-        </div>
-        <div className="flex flex-col">
-          <span>Writing</span>
-          <span className="text-sm text-[#4e525f]">{writing}</span>
-        </div>
-        <div className="flex flex-col">
-          <span>Understanding</span>
-          <span className="text-sm text-[#4e525f]">{understanding}</span>
+        <div
+          className="hover:bg-[#5096db66] text-sidebar-primary p-1.5 rounded-full cursor-pointer border"
+          onClick={onDelete}
+        >
+          <RiDeleteBin6Fill />
         </div>
       </div>
     </div>
-  );
-};
+    <div className="flex gap-8">
+      <div className="flex flex-col">
+        <span>Reading</span>
+        <span className="text-sm text-[#4e525f]">{reading}</span>
+      </div>
+      <div className="flex flex-col">
+        <span>Speaking</span>
+        <span className="text-sm text-[#4e525f]">{speaking}</span>
+      </div>
+      <div className="flex flex-col">
+        <span>Writing</span>
+        <span className="text-sm text-[#4e525f]">{writing}</span>
+      </div>
+      <div className="flex flex-col">
+        <span>Understanding</span>
+        <span className="text-sm text-[#4e525f]">{understanding}</span>
+      </div>
+    </div>
+  </div>
+);

@@ -15,6 +15,7 @@ const knownLanguageSchema = new Schema({
 }, { _id: false });
 
 const familyMemberSchema = new Schema({
+  relation: String,
   name: String,
   gender: String,
   adharCard: String,
@@ -86,6 +87,11 @@ const documentSchema = new Schema({
   type: String,
 }, { _id: false });
 
+const socialLinkSchema = new Schema({
+  label: String,
+  url: String,
+}, { _id: false });
+
 const userProfileSchema = new Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
 
@@ -148,9 +154,24 @@ const userProfileSchema = new Schema({
     official: [documentSchema],
   },
 
+  contactSocialLinks: {
+    personalMobile: String,
+    emergencyContact: String,
+    personalEmail: String,
+    officialEmail: String,
+    currentAddress: String,
+    permanentAddress: String,
+    linkedin: String,
+    github: String,
+    twitter: String,
+    facebook: String,
+    socialLinks: [socialLinkSchema],
+  },
+
 }, {
   timestamps: true,
 });
 
-const UserProfile = mongoose.models.UserProfile || mongoose.model("UserProfile", userProfileSchema);
+delete mongoose.connection.models['UserProfile'];
+const UserProfile = mongoose.model("UserProfile", userProfileSchema);
 export default UserProfile;

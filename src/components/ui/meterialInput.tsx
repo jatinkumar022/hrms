@@ -87,7 +87,7 @@ const MaterialTextField = forwardRef<HTMLInputElement, MaterialTextFieldProps>(
             absolute left-3 top-3 pointer-events-none origin-left
             transition-all duration-200
             ${
-              active || hasValue
+              active || hasValue || placeholder
                 ? "-translate-y-6 scale-75"
                 : "translate-y-0 scale-100 text-zinc-500 dark:text-zinc-400 -ml-2"
             }
