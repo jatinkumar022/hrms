@@ -48,7 +48,7 @@ export function FloatingSelect({
   const isActive = open;
 
   return (
-    <div className={`relative  w-full ${className}`} key={key}>
+    <div className={`relative !m-0  mt-2.5  w-full  ${className}`} key={key}>
       <Select
         value={selected}
         onValueChange={handleValueChange}
@@ -56,7 +56,7 @@ export function FloatingSelect({
         onOpenChange={setOpen}
       >
         <SelectTrigger
-          className={`w-full !h-[50px] rounded-[5px] bg-transparent border text-left
+          className={`w-full !h-[43.73px] rounded-[5px] bg-transparent border text-left
             appearance-none transition-colors duration-200
             ${
               isActive

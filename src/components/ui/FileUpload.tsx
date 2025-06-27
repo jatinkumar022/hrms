@@ -3,7 +3,6 @@ import { useRef, useEffect, useMemo } from "react";
 import { Button } from "./button";
 import { FaFileUpload } from "react-icons/fa";
 import { X } from "lucide-react";
-import Image from "next/image";
 
 interface FileUploadProps {
   label?: string;
@@ -63,7 +62,7 @@ export default function FileUpload({ label, file, onChange }: FileUploadProps) {
         <div className="text-sm text-muted-foreground truncate mt-1">
           <span className="block mb-1">{file.name}</span>
           {file.type.startsWith("image/") ? (
-            <Image
+            <img
               key={previewUrl}
               src={previewUrl}
               alt="Preview"

@@ -3,10 +3,10 @@ const { Schema } = mongoose;
 
 // Reusable Sub-Schemas
 const languageSkillSchema = new Schema({
-  reading: Boolean,
-  speaking: Boolean,
-  writing: Boolean,
-  understanding: Boolean,
+  reading: String,
+  speaking: String,
+  writing: String,
+  understanding: String,
 }, { _id: false });
 
 const knownLanguageSchema = new Schema({
@@ -63,7 +63,7 @@ const jobInfoSchema = new Schema({
   reportingManager: String,
   lineManager: String,
   lineManager2: String,
-  employmentStatus: { type: String, enum: ['fulltime', 'part'] },
+  employmentStatus: { type: String, enum: ['Full Time', 'Part Time', 'Intern', 'Consultant'] },
   note: String,
 }, { _id: false });
 
@@ -83,8 +83,8 @@ const upiWalletSchema = new Schema({
 
 const documentSchema = new Schema({
   name: String,
-  url: String,
-  type: String,
+  number: String,
+  fileUrl: String,
 }, { _id: false });
 
 const socialLinkSchema = new Schema({
@@ -139,7 +139,7 @@ const userProfileSchema = new Schema({
   education: [educationSchema],
 
   // Job Info
-  jobInfo: jobInfoSchema,
+  jobInfo: [jobInfoSchema],
 
   // Bank Info
   bank: {

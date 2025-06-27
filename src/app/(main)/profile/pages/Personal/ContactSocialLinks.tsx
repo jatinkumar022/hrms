@@ -2,9 +2,7 @@
 
 import Input from "@/components/ui/meterialInput";
 import MobileInput from "@/components/ui/mobilenumber";
-import { Button } from "@/components/ui/button";
 import { FaLinkedin, FaGithub, FaTwitter, FaFacebookF } from "react-icons/fa";
-import { IoMdAdd } from "react-icons/io";
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
@@ -90,97 +88,97 @@ export default function ContactSocialLinks() {
   };
 
   return (
-    <div className="space-y-8 p-4 bg-white dark:bg-black">
+    <div className="">
       <FullPageLoader show={isLoading || loading} />
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* ─────────────── Contact Info ─────────────── */}
-        <section>
-          <h2 className="font-semibold text-lg mb-4">Contact Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <MobileInput
-              label="Personal Mobile"
-              id="personal"
-              {...register("personalMobile")}
-            />
-            <MobileInput
-              label="Emergency Contact"
-              id="emergency"
-              {...register("emergencyContact")}
-            />
-            <Input
-              label="Personal Email"
-              type="email"
-              {...register("personalEmail")}
-            />
-            <Input
-              label="Official Email"
-              type="email"
-              {...register("officialEmail")}
-            />
-          </div>
-        </section>
+        <div className="p-3 items-center border-b font-medium flex justify-between sticky top-0 w-full">
+          <div className="text-lg font-medium">Contact & Social Links</div>
+          {isDirty && (
+            <button
+              type="submit"
+              className="bg-sidebar-primary p-1.5 px-4 !text-white !text-sm rounded-xs cursor-pointer backdrop-blur-sm   hover:shadow-[0px_0px_2px_2px_rgba(59,130,246,0.2)]  transition duration-200"
+            >
+              Save
+            </button>
+          )}
+        </div>
+        <div className="font-medium bg-white dark:bg-black  max-h-screen  overflow-y-auto pb-[250px]">
+          {/* ─────────────── Contact Info ─────────────── */}
+          <section>
+            <h2 className=" p-3 bg-[#f5f6fa] font-medium ">
+              Contact Information
+            </h2>
+            <div className="p-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <MobileInput
+                label="Personal Mobile"
+                id="personal"
+                {...register("personalMobile")}
+              />
+              <MobileInput
+                label="Emergency Contact"
+                id="emergency"
+                {...register("emergencyContact")}
+              />
+              <Input
+                label="Personal Email"
+                type="email"
+                {...register("personalEmail")}
+              />
+              <Input
+                label="Official Email"
+                type="email"
+                {...register("officialEmail")}
+              />
+            </div>
+          </section>
 
-        {/* ─────────────── Address Summary ─────────────── */}
-        <section>
-          <h2 className="font-semibold text-lg mb-4">Address Summary</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <Input label="Current Address" {...register("currentAddress")} />
-            <Input
-              label="Permanent Address"
-              {...register("permanentAddress")}
-            />
-          </div>
-        </section>
+          {/* ─────────────── Address Summary ─────────────── */}
+          <section>
+            <h2 className="!mt-5  p-3 bg-[#f5f6fa] font-medium">
+              Address Summary
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 p-3 xl:grid-cols-3 gap-5">
+              <Input label="Current Address" {...register("currentAddress")} />
+              <Input
+                label="Permanent Address"
+                {...register("permanentAddress")}
+              />
+            </div>
+          </section>
 
-        {/* ─────────────── Social Links ─────────────── */}
-        <section>
-          <h2 className="font-semibold text-lg mb-4">Social Media Links</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            <Input
-              label="LinkedIn"
-              icon={<FaLinkedin className="text-blue-600" />}
-              placeholder="https://linkedin.com/in/your-profile"
-              {...register("linkedin")}
-            />
-            <Input
-              label="GitHub"
-              icon={<FaGithub className="text-black" />}
-              placeholder="https://github.com/username"
-              {...register("github")}
-            />
-            <Input
-              label="Twitter"
-              icon={<FaTwitter className="text-blue-400" />}
-              placeholder="https://twitter.com/handle"
-              {...register("twitter")}
-            />
-            <Input
-              label="Facebook"
-              icon={<FaFacebookF className="text-blue-600" />}
-              placeholder="https://facebook.com/username"
-              {...register("facebook")}
-            />
-          </div>
-        </section>
-
-        {/* ─────────────── Add More Links (optional) ─────────────── */}
-        <section>
-          <Button
-            variant="outline"
-            className="border-dashed text-blue-600 flex gap-2 items-center"
-            type="button"
-            // You can implement dynamic add here if you want, but keeping as static for now
-          >
-            <IoMdAdd size={16} />
-            Add Another Link
-          </Button>
-        </section>
-
-        {isDirty && (
-          <Button type="submit" className="mt-6" disabled={loading}>
-            {loading ? "Saving..." : "Save Changes"}
-          </Button>
-        )}
+          {/* ─────────────── Social Links ─────────────── */}
+          <section>
+            <h2 className="!mt-5 p-3 bg-[#f5f6fa] font-medium">
+              Social Media Links
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 p-3 xl:grid-cols-3 gap-5">
+              <Input
+                label="LinkedIn"
+                icon={<FaLinkedin className="text-blue-600" />}
+                placeholder="https://linkedin.com/in/your-profile"
+                {...register("linkedin")}
+              />
+              <Input
+                label="GitHub"
+                icon={<FaGithub className="text-black" />}
+                placeholder="https://github.com/username"
+                {...register("github")}
+              />
+              <Input
+                label="Twitter"
+                icon={<FaTwitter className="text-blue-400" />}
+                placeholder="https://twitter.com/handle"
+                {...register("twitter")}
+              />
+              <Input
+                label="Facebook"
+                icon={<FaFacebookF className="text-blue-600" />}
+                placeholder="https://facebook.com/username"
+                {...register("facebook")}
+              />
+            </div>
+          </section>
+        </div>
       </form>
     </div>
   );

@@ -18,13 +18,7 @@ export const menus: Record<string, { label: string; slug: string }[] | null> = {
     { label: "Address", slug: "address" },
     { label: "Education", slug: "education" },
   ],
-  Job: [
-    { label: "Job Information", slug: "jobinfo" },
-    { label: "Agreement", slug: "agreement" },
-    { label: "Compensation", slug: "compensation" },
-    { label: "Employee Resignation", slug: "resignation" },
-    { label: "Internship / Probation", slug: "internship" },
-  ],
+  Job: [{ label: "Job Information", slug: "jobinfo" }],
   "Bank Information": [{ label: "Bank Info", slug: "bankinfo" }],
   Settings: null,
   Documents: [

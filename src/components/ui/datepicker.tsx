@@ -37,7 +37,7 @@ export function DatePickerWithLabel({
   const isActive = focused;
   const isDate = date !== undefined || null || "";
   return (
-    <div className={`relative w-full ${className}`}>
+    <div className={`relative !m-0 mt-2.5  w-full ${className}`}>
       <DatePicker
         open={open}
         onOpenChange={setOpen}
@@ -67,9 +67,7 @@ export function DatePickerWithLabel({
             : "translate-y-0 scale-100 -ml-2"
         }
         ${
-          isActive || isDate
-            ? "text-sidebar-primary"
-            : "text-zinc-500 dark:text-zinc-400"
+          isActive ? "text-sidebar-primary" : "text-zinc-500 dark:text-zinc-400"
         }`}
       >
         <span className="bg-white px-2 dark:bg-black">{label}</span>

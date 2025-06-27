@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { BiSolidPencil } from "react-icons/bi";
 import { RiDeleteBin6Fill } from "react-icons/ri";
@@ -131,107 +130,118 @@ export default function BasicInfo() {
   return (
     <>
       <FullPageLoader show={isLoading || loading} />
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-6 py-10 bg-white dark:bg-black px-3"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 space-y-2">
-          <Input label="Company Name" {...register("companyName")} />
-          <Input
-            label="Legal Entity Company"
-            {...register("legalEntityCompany")}
-          />
-          <Input label="Unique ID" {...register("uniqueId")} />
-          <Input label="Employee ID" {...register("employeeId")} />
-          <Controller
-            name="joiningDate"
-            control={control}
-            render={({ field }) => (
-              <DatePickerWithLabel
-                label="Joining Date"
-                value={field.value ? new Date(field.value) : undefined}
-                onChange={(date) =>
-                  field.onChange(date ? date.toISOString().split("T")[0] : "")
-                }
-              />
-            )}
-          />
-          <Input label="First Name" {...register("firstName")} />
-          <Input label="Middle Name" {...register("middleName")} />
-          <Input label="Last Name" {...register("lastName")} />
-          <Controller
-            name="gender"
-            control={control}
-            render={({ field }) => (
-              <FloatingSelect
-                label="Gender"
-                value={field.value}
-                onChange={(val) => field.onChange(val || undefined)}
-                options={[
-                  { label: "Male", value: "male" },
-                  { label: "Female", value: "female" },
-                  { label: "Other", value: "other" },
-                ]}
-              />
-            )}
-          />
 
-          <Controller
-            name="dateOfBirth"
-            control={control}
-            render={({ field }) => (
-              <DatePickerWithLabel
-                label="Date of Birth"
-                value={field.value ? new Date(field.value) : undefined}
-                onChange={(val) =>
-                  field.onChange(val ? val.toISOString().split("T")[0] : "")
-                }
-              />
-            )}
-          />
-          <Controller
-            name="maritalStatus"
-            control={control}
-            render={({ field }) => (
-              <FloatingSelect
-                label="Marital Status"
-                value={field.value}
-                onChange={(val) => field.onChange(val || undefined)}
-                options={[
-                  { label: "Single", value: "single" },
-                  { label: "Married", value: "married" },
-                  { label: "Divorced", value: "divorced" },
-                  { label: "Widowed", value: "widowed" },
-                ]}
-              />
-            )}
-          />
-
-          <Input label="Blood Group" {...register("bloodGroup")} />
-          <Input label="Place of Birth" {...register("placeOfBirth")} />
-          <Input label="Nationality" {...register("nationality")} />
-          <Input label="Display Name" {...register("displayName")} />
+      <form onSubmit={handleSubmit(onSubmit)} className="relative">
+        <div className="p-3 px-5 items-center border-b font-medium flex justify-between sticky top-0 w-full">
+          <div className="text-lg font-medium">Basic Info</div>
+          {isDirty && (
+            <button
+              type="submit"
+              className="bg-sidebar-primary p-1.5 px-4 !text-white !text-sm rounded-xs cursor-pointer backdrop-blur-sm   hover:shadow-[0px_0px_2px_2px_rgba(59,130,246,0.2)]  transition duration-200"
+            >
+              Save
+            </button>
+          )}
         </div>
-
-        {/* Languages */}
-        <div className="flex gap-4 flex-wrap">
-          {fields.map((field, idx) => (
-            <LanguageCard
-              key={field.id}
-              Title="Known Language"
-              language={field.language}
-              reading={field.skill.reading}
-              speaking={field.skill.speaking}
-              writing={field.skill.writing}
-              understanding={field.skill.understanding}
-              onEdit={() => {
-                setEditIdx(idx);
-                setLanguageDraft(field);
-                setLanguageModalOpen(true);
-              }}
-              onDelete={() => remove(idx)}
+        <div className="space-y-6 py-4 bg-white dark:bg-black px-3 max-h-screen  overflow-y-auto pb-[250px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 space-y-2">
+            <Input label="Company Name" {...register("companyName")} />
+            <Input
+              label="Legal Entity Company"
+              {...register("legalEntityCompany")}
             />
-          ))}
+            <Input label="Unique ID" {...register("uniqueId")} />
+            <Input label="Employee ID" {...register("employeeId")} />
+            <Controller
+              name="joiningDate"
+              control={control}
+              render={({ field }) => (
+                <DatePickerWithLabel
+                  label="Joining Date"
+                  value={field.value ? new Date(field.value) : undefined}
+                  onChange={(date) =>
+                    field.onChange(date ? date.toISOString().split("T")[0] : "")
+                  }
+                />
+              )}
+            />
+            <Input label="First Name" {...register("firstName")} />
+            <Input label="Middle Name" {...register("middleName")} />
+            <Input label="Last Name" {...register("lastName")} />
+            <Controller
+              name="gender"
+              control={control}
+              render={({ field }) => (
+                <FloatingSelect
+                  label="Gender"
+                  value={field.value}
+                  onChange={(val) => field.onChange(val || undefined)}
+                  options={[
+                    { label: "Male", value: "male" },
+                    { label: "Female", value: "female" },
+                    { label: "Other", value: "other" },
+                  ]}
+                />
+              )}
+            />
+
+            <Controller
+              name="dateOfBirth"
+              control={control}
+              render={({ field }) => (
+                <DatePickerWithLabel
+                  label="Date of Birth"
+                  value={field.value ? new Date(field.value) : undefined}
+                  onChange={(val) =>
+                    field.onChange(val ? val.toISOString().split("T")[0] : "")
+                  }
+                />
+              )}
+            />
+            <Controller
+              name="maritalStatus"
+              control={control}
+              render={({ field }) => (
+                <FloatingSelect
+                  label="Marital Status"
+                  value={field.value}
+                  onChange={(val) => field.onChange(val || undefined)}
+                  options={[
+                    { label: "Single", value: "single" },
+                    { label: "Married", value: "married" },
+                    { label: "Divorced", value: "divorced" },
+                    { label: "Widowed", value: "widowed" },
+                  ]}
+                />
+              )}
+            />
+
+            <Input label="Blood Group" {...register("bloodGroup")} />
+            <Input label="Place of Birth" {...register("placeOfBirth")} />
+            <Input label="Nationality" {...register("nationality")} />
+            <Input label="Display Name" {...register("displayName")} />
+          </div>
+
+          {/* Languages */}
+          <div className="flex gap-4 flex-wrap">
+            {fields.map((field, idx) => (
+              <LanguageCard
+                key={field.id}
+                Title="Known Language"
+                language={field.language}
+                reading={field.skill.reading}
+                speaking={field.skill.speaking}
+                writing={field.skill.writing}
+                understanding={field.skill.understanding}
+                onEdit={() => {
+                  setEditIdx(idx);
+                  setLanguageDraft(field);
+                  setLanguageModalOpen(true);
+                }}
+                onDelete={() => remove(idx)}
+              />
+            ))}
+          </div>
           <button
             type="button"
             className="border border-dashed border-gray-300 w-fit px-4 py-2 rounded hover:border-black cursor-pointer group flex items-center gap-1"
@@ -255,12 +265,6 @@ export default function BasicInfo() {
             Add New
           </button>
         </div>
-
-        {isDirty && (
-          <Button type="submit" className="mt-6">
-            Save Changes
-          </Button>
-        )}
       </form>
 
       {languageModalOpen && (

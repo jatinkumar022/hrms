@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,100 +19,175 @@ import {
 } from "@/components/ui/select";
 import { FaPaperclip, FaEdit } from "react-icons/fa";
 import FileUpload from "@/components/ui/FileUpload";
-import Image from "next/image";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useForm, useFieldArray } from "react-hook-form";
+import {
+  fetchPersonalDocuments,
+  updatePersonalDocuments,
+  PersonalDocumentType,
+} from "@/redux/slices/personalDocumentsSlice";
+import FullPageLoader from "@/components/loaders/FullPageLoader";
+import { toast } from "sonner";
 
-type Props = {
-  dialogOpen?: boolean;
-  setDialogOpen?: (open: boolean) => void;
+import Link from "next/link";
+import { CgMathPlus } from "react-icons/cg";
+
+type PersonalDocumentsFormData = {
+  documents: PersonalDocumentType[];
 };
 
-export default function PersonalDocuments({
-  dialogOpen,
-  setDialogOpen,
-}: Props) {
-  /** master array */
-  const [documents, setDocuments] = useState<
-    { name: string; number: string; file: File | null }[]
-  >([
-    {
-      name: "Aadhaar Card (UID)",
-      number: "408677155875",
-      file: null,
-    },
-    {
-      name: "PAN Card",
-      number: "FIUPR6684C",
-      file: null,
-    },
-  ]);
+const docLabel: Record<string, string> = {
+  voter: "Voter ID",
+  passport: "Passport",
+  driving: "Driving License",
+};
 
-  /** form state */
+const labelToKey = (label: string): string => {
+  return (
+    Object.entries(docLabel).find(([, val]) => val === label)?.[0] || label
+  );
+};
+
+export default function PersonalDocuments() {
+  const dispatch = useAppDispatch();
+  const { data: fetchedData, isLoading } = useAppSelector(
+    (state) => state.personalDocuments
+  );
+  const [loading, setLoading] = useState(true);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [fileUploading, setFileUploading] = useState(false);
+
+  const {
+    handleSubmit,
+    reset,
+    control,
+    formState: { isDirty },
+  } = useForm<PersonalDocumentsFormData>({
+    defaultValues: {
+      documents: [],
+    },
+  });
+
+  const { fields, append, update, remove } = useFieldArray({
+    control,
+    name: "documents",
+  });
+
+  useEffect(() => {
+    dispatch(fetchPersonalDocuments());
+  }, [dispatch]);
+
+  useEffect(() => {
+    setLoading(true);
+    if (fetchedData && Array.isArray(fetchedData)) {
+      reset({ documents: fetchedData });
+    }
+    setLoading(false);
+  }, [fetchedData, reset]);
+
+  // File upload handler
+  const handleFileUpload = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    return data.url;
+  };
+
+  const onSubmit = async (formData: PersonalDocumentsFormData) => {
+    setLoading(true);
+    const toastId = toast.loading("Saving...");
+    try {
+      await dispatch(updatePersonalDocuments(formData.documents)).unwrap();
+      toast.success("Saved successfully", { id: toastId });
+      dispatch(fetchPersonalDocuments());
+    } catch {
+      toast.error("Failed to save", { id: toastId });
+    }
+    setLoading(false);
+  };
+
+  // Dialog state for add/edit
+  const [dialogState, setDialogState] = useState({
+    open: false,
+    mode: "add" as "add" | "edit",
+  });
   const [docType, setDocType] = useState("");
   const [docNumber, setDocNumber] = useState("");
   const [docFile, setDocFile] = useState<File | null>(null);
 
-  // Track if we’re editing or adding
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-
-  /** log whenever documents change */
-  useEffect(() => {
-    console.log("Documents:", documents);
-  }, [documents]);
-
-  /* helper map */
-  const docLabel: Record<string, string> = {
-    voter: "Voter ID",
-    passport: "Passport",
-    driving: "Driving License",
-  };
-
-  const labelToKey = (label: string): string => {
-    return (
-      Object.entries(docLabel).find(([, val]) => val === label)?.[0] || label
-    );
-  };
-
-  /** add or update doc */
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!docType || !docNumber) return;
-
-    const newDoc = {
-      name: docLabel[docType] ?? docType,
-      number: docNumber,
-      file: docFile,
-    };
-
-    if (editIndex !== null) {
-      // Update existing
-      const updatedDocs = [...documents];
-      updatedDocs[editIndex] = newDoc;
-      setDocuments(updatedDocs);
-    } else {
-      // Add new
-      setDocuments((prev) => [...prev, newDoc]);
-    }
-
-    // reset form
+  // Open dialog for add
+  const openAddDialog = () => {
     setDocType("");
     setDocNumber("");
     setDocFile(null);
     setEditIndex(null);
-    setDialogOpen?.(false);
+    setDialogState({ open: true, mode: "add" });
   };
 
-  /** open edit dialog with values */
+  // Open dialog for edit
   const handleEdit = (index: number) => {
-    const doc = documents[index];
+    const doc = fields[index];
     setDocType(labelToKey(doc.name));
     setDocNumber(doc.number);
-    setDocFile(doc.file);
+    setDocFile(null); // No file re-upload for edit
     setEditIndex(index);
-    setDialogOpen?.(true);
+    setDialogState({ open: true, mode: "edit" });
+  };
+
+  // Handle dialog form submit
+  const handleDialogSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!docType || !docNumber) return;
+    let fileUrl = "";
+    if (docFile) {
+      setFileUploading(true);
+      fileUrl = await handleFileUpload(docFile);
+      setFileUploading(false);
+    }
+    const newDoc: PersonalDocumentType = {
+      name: docLabel[docType] ?? docType,
+      number: docNumber,
+      fileUrl,
+    };
+    if (editIndex !== null) {
+      update(editIndex, newDoc);
+    } else {
+      append(newDoc);
+    }
+    setDocType("");
+    setDocNumber("");
+    setDocFile(null);
+    setEditIndex(null);
+    setDialogState({ open: false, mode: "add" });
   };
 
   return (
     <div>
+      <FullPageLoader show={isLoading || loading || fileUploading} />
+      <div className="p-4 border font-medium flex justify-between items-center">
+        <div>Personal Documents</div>
+        <div className="flex items-center gap-2">
+          {isDirty && (
+            <button
+              type="submit"
+              className="bg-sidebar-primary p-1.5 px-4 !text-white !text-sm rounded-xs cursor-pointer backdrop-blur-sm   hover:shadow-[0px_0px_2px_2px_rgba(59,130,246,0.2)]  transition duration-200"
+            >
+              Save
+            </button>
+          )}
+          <button
+            className="bg-sidebar-primary p-1.5  !text-white !text-sm rounded-xs cursor-pointer backdrop-blur-sm   hover:shadow-[0px_0px_2px_2px_rgba(59,130,246,0.2)]  transition duration-200"
+            type="button"
+            onClick={openAddDialog}
+          >
+            <CgMathPlus size={20} />
+          </button>
+        </div>
+      </div>
       {/* ====== table ====== */}
       <div className="overflow-hidden">
         <table className="w-full text-sm">
@@ -125,28 +200,34 @@ export default function PersonalDocuments({
             </tr>
           </thead>
           <tbody>
-            {documents.map((d, i) => (
-              <tr key={i} className="border-t">
+            {fields.map((d, i) => (
+              <tr key={d.id} className="border-t">
                 <td className="px-4 py-3">{d.name}</td>
                 <td className="px-4 py-3">{d.number}</td>
                 <td className="px-4 py-3">
-                  {d.file ? (
+                  {d.fileUrl ? (
                     <div className="flex items-center gap-2">
-                      {d.file.type.startsWith("image/") ? (
-                        <a href={URL.createObjectURL(d.file)} target="_blank">
-                          <Image
-                            src={URL.createObjectURL(d.file)}
-                            alt={d.file.name}
-                            className="w-10 h-10 rounded object-cover border"
+                      {d.fileUrl.match(/\.(jpg|jpeg|png)$/i) ? (
+                        <Link
+                          href={d.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={d.fileUrl}
+                            alt={d.name}
+                            className="w-20 h-20 rounded object-cover border hover:scale-150 transition-transform duration-200"
                           />
-                        </a>
+                        </Link>
                       ) : (
                         <a
-                          className="inline-flex items-center gap-1 underline text-blue-600"
-                          href={URL.createObjectURL(d.file)}
+                          href={d.fileUrl}
                           target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 underline text-blue-600"
                         >
-                          <FaPaperclip /> {d.file.name}
+                          <FaPaperclip />
+                          {d.fileUrl.split("/").pop()}
                         </a>
                       )}
                     </div>
@@ -163,25 +244,30 @@ export default function PersonalDocuments({
                     <FaEdit size={14} />
                     Edit
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(i)}
+                    className="ml-2 text-red-500 hover:underline"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
       {/* ====== dialog ====== */}
       <Dialog
-        open={dialogOpen}
+        open={dialogState.open}
         onOpenChange={(open) => {
           if (!open) {
-            // Reset form if closing
             setDocType("");
             setDocNumber("");
             setDocFile(null);
             setEditIndex(null);
           }
-          setDialogOpen?.(open);
+          setDialogState((prev) => ({ ...prev, open }));
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -191,7 +277,7 @@ export default function PersonalDocuments({
             </DialogTitle>
           </DialogHeader>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleDialogSubmit}>
             <div className="space-y-1">
               <Label>Document Type</Label>
               <Select value={docType} onValueChange={setDocType}>
@@ -229,19 +315,24 @@ export default function PersonalDocuments({
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setDialogOpen?.(false);
+                  setDialogState((prev) => ({ ...prev, open: false }));
                   setEditIndex(null);
                 }}
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={fileUploading}>
                 {editIndex !== null ? "Update" : "Save"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+      {isDirty && (
+        <div className="pt-4">
+          <Button onClick={handleSubmit(onSubmit)}>Save All Changes</Button>
+        </div>
+      )}
     </div>
   );
 }

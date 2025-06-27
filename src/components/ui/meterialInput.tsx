@@ -45,7 +45,7 @@ const MaterialTextField = forwardRef<HTMLInputElement, MaterialTextFieldProps>(
     };
 
     return (
-      <div className="relative">
+      <div className="relative !font-normal !m-0  mt-2.5">
         <input
           {...props}
           id={id}

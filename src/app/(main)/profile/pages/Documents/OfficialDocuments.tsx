@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,63 +18,159 @@ import {
 } from "@/components/ui/select";
 import { FaPaperclip, FaEdit } from "react-icons/fa";
 import FileUpload from "@/components/ui/FileUpload";
-import Image from "next/image";
-type Props = {
-  dialogOpen?: boolean;
-  setDialogOpen?: (open: boolean) => void;
+import { CgMathPlus } from "react-icons/cg";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useForm, useFieldArray } from "react-hook-form";
+import {
+  fetchOfficialDocuments,
+  OfficialDocumentType,
+} from "@/redux/slices/officialDocumentsSlice";
+import FullPageLoader from "@/components/loaders/FullPageLoader";
+import Link from "next/link";
+
+type OfficialDocumentsFormData = {
+  documents: OfficialDocumentType[];
 };
-export default function OfficialDocuments({
-  dialogOpen,
-  setDialogOpen,
-}: Props) {
-  const [documents, setDocuments] = useState<
-    { name: string; number: string; file: File | null }[]
-  >([]);
+
+const docLabel: Record<string, string> = {
+  offer: "Offer Letter",
+  experience: "Experience Letter",
+  salary: "Salary Slip",
+  relieving: "Relieving Letter",
+  idcard: "Employee ID Card",
+};
+
+const labelToKey = (label: string): string =>
+  Object.entries(docLabel).find(([, val]) => val === label)?.[0] || label;
+
+export default function OfficialDocuments() {
+  const dispatch = useAppDispatch();
+  const { data: fetchedData, isLoading } = useAppSelector(
+    (state) => state.officialDocuments
+  );
+  const [loading, setLoading] = useState(true);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [fileUploading, setFileUploading] = useState(false);
+
+  const {
+    reset,
+    control,
+    formState: { isDirty },
+  } = useForm<OfficialDocumentsFormData>({
+    defaultValues: {
+      documents: [],
+    },
+  });
+
+  const { fields, append, update, remove } = useFieldArray({
+    control,
+    name: "documents",
+  });
+
+  useEffect(() => {
+    dispatch(fetchOfficialDocuments());
+  }, [dispatch]);
+
+  useEffect(() => {
+    setLoading(true);
+    if (fetchedData && Array.isArray(fetchedData)) {
+      reset({ documents: fetchedData });
+    }
+    setLoading(false);
+  }, [fetchedData, reset]);
+
+  // File upload handler (mock, replace with real upload logic)
+  const handleFileUpload = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    return data.url; // The public URL returned by your backend
+  };
+
+  // Dialog state for add/edit
+  const [dialogState, setDialogState] = useState({
+    open: false,
+    mode: "add" as "add" | "edit",
+  });
   const [docType, setDocType] = useState("");
   const [docNumber, setDocNumber] = useState("");
   const [docFile, setDocFile] = useState<File | null>(null);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const docLabel: Record<string, string> = {
-    offer: "Offer Letter",
-    experience: "Experience Letter",
-    salary: "Salary Slip",
-    relieving: "Relieving Letter",
-    idcard: "Employee ID Card",
+
+  // Open dialog for add
+  const openAddDialog = () => {
+    setDocType("");
+    setDocNumber("");
+    setDocFile(null);
+    setEditIndex(null);
+    setDialogState({ open: true, mode: "add" });
   };
-  const labelToKey = (label: string): string =>
-    Object.entries(docLabel).find(([, val]) => val === label)?.[0] || label;
-  const handleSubmit = (e: React.FormEvent) => {
+
+  // Open dialog for edit
+  const handleEdit = (index: number) => {
+    const doc = fields[index];
+    setDocType(labelToKey(doc.name));
+    setDocNumber(doc.number);
+    setDocFile(null); // No file re-upload for edit
+    setEditIndex(index);
+    setDialogState({ open: true, mode: "edit" });
+  };
+
+  // Handle dialog form submit
+  const handleDialogSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!docType || !docNumber) return;
-    const newDoc = {
+    let fileUrl = "";
+    if (docFile) {
+      setFileUploading(true);
+      fileUrl = await handleFileUpload(docFile);
+      setFileUploading(false);
+    }
+    const newDoc: OfficialDocumentType = {
       name: docLabel[docType] ?? docType,
       number: docNumber,
-      file: docFile,
+      fileUrl,
     };
     if (editIndex !== null) {
-      const updated = [...documents];
-      updated[editIndex] = newDoc;
-      setDocuments(updated);
+      update(editIndex, newDoc);
     } else {
-      setDocuments((prev) => [...prev, newDoc]);
+      append(newDoc);
     }
     setDocType("");
     setDocNumber("");
     setDocFile(null);
     setEditIndex(null);
-    setDialogOpen?.(false);
+    setDialogState({ open: false, mode: "add" });
   };
-  /** Open edit dialog with values */
-  const handleEdit = (index: number) => {
-    const doc = documents[index];
-    setDocType(labelToKey(doc.name));
-    setDocNumber(doc.number);
-    setDocFile(doc.file);
-    setEditIndex(index);
-    setDialogOpen?.(true);
-  };
+
   return (
     <div>
+      <FullPageLoader show={isLoading || loading || fileUploading} />
+      <div className="p-4 border font-medium flex justify-between items-center">
+        <div>Official Documents</div>
+        <div className="flex items-center gap-2">
+          {isDirty && (
+            <button
+              type="submit"
+              className="bg-sidebar-primary p-1.5 px-4 !text-white !text-sm rounded-xs cursor-pointer backdrop-blur-sm   hover:shadow-[0px_0px_2px_2px_rgba(59,130,246,0.2)]  transition duration-200"
+            >
+              Save
+            </button>
+          )}
+          <button
+            className="bg-sidebar-primary p-1.5  !text-white !text-sm rounded-xs cursor-pointer backdrop-blur-sm   hover:shadow-[0px_0px_2px_2px_rgba(59,130,246,0.2)]  transition duration-200"
+            type="button"
+            onClick={openAddDialog}
+          >
+            <CgMathPlus size={20} />
+          </button>
+        </div>
+      </div>
       {/* ===== Table ===== */}
       <div className="overflow-hidden">
         <table className="w-full text-sm">
@@ -87,34 +183,34 @@ export default function OfficialDocuments({
             </tr>
           </thead>
           <tbody>
-            {documents.map((d, i) => (
-              <tr key={i} className="border-t">
+            {fields.map((d, i) => (
+              <tr key={d.id} className="border-t">
                 <td className="px-4 py-3">{d.name}</td>
                 <td className="px-4 py-3">{d.number}</td>
                 <td className="px-4 py-3">
-                  {d.file ? (
+                  {d.fileUrl ? (
                     <div className="flex items-center gap-2">
-                      {d.file.type.startsWith("image/") ? (
-                        <a
-                          href={URL.createObjectURL(d.file)}
+                      {d.fileUrl.match(/\.(jpg|jpeg|png)$/i) ? (
+                        <Link
+                          href={d.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <Image
-                            src={URL.createObjectURL(d.file)}
-                            alt={d.file.name}
-                            className="w-10 h-10 rounded object-cover border"
+                          <img
+                            src={d.fileUrl}
+                            alt={d.name}
+                            className="w-20 h-20 rounded object-cover border hover:scale-150 transition-transform duration-200"
                           />
-                        </a>
+                        </Link>
                       ) : (
                         <a
-                          href={URL.createObjectURL(d.file)}
+                          href={d.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 underline text-blue-600"
                         >
                           <FaPaperclip />
-                          {d.file.name}
+                          {d.fileUrl.split("/").pop()}
                         </a>
                       )}
                     </div>
@@ -131,6 +227,13 @@ export default function OfficialDocuments({
                     <FaEdit size={14} />
                     Edit
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(i)}
+                    className="ml-2 text-red-500 hover:underline"
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -139,7 +242,7 @@ export default function OfficialDocuments({
       </div>
       {/* ===== Dialog Form ===== */}
       <Dialog
-        open={dialogOpen}
+        open={dialogState.open}
         onOpenChange={(open) => {
           if (!open) {
             setDocType("");
@@ -147,7 +250,7 @@ export default function OfficialDocuments({
             setDocFile(null);
             setEditIndex(null);
           }
-          setDialogOpen?.(open);
+          setDialogState((prev) => ({ ...prev, open }));
         }}
       >
         <DialogContent className="sm:max-w-md">
@@ -156,7 +259,7 @@ export default function OfficialDocuments({
               {editIndex !== null ? "Edit Document" : "Add Official Document"}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleDialogSubmit} className="space-y-4">
             <div className="space-y-1">
               <Label>Document Type</Label>
               <Select value={docType} onValueChange={setDocType}>
@@ -193,13 +296,13 @@ export default function OfficialDocuments({
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setDialogOpen?.(false);
+                  setDialogState((prev) => ({ ...prev, open: false }));
                   setEditIndex(null);
                 }}
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={fileUploading}>
                 {editIndex !== null ? "Update" : "Save"}
               </Button>
             </div>

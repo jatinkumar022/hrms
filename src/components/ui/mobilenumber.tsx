@@ -35,7 +35,7 @@ const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
         : localRef.current?.value !== "";
 
     return (
-      <div className="relative">
+      <div className="relative !m-0 mt-2.5 ">
         {/* +91 Prefix */}
         <span
           className={`absolute inset-y-0 left-0 flex items-center pl-3 text-sm select-none ${
@@ -68,7 +68,7 @@ const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
             props.onChange?.(e);
           }}
           className={`
-            block w-full border rounded-[5px] bg-transparent p-3 text-base text-zinc-900 dark:text-white pl-18
+            block w-full border font-normal rounded-[5px] bg-transparent p-3 text-base text-zinc-900 dark:text-white pl-18
             transition-colors duration-200
             ${
               active
