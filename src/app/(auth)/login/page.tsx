@@ -272,7 +272,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-[60%] bg-white flex flex-col justify-center px-8 lg:px-20 py-12 mt-20 lg:mt-0">
+      <div className="w-full lg:w-[60%] bg-white flex flex-col justify-center px-8 lg:px-20 py-12  lg:mt-0">
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="w-full max-w-md mx-auto space-y-6"
