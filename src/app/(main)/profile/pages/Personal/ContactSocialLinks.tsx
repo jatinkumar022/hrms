@@ -92,7 +92,9 @@ export default function ContactSocialLinks() {
       <FullPageLoader show={isLoading || loading} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-3 items-center border-b font-medium flex justify-between sticky top-0 w-full">
-          <div className="text-lg font-medium">Contact & Social Links</div>
+          <div className="text-base md:text-lg font-medium">
+            Contact & Social Links
+          </div>
           {isDirty && (
             <button
               type="submit"
@@ -108,7 +110,7 @@ export default function ContactSocialLinks() {
             <h2 className=" p-3 bg-[#f5f6fa] font-medium ">
               Contact Information
             </h2>
-            <div className="p-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div className="p-3 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
               <MobileInput
                 label="Personal Mobile"
                 id="personal"
@@ -137,7 +139,7 @@ export default function ContactSocialLinks() {
             <h2 className="!mt-5  p-3 bg-[#f5f6fa] font-medium">
               Address Summary
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 p-3 xl:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-5">
               <Input label="Current Address" {...register("currentAddress")} />
               <Input
                 label="Permanent Address"
@@ -151,7 +153,7 @@ export default function ContactSocialLinks() {
             <h2 className="!mt-5 p-3 bg-[#f5f6fa] font-medium">
               Social Media Links
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 p-3 xl:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-5">
               <Input
                 label="LinkedIn"
                 icon={<FaLinkedin className="text-blue-600" />}

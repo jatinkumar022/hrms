@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Rubik } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 
 import "../globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -8,9 +8,9 @@ import Sidebar from "@/components/custom/Sidebar";
 import { ThemeProvider } from "next-themes";
 import ReduxProvider from "@/lib/redux-provider";
 
-const rubik = Rubik({
+const openSans = Open_Sans({
   subsets: ["latin"],
-  variable: "--font-rubik",
+  variable: "--font-open-sans",
   display: "swap",
 });
 export const metadata: Metadata = {
@@ -26,12 +26,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={` ${rubik.variable} h-full`}
+      className={` ${openSans.variable} h-full`}
       suppressHydrationWarning
     >
       <body
         className={` antialiased h-full`}
-        style={{ fontFamily: "var(--font-rubik), sans-serif" }}
+        style={{ fontFamily: "var(--font-open-sans), sans-serif" }}
       >
         <ReduxProvider>
           <ThemeProvider
@@ -42,12 +42,12 @@ export default function RootLayout({
             {/* Full height flex layout */}
             <div className="flex h-screen overflow-hidden">
               {/* Fixed sidebar */}
-              <aside className="w-20 fixed top-0 left-0 h-screen z-40">
+              <aside className="hidden md:block w-20 fixed top-0 left-0 h-screen z-30">
                 <Sidebar />
               </aside>
 
               {/* Main content area with left padding for sidebar */}
-              <div className="flex-1 flex flex-col pl-20">
+              <div className="flex-1 flex flex-col md:pl-20">
                 {/* Sticky navbar */}
                 <Navbar />
                 {/* Scrollable content */}

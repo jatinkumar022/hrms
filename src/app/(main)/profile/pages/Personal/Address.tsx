@@ -96,7 +96,7 @@ export default function Address() {
       <FullPageLoader show={isLoading || loading} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-3  items-center border-b font-medium flex justify-between sticky top-0 w-full">
-          <div className="text-lg font-medium">Address</div>
+          <div className="text-base md:text-lg font-medium">Address</div>
           {isDirty && (
             <button
               type="submit"
@@ -110,7 +110,7 @@ export default function Address() {
         <div className="space-y-6  bg-white dark:bg-black max-h-screen  overflow-y-auto pb-[250px]">
           <section>
             <h2 className="p-3 bg-[#f5f6fa] font-medium ">Current Address</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 p-3 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-4">
               <Input
                 label="Address Line 1"
                 {...register("address.current.addressLine1")}
@@ -129,7 +129,7 @@ export default function Address() {
           {/* ─────────────── Permanent Address ─────────────── */}
           <section>
             <h2 className="p-3 bg-[#f5f6fa] font-medium ">Permanent Address</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 p-3 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-4">
               <Input
                 label="Address Line 1"
                 {...register("address.permanent.addressLine1")}
@@ -176,7 +176,7 @@ export default function Address() {
                   >
                     <RxCross2 className="text-red-400" />
                   </button>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                     <Input
                       label="Address Line 1"
                       {...register(

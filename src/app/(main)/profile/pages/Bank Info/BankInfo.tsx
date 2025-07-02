@@ -92,7 +92,7 @@ export default function BankDetails() {
       <FullPageLoader show={isLoading || loading} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-3 px-5 items-center border-b font-medium flex justify-between sticky top-0 w-full">
-          <div>Profile Page</div>
+          <div className="text-lg font-medium">Bank Info</div>
           {isDirty && (
             <button
               type="submit"
@@ -103,11 +103,11 @@ export default function BankDetails() {
           )}
         </div>
         <div className=" bg-white dark:bg-black  max-h-screen  overflow-y-auto pb-[250px]">
-          <h2 className=" p-2 px-3 font-semibold text-lg !mb-5 bg-[#f5f6fa]">
+          <h2 className=" p-2 px-3 font-semibold text-lg  bg-[#f5f6fa]">
             Primary Bank Detail
           </h2>
           <section className=" py-4 px-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
               <Input label="Bank Name" {...register("bank.primary.bankName")} />
               <Input
                 label="Account Number"
@@ -141,17 +141,20 @@ export default function BankDetails() {
               </button>
             </div>
             {otherFields.map((field, idx) => (
-              <div key={field.id} className="relative border p-4 mb-4 rounded">
+              <div
+                key={field.id}
+                className="relative border m-3 p-4 mb-4 pt-8 rounded"
+              >
                 {otherFields.length > 1 && (
                   <button
                     type="button"
                     onClick={() => removeOther(idx)}
-                    className="absolute top-2 right-2 rounded-full cursor-pointer p-2 hover:bg-red-100"
+                    className="absolute top-0.5 right-0.5 rounded-full cursor-pointer p-1.5 hover:bg-red-100"
                   >
                     <RxCross2 className="text-red-400" />
                   </button>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4">
                   <Input
                     label="Bank Name"
                     {...register(`bank.others.${idx}.bankName` as const)}
@@ -186,7 +189,7 @@ export default function BankDetails() {
             <h2 className=" p-2 px-3 font-semibold text-lg !mb-5 bg-[#f5f6fa]">
               UPI / Wallet
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4 p-3">
               <Input label="UPI ID" {...register("bank.upiWallets.0.upiId")} />
               <Input
                 label="Wallet Name"

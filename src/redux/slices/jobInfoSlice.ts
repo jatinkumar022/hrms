@@ -2,32 +2,36 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export interface JobInfoType {
-  effectiveDate?: string;
+export interface CurrentJobType {
+  joiningDate?: string;
   location?: string;
-  subLocation?: string;
   jobTitle?: string;
-  grade?: string;
-  band?: string;
   category?: string;
   department?: string;
-  subDepartment?: string;
   reportingManager?: string;
-  lineManager?: string;
-  lineManager2?: string;
   employmentStatus?: string;
-  note?: string;
+}
+
+export interface PreviousExperienceType {
+  companyName?: string;
+  joiningDate?: string;
+  lastDate?: string;
+  department?: string;
+  category?: string;
+  employmentStatus?: string;
 }
 
 interface JobInfoState {
-  data: JobInfoType[];
+  currentJob: CurrentJobType | null;
+  previousExperience: PreviousExperienceType[];
   isLoading: boolean;
   isError: boolean;
   errorMessage: string | null;
 }
 
 const initialState: JobInfoState = {
-  data: [],
+  currentJob: null,
+  previousExperience: [],
   isLoading: false,
   isError: false,
   errorMessage: null,
@@ -44,7 +48,10 @@ export const fetchJobInfo = createAsyncThunk(
           Authorization: `Bearer ${token}`,
         },
       });
-      return res.data.profile?.jobInfo || [];
+      return {
+        currentJob: res.data.profile?.currentJob || null,
+        previousExperience: res.data.profile?.previousExperience || [],
+      };
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Fetch failed");
     }
@@ -54,19 +61,28 @@ export const fetchJobInfo = createAsyncThunk(
 // PUT /api/user-profile/job-info
 export const updateJobInfo = createAsyncThunk(
   "profile/updateJobInfo",
-  async (formData: JobInfoType[], { rejectWithValue }) => {
+  async (
+    data: {
+      currentJob: CurrentJobType;
+      previousExperience: PreviousExperienceType[];
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const token = Cookies.get("token");
       const res = await axios.put(
         "/api/user-profile/job-info",
-        { data: { jobInfo: formData } },
+        { data },
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      return res.data.profile?.jobInfo || [];
+      return {
+        currentJob: res.data.profile?.currentJob || null,
+        previousExperience: res.data.profile?.previousExperience || [],
+      };
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Update failed");
     }
@@ -86,7 +102,8 @@ const jobInfoSlice = createSlice({
       })
       .addCase(fetchJobInfo.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.data = action.payload;
+        state.currentJob = action.payload.currentJob;
+        state.previousExperience = action.payload.previousExperience;
       })
       .addCase(fetchJobInfo.rejected, (state, action) => {
         state.isLoading = false;
@@ -100,7 +117,8 @@ const jobInfoSlice = createSlice({
       })
       .addCase(updateJobInfo.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.data = action.payload;
+        state.currentJob = action.payload.currentJob;
+        state.previousExperience = action.payload.previousExperience;
       })
       .addCase(updateJobInfo.rejected, (state, action) => {
         state.isLoading = false;

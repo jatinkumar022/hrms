@@ -94,7 +94,7 @@ export default function EducationInfo() {
       <FullPageLoader show={isLoading || loading} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-3  items-center border-b font-medium flex justify-between sticky top-0 w-full">
-          <div className="text-lg font-medium">Education</div>
+          <div className="text-base md:text-lg font-medium">Education</div>
           {isDirty && (
             <button
               type="submit"
@@ -130,7 +130,7 @@ export default function EducationInfo() {
               key={edu.id}
               className="border rounded-md p-4 space-y-4 relative"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 pt-5 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 pt-5 xl:grid-cols-3 gap-4">
                 <Input
                   label="Degree / Qualification"
                   {...register(`education.${index}.degree` as const)}

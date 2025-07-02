@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     position: "bottom-right", // <-- this also helps
   },
   images: {
-    domains: ["randomuser.me"],
+    domains: ["randomuser.me", "res.cloudinary.com"],
   },
   env: {
     TOKEN_SECRET: process.env.TOKEN_SECRET, // 👈 expose the token secret to the app

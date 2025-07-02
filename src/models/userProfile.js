@@ -51,20 +51,22 @@ const educationSchema = new Schema({
 }, { _id: false });
 
 const jobInfoSchema = new Schema({
-  effectiveDate: Date,
+  joiningDate: Date,
   location: String,
-  subLocation: String,
   jobTitle: String,
-  grade: String,
-  brand: String,
   category: String,
   department: String,
-  subDepartment: String,
   reportingManager: String,
-  lineManager: String,
-  lineManager2: String,
   employmentStatus: { type: String, enum: ['Full Time', 'Part Time', 'Intern', 'Consultant'] },
-  note: String,
+}, { _id: false });
+
+const previousExperienceSchema = new Schema({
+  companyName: String,
+  joiningDate: Date,
+  lastDate: Date,
+  department: String,
+  category: String,
+  employmentStatus: { type: String, enum: ['Full Time', 'Part Time', 'Intern', 'Consultant'] },
 }, { _id: false });
 
 const bankAccountSchema = new Schema({
@@ -139,7 +141,8 @@ const userProfileSchema = new Schema({
   education: [educationSchema],
 
   // Job Info
-  jobInfo: [jobInfoSchema],
+  currentJob: jobInfoSchema,
+  previousExperience: [previousExperienceSchema],
 
   // Bank Info
   bank: {
@@ -167,7 +170,7 @@ const userProfileSchema = new Schema({
     facebook: String,
     socialLinks: [socialLinkSchema],
   },
-
+  profileImage: { type: String, default: "" },
 }, {
   timestamps: true,
 });

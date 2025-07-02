@@ -4,7 +4,7 @@ import { Info } from "lucide-react";
 
 function DataSummery() {
   return (
-    <div className="flex overflow-x-auto border-b  bg-white p-1 text-xs w-[calc(100vw-5rem)] ">
+    <div className="flex overflow-x-auto border-b  bg-white p-1 text-xs w-screen md:w-[calc(100vw-5rem)] ">
       {metrics.map((metric, index) => (
         <div
           key={index}

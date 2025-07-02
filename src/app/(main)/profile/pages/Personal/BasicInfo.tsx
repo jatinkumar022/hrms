@@ -132,8 +132,8 @@ export default function BasicInfo() {
       <FullPageLoader show={isLoading || loading} />
 
       <form onSubmit={handleSubmit(onSubmit)} className="relative">
-        <div className="p-3 px-5 items-center border-b font-medium flex justify-between sticky top-0 w-full">
-          <div className="text-lg font-medium">Basic Info</div>
+        <div className="p-2 md:p-3 px-5 items-center border-b font-medium flex justify-between sticky top-0 w-full">
+          <div className="text-base md:text-lg font-medium">Basic Info</div>
           {isDirty && (
             <button
               type="submit"
@@ -144,7 +144,7 @@ export default function BasicInfo() {
           )}
         </div>
         <div className="space-y-6 py-4 bg-white dark:bg-black px-3 max-h-screen  overflow-y-auto pb-[250px]">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 space-y-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5 space-y-2">
             <Input label="Company Name" {...register("companyName")} />
             <Input
               label="Legal Entity Company"
@@ -385,12 +385,15 @@ export default function BasicInfo() {
               <Button
                 type="button"
                 variant="outline"
+                className="cursor-pointer !font-normal"
                 onClick={() => setLanguageModalOpen(false)}
               >
                 Cancel
               </Button>
               <Button
-                type="button"
+                variant={"default"}
+                type="submit"
+                className="bg-sidebar-primary !text-white border border-transparent  hover:!text-sidebar-primary cursor-pointer hover:bg-transparent hover:border-sidebar-primary !font-normal"
                 onClick={() => {
                   if (editIdx === null) {
                     append(languageDraft);
@@ -430,7 +433,7 @@ const LanguageCard: React.FC<
       <span className="bg-white px-2 dark:bg-black">{Title}</span>
     </label>
     <div className="flex justify-between">
-      <div className="text-[18px] font-medium">{language}</div>
+      <div className="lg:text-[18px]  font-medium">{language}</div>
       <div className="flex items-center gap-2">
         <div
           className="hover:bg-[#5096db66] text-sidebar-primary p-1.5 rounded-full cursor-pointer border"
@@ -446,22 +449,24 @@ const LanguageCard: React.FC<
         </div>
       </div>
     </div>
-    <div className="flex gap-8">
+    <div className="flex lg:gap-8 gap-3">
       <div className="flex flex-col">
-        <span>Reading</span>
-        <span className="text-sm text-[#4e525f]">{reading}</span>
+        <span className="text-sm">Reading</span>
+        <span className="text-xs lg:text-sm text-[#4e525f]">{reading}</span>
       </div>
       <div className="flex flex-col">
-        <span>Speaking</span>
-        <span className="text-sm text-[#4e525f]">{speaking}</span>
+        <span className="text-sm">Speaking</span>
+        <span className="text-xs lg:text-sm text-[#4e525f]">{speaking}</span>
       </div>
       <div className="flex flex-col">
-        <span>Writing</span>
-        <span className="text-sm text-[#4e525f]">{writing}</span>
+        <span className="text-sm">Writing</span>
+        <span className="text-xs lg:text-sm text-[#4e525f]">{writing}</span>
       </div>
       <div className="flex flex-col">
-        <span>Understanding</span>
-        <span className="text-sm text-[#4e525f]">{understanding}</span>
+        <span className="text-sm">Understanding</span>
+        <span className="text-xs lg:text-sm text-[#4e525f]">
+          {understanding}
+        </span>
       </div>
     </div>
   </div>

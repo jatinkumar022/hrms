@@ -39,7 +39,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="overflow-x-auto mt-1 w-[calc(100vw-5rem)]">
+    <div className="overflow-x-auto mt-1 w-screen md:w-[calc(100vw-5rem)]">
       <Table className="min-w-[1800px] text-xs border-b">
         <TableHeader className="bg-[#fafafb]">
           {table.getHeaderGroups().map((headerGroup) => (

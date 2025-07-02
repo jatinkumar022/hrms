@@ -130,7 +130,7 @@ export default function FamilyInfo() {
       <FullPageLoader show={isLoading || loading} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-3  items-center border-b font-medium flex justify-between sticky top-0 w-full">
-          <div className="text-lg font-medium">Family Details</div>
+          <div className="text-base md:text-lg font-medium">Family Details</div>
           {isDirty && (
             <button
               type="submit"
@@ -169,7 +169,7 @@ export default function FamilyInfo() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 ">
                 {/* Name always shown */}
                 <Input label="Name" {...register("father.name")} />
 
@@ -251,7 +251,7 @@ export default function FamilyInfo() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {/* Name always shown */}
                 <Input label="Name" {...register("mother.name")} />
 
@@ -353,7 +353,7 @@ export default function FamilyInfo() {
                   className="w-1/2"
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 <Input
                   label="Name"
                   {...register(`others.${idx}.name` as const)}

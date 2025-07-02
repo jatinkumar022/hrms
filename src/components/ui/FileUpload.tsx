@@ -59,8 +59,7 @@ export default function FileUpload({ label, file, onChange }: FileUploadProps) {
       </div>
 
       {file && previewUrl && (
-        <div className="text-sm text-muted-foreground truncate mt-1">
-          <span className="block mb-1">{file.name}</span>
+        <div className="text-sm text-muted-foreground truncate mt-2">
           {file.type.startsWith("image/") ? (
             <img
               key={previewUrl}
@@ -78,6 +77,10 @@ export default function FileUpload({ label, file, onChange }: FileUploadProps) {
               Preview Document
             </a>
           )}
+
+          <span className="block mb-1 max-w-[300px] truncate text-gray-600 mt-2">
+            {file.name}
+          </span>
         </div>
       )}
     </div>

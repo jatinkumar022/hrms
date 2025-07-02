@@ -11,6 +11,9 @@ import jobInfoReducer from "./slices/jobInfoSlice";
 import bankInfoReducer from "./slices/bankInfoSlice";
 import officialDocumentsReducer from "./slices/officialDocumentsSlice";
 import personalDocumentsReducer from "./slices/personalDocumentsSlice";
+import imageUploadReducer from "./slices/imageUploadSlice";
+import profileImageReducer from "./slices/profileImageSlice";
+import userProfileReducer from "./slices/userProfileSlice";
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +28,9 @@ export const store = configureStore({
     bankInfo: bankInfoReducer,
     officialDocuments: officialDocumentsReducer,
     personalDocuments: personalDocumentsReducer,
+    imageUpload: imageUploadReducer,
+    profileImage: profileImageReducer,
+    userProfile: userProfileReducer,
   },
 });
 

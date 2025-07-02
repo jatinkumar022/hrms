@@ -8,8 +8,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import Avatar from "@/assets/AVATAR.jpg";
-
+import { ProfileImageCropper } from "./ProfileImageCropper";
+import { MdInfo } from "react-icons/md";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { fetchUserProfile } from "@/redux/slices/userProfileSlice";
+import { useEffect } from "react";
 export const menus: Record<string, { label: string; slug: string }[] | null> = {
   Personal: [
     { label: "Basic Info", slug: "basic" },
@@ -33,22 +42,74 @@ export default function Sidebar({
   onSelectPage: (page: string) => void;
   selectedPage: string;
 }) {
+  const dispatch = useAppDispatch();
+  const userProfile = useAppSelector((state) => state.userProfile.profile);
+
+  useEffect(() => {
+    dispatch(fetchUserProfile());
+  }, [dispatch]);
   return (
-    <aside className="w-[280px] flex-shrink-0  bg-white dark:bg-black border-r overflow-y-auto">
+    <aside className="md:w-[280px] flex-shrink-0  bg-white dark:bg-black border-r overflow-y-auto">
       {/* Profile header */}
       <div className="p-4 border-b  sticky top-0 z-30 bg-white dark:bg-black">
         <div className="bg-[#1e2538] w-full absolute left-0 top-0">
           <Image src={ProfileBg} alt="" className="w-full h-[108px]" />
         </div>
+        <div className="min-[1420px]:hidden block">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="absolute right-2 top-2 rounded-full p-1 bg-[#60b158] cursor-pointer">
+                <MdInfo className="text-white " />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="w-96 p-0 gap-0">
+              <DialogTitle className="bg-[#fafbff] border-b !m-0 border-zinc-200 p-4 rounded-t-lg">
+                {userProfile?.displayName || "User Info"}
+              </DialogTitle>
+              <ul className=" p-4 !m-0 flex flex-col gap-2  text-sm">
+                <li>
+                  <span className="font-medium mr-3 text-base">Email:</span>{" "}
+                  {userProfile?.officialEmail || "N/A"}
+                </li>
+                <li>
+                  <span className="font-medium mr-3 text-base">Contact:</span>{" "}
+                  {userProfile?.mobile || "N/A"}
+                </li>
+                <li>
+                  <span className="font-medium mr-3 text-base">
+                    Experience:
+                  </span>{" "}
+                  {userProfile?.experience || "N/A"}
+                </li>
+                <li>
+                  <span className="font-medium mr-3 text-base">
+                    Joining Date:
+                  </span>{" "}
+                  {userProfile?.joiningDate
+                    ? new Date(userProfile.joiningDate).toLocaleDateString()
+                    : "No joining date"}
+                </li>
+                <li>
+                  <span className="font-medium mr-3 text-base">
+                    Reporting Manager:
+                  </span>{" "}
+                  {userProfile?.reportingManager || "N/A"}
+                </li>
+                <li>
+                  <span className="font-medium mr-3 text-base">
+                    Previous Employer:
+                  </span>{" "}
+                  {userProfile?.previousEmployer || "N/A"}
+                </li>
+              </ul>
+            </DialogContent>
+          </Dialog>
+        </div>
         <div className="flex flex-col items-center mt-10 ">
-          <Image
-            src={Avatar}
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm p-1 z-20"
-          />
+          <ProfileImageCropper userName="Jatin Ramani" />
           <h2 className="font-semibold text-xl text-zinc-800">Jatin Ramani</h2>
           <span className="text-xs text-zinc-500">
-            Software Engineer | React Developer
+            Software Engineer | React Developer
           </span>
         </div>
       </div>
