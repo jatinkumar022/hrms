@@ -5,11 +5,16 @@ import User from "@/models/userModel";
 import Shift from "@/models/Shift";
 import { getUserFromToken } from "@/lib/getUserFromToken";
 import { NextRequest } from "next/server";
-export async function PATCH(req: NextRequest, params: { userId: string }) {
+
+export async function PATCH(
+  request: NextRequest,
+  context: { params: { userId: string } }
+) {
+  const { userId } = context.params;
   try {
     await connect();
 
-    const currentUser = await getUserFromToken(req);
+    const currentUser = await getUserFromToken(request);
     if (!currentUser) {
       return new Response(JSON.stringify({ error: "Not authenticated" }), {
         status: 401,
@@ -22,7 +27,7 @@ export async function PATCH(req: NextRequest, params: { userId: string }) {
       });
     }
 
-    const { shiftId } = await req.json();
+    const { shiftId } = await request.json();
     if (!shiftId) {
       return new Response(JSON.stringify({ error: "shiftId is required" }), {
         status: 400,
@@ -36,7 +41,7 @@ export async function PATCH(req: NextRequest, params: { userId: string }) {
       });
     }
 
-    const userToUpdate = await User.findById(params.userId);
+    const userToUpdate = await User.findById(userId);
     if (!userToUpdate) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
