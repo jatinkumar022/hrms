@@ -4,13 +4,10 @@ import User from "@/models/userModel";
 import Shift from "@/models/Shift";
 import { connect } from "@/dbConfig/dbConfig";
 
-interface Context {
-  params: {
-    userId: string;
-  };
-}
-
-export async function PATCH(req: NextRequest, context: Context) {
+export async function PATCH(
+  req: NextRequest,
+  context: { params: { userId: string } } // ✅ inline type, not `Context`
+) {
   const { userId } = context.params;
 
   try {
