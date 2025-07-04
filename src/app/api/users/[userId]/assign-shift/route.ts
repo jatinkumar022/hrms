@@ -1,11 +1,13 @@
-import { getUserFromToken } from "@/lib/getUserFromToken";
+// src/app/api/users/[userId]/assign-shift/route.ts
+
+import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import Shift from "@/models/Shift";
-import { connect } from "@/dbConfig/dbConfig";
-
+import { getUserFromToken } from "@/lib/getUserFromToken";
+import { NextRequest } from "next/server";
 export async function PATCH(
-  req: Request,
-  context: { params: { userId: string } }
+  req: NextRequest,
+  { params }: { params: { userId: string } }
 ) {
   try {
     await connect();
@@ -37,7 +39,7 @@ export async function PATCH(
       });
     }
 
-    const userToUpdate = await User.findById(context.params.userId);
+    const userToUpdate = await User.findById(params.userId);
     if (!userToUpdate) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
