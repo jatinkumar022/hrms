@@ -1,5 +1,3 @@
-// src/app/api/users/[userId]/assign-shift/route.ts
-
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import Shift from "@/models/Shift";
@@ -8,9 +6,10 @@ import { NextRequest } from "next/server";
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { userId: string } }
+  { params }: { params: { userId: string } }
 ) {
-  const { userId } = context.params;
+  const { userId } = params;
+
   try {
     await connect();
 
