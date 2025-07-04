@@ -1,4 +1,3 @@
-// ✅ FIXED VERSION
 import { NextRequest } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
