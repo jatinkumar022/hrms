@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { getUserFromToken } from "@/lib/getUserFromToken";
 import User from "@/models/userModel";
 import Shift from "@/models/Shift";
