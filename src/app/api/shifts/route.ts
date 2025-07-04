@@ -1,41 +1,29 @@
-// app/api/shifts/route.ts
+// src/app/api/users/[userId]/assign-shift/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
-import Shift from "@/models/Shift";
 import { connect } from "@/dbConfig/dbConfig";
+import User from "@/models/userModel";
 
-export async function GET() {
+export async function PATCH(
+  req: NextRequest,
+  context: { params: { userId: string } }
+) {
   await connect();
-  const shifts = await Shift.find();
-  return NextResponse.json({ shifts });
-}
-
-export async function POST(req: NextRequest) {
-  await connect();
+  const { userId } = context.params;
   const body = await req.json();
-  const { name, startTime, endTime, minClockIn, maxClockIn } = body;
+  const { shiftId } = body;
 
-  if (!name || !startTime || !endTime || !minClockIn || !maxClockIn) {
-    return NextResponse.json(
-      { error: "All fields are required" },
-      { status: 400 }
-    );
+  if (!shiftId) {
+    return NextResponse.json({ error: "shiftId is required" }, { status: 400 });
   }
 
-  const exists = await Shift.findOne({ name });
-  if (exists) {
-    return NextResponse.json(
-      { error: "Shift with this name already exists" },
-      { status: 409 }
-    );
+  const user = await User.findById(userId);
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const shift = await Shift.create({
-    name,
-    startTime,
-    endTime,
-    minClockIn,
-    maxClockIn,
-  });
+  user.shiftId = shiftId;
+  await user.save();
 
-  return NextResponse.json({ success: true, shift });
+  return NextResponse.json({ success: true, message: "Shift assigned" });
 }

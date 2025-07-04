@@ -15,7 +15,6 @@ import Avatar from "@/assets/AVATAR.jpg";
 import { useState, useMemo } from "react";
 import AttendanceReasonDialog from "@/components/Dashboard/AttendanceReasonDialog";
 import Link from "next/link";
-
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import { parseDurationToSeconds } from "@/lib/attendanceHelpers";
