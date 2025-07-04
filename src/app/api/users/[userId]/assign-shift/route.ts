@@ -5,10 +5,7 @@ import User from "@/models/userModel";
 import Shift from "@/models/Shift";
 import { getUserFromToken } from "@/lib/getUserFromToken";
 import { NextRequest } from "next/server";
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function PATCH(req: NextRequest, params: { userId: string }) {
   try {
     await connect();
 
