@@ -7,42 +7,39 @@ import Warning from "@/assets/warning-image.png";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AiOutlineLogin, AiOutlineLogout } from "react-icons/ai";
-import {
-  IoLaptopOutline,
-  IoFastFoodOutline,
-  IoReturnDownBackOutline,
-} from "react-icons/io5";
+import { IoFastFoodOutline, IoReturnDownBackOutline } from "react-icons/io5";
 import DashboardOverview from "@/components/Dashboard/DashboardOverview";
 import DashboardDetails from "@/components/Dashboard/DashboardDetails";
-import { useEffect, useState } from "react";
 import type { AttendanceStatus, DashboardData } from "@/lib/types";
 import Avatar from "@/assets/AVATAR.jpg";
-const timeEntries = [
-  {
-    label: "Clock In",
-    time: "09:51 AM",
-    leftIcon: <AiOutlineLogin size={22} />,
-    rightIcon: <IoLaptopOutline size={19} />,
-  },
-  {
-    label: "Break Start",
-    time: "01:00 PM",
-    leftIcon: <IoFastFoodOutline size={22} />,
-    rightIcon: <IoLaptopOutline size={19} />,
-  },
-  {
-    label: "Break End",
-    time: "01:30 PM",
-    leftIcon: <IoReturnDownBackOutline size={22} />,
-    rightIcon: <IoLaptopOutline size={19} />,
-  },
-  {
-    label: "Clock Out",
-    time: "06:00 PM",
-    leftIcon: <AiOutlineLogout size={22} />,
-    rightIcon: <IoLaptopOutline size={19} />,
-  },
-];
+import { useState, useMemo } from "react";
+import AttendanceReasonDialog from "@/components/Dashboard/AttendanceReasonDialog";
+import Link from "next/link";
+
+import dayjs from "dayjs";
+import minMax from "dayjs/plugin/minMax";
+import { parseDurationToSeconds } from "@/lib/attendanceHelpers";
+import { useAttendance } from "@/hooks/useAttendance";
+import { Toaster, toast } from "sonner";
+import React from "react";
+import { useGeolocation } from "@/hooks/useGeolocation";
+
+dayjs.extend(minMax);
+
+interface WorkSegmentType {
+  clockIn: string;
+  clockOut?: string;
+  duration?: string;
+  productiveDuration?: string;
+}
+
+interface BreakType {
+  start: string;
+  end?: string;
+  duration?: string;
+  reason?: string;
+}
+
 const DashboardData: DashboardData = {
   lateArrivals: [{ duration: "00 H : 03 M", date: "05 Jun, 2025" }],
   attendance: [
@@ -144,54 +141,252 @@ const DashboardData: DashboardData = {
 };
 
 export default function Dashboard() {
-  function formatDuration(ms: number): string {
-    const h = String(Math.floor(ms / 3600000)).padStart(2, "0");
-    const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, "0");
-    const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
-    return `${h}:${m}:${s}`;
-  }
-  function useWorkTimer(
-    clockInTime: Date,
-    breaks: { start: Date; end?: Date }[]
-  ) {
-    const [workTime, setWorkTime] = useState("00:00:00");
-    const [breakTime, setBreakTime] = useState("00:00:00");
-    const [netTime, setNetTime] = useState("00:00:00");
+  const {
+    report,
+    workTime,
+    breakTime,
+    netTime,
+    clockIn,
+    breakStart,
+    breakEnd,
+    isLoading,
+  } = useAttendance();
 
-    useEffect(() => {
-      const interval = setInterval(() => {
-        const now = new Date();
+  const { loading: loadingLocation, getLocation } = useGeolocation();
 
-        // ⏱ Total work time
-        const workMs = now.getTime() - clockInTime.getTime();
+  const [isReasonDialogOpen, setIsReasonDialogOpen] = useState(false);
+  const [isEndBreakReasonDialogOpen, setIsEndBreakReasonDialogOpen] =
+    useState(false);
+  const [isStartBreakReasonDialogOpen, setIsStartBreakReasonDialogOpen] =
+    useState(false);
 
-        // ☕ Total break time
-        const breakMs = breaks.reduce((total, brk) => {
-          const end = brk.end ?? now;
-          return total + (end.getTime() - brk.start.getTime());
-        }, 0);
+  const handleAction = async (action: () => Promise<any>) => {
+    const result = await action();
+    if (result.meta.requestStatus === "fulfilled") {
+      toast.success(result.payload.message || "Action successful!");
+    } else {
+      toast.error(result.payload || "An error occurred.");
+    }
+  };
 
-        setWorkTime(formatDuration(workMs));
-        setBreakTime(formatDuration(breakMs));
-        setNetTime(formatDuration(workMs - breakMs));
-      }, 1000);
+  const attendance = report?.attendance;
+  const shift = report?.shift;
 
-      return () => clearInterval(interval);
-    }, [clockInTime, breaks]);
+  const hasAnyClockIn =
+    attendance?.workSegments && attendance.workSegments.length > 0;
+  const isClockedInCurrently = attendance?.workSegments?.some(
+    (segment: WorkSegmentType) => !segment.clockOut
+  );
+  const isBreakActive = attendance?.breaks?.some((b: BreakType) => !b.end);
+  const isClockedOutForToday = hasAnyClockIn && !isClockedInCurrently;
 
-    return { workTime, breakTime, netTime };
-  }
+  // Generate dynamic attendance activities
+  const activities = useMemo(() => {
+    if (!attendance || (!attendance.workSegments && !attendance.breaks)) {
+      return [];
+    }
 
-  const clockInTime = new Date("2025-06-23T10:00:00");
+    const generatedActivities: {
+      time: string;
+      label: string;
+      icon: React.ReactElement;
+    }[] = [];
 
-  const breaks = [
-    {
-      start: new Date("2025-06-23T10:00:00"),
-      end: new Date("2025-06-23T10:55:00"),
-    },
-  ];
+    // Process work segments
+    attendance.workSegments?.forEach((segment: WorkSegmentType) => {
+      if (segment.clockIn) {
+        const dateTimeString = `${report?.date}T${segment.clockIn}`;
+        const formattedTime = dayjs(dateTimeString).format("hh:mm A");
+        generatedActivities.push({
+          time: formattedTime,
+          label: "Clock In",
+          icon: <AiOutlineLogin size={22} />,
+        });
+      }
+      if (segment.clockOut) {
+        const dateTimeString = `${report?.date}T${segment.clockOut}`;
+        const formattedTime = dayjs(dateTimeString).format("hh:mm A");
+        generatedActivities.push({
+          time: formattedTime,
+          label: "Clock Out",
+          icon: <AiOutlineLogout size={22} />,
+        });
+      }
+    });
 
-  const { workTime, breakTime, netTime } = useWorkTimer(clockInTime, breaks);
+    // Process breaks
+    attendance.breaks?.forEach((b: BreakType) => {
+      if (b.start) {
+        const dateTimeString = `${report?.date}T${b.start}`;
+        const formattedTime = dayjs(dateTimeString).format("hh:mm A");
+        generatedActivities.push({
+          time: formattedTime,
+          label: "Break Start",
+          icon: <IoFastFoodOutline size={22} />,
+        });
+      }
+      if (b.end) {
+        const dateTimeString = `${report?.date}T${b.end}`;
+        const formattedTime = dayjs(dateTimeString).format("hh:mm A");
+        generatedActivities.push({
+          time: formattedTime,
+          label: "Break End",
+          icon: <IoReturnDownBackOutline size={22} />,
+        });
+      }
+    });
+
+    return generatedActivities.sort((a, b) => {
+      const timeA = dayjs(`${report?.date}T${a.time}`, "YYYY-MM-DDTHH:mm A");
+      const timeB = dayjs(`${report?.date}T${b.time}`, "YYYY-MM-DDTHH:mm A");
+      return timeA.diff(timeB);
+    });
+  }, [attendance, report?.date]);
+
+  const onClockInAttempt = async () => {
+    const currentLocation = await getLocation();
+
+    if (!currentLocation) {
+      toast.error("Location not available. Please allow location access.");
+      return;
+    }
+
+    const now = dayjs();
+    const maxClockInTime = dayjs(`${report?.date}T${shift?.maxClockIn}`);
+
+    const isLate = now.isAfter(maxClockInTime);
+
+    if (isLate) {
+      setIsReasonDialogOpen(true);
+    } else {
+      handleAction(() => clockIn({ reason: "", location: currentLocation }));
+    }
+  };
+
+  const handleLateClockIn = async (reason: string) => {
+    if (reason.trim().length < 3) {
+      toast.error("Reason must be at least 3 characters long.");
+      return;
+    }
+
+    const currentLocation = await getLocation();
+
+    if (!currentLocation) {
+      toast.error(
+        "Location not available. Please allow location access or try again."
+      );
+      return;
+    }
+
+    await handleAction(() => clockIn({ reason, location: currentLocation }));
+    setIsReasonDialogOpen(false);
+  };
+
+  const onEndBreakAttempt = async () => {
+    const currentLocation = await getLocation();
+
+    if (!currentLocation) {
+      toast.error("Location not available. Please allow location access.");
+      return;
+    }
+
+    const now = dayjs();
+    const activeBreak = attendance?.breaks?.find((b: BreakType) => !b.end);
+
+    if (!activeBreak) {
+      toast.error("No active break to end.");
+      return;
+    }
+
+    // Calculate total break time today to check for excessive break
+    let totalBreakSecondsToday = 0;
+    attendance?.breaks?.forEach((brk: BreakType) => {
+      if (brk.duration !== undefined) {
+        totalBreakSecondsToday += parseDurationToSeconds(brk.duration);
+      } else if (brk.start && !brk.end) {
+        const breakStartTime = dayjs(`${report?.date}T${brk.start}`);
+        totalBreakSecondsToday += now.diff(breakStartTime, "second");
+      }
+    });
+
+    // Assume a break limit for demonstration (e.g., 60 minutes = 3600 seconds)
+    const breakLimitSeconds = 3600; // 1 hour
+    const isExcessiveBreak = totalBreakSecondsToday >= breakLimitSeconds;
+
+    if (isExcessiveBreak) {
+      setIsEndBreakReasonDialogOpen(true);
+    } else {
+      handleAction(() => breakEnd({ reason: "", location: currentLocation }));
+    }
+  };
+
+  const handleEndBreakWithReason = async (reason: string) => {
+    if (reason.trim().length < 3) {
+      toast.error("Reason must be at least 3 characters long.");
+      return;
+    }
+
+    const currentLocation = await getLocation();
+
+    if (!currentLocation) {
+      toast.error(
+        "Location not available. Please allow location access or try again."
+      );
+      return;
+    }
+
+    await handleAction(() => breakEnd({ reason, location: currentLocation }));
+    setIsEndBreakReasonDialogOpen(false);
+  };
+
+  const onStartBreakAttempt = async () => {
+    const currentLocation = await getLocation();
+
+    if (!currentLocation) {
+      toast.error("Location not available. Please allow location access.");
+      return;
+    }
+
+    const activeBreak = attendance?.breaks?.find((b: BreakType) => !b.end);
+    if (activeBreak) {
+      toast.error("Break already active. Please end your current break first.");
+      return;
+    }
+    const totalBreakSoFar =
+      attendance?.breakDuration !== undefined ? attendance.breakDuration : 0;
+    const breakLimit = 3600; // 1 hour
+    const requiresReason = totalBreakSoFar >= breakLimit;
+
+    if (requiresReason) {
+      setIsStartBreakReasonDialogOpen(true);
+    } else {
+      handleAction(() => breakStart({ reason: "", location: currentLocation }));
+    }
+  };
+
+  const handleStartBreakWithReason = async (reason: string) => {
+    if (reason.trim().length < 3) {
+      toast.error("Reason must be at least 3 characters long.");
+      return;
+    }
+
+    const currentLocation = await getLocation();
+
+    if (!currentLocation) {
+      toast.error(
+        "Location not available. Please allow location access or try again."
+      );
+      return;
+    }
+
+    await handleAction(() => breakStart({ reason, location: currentLocation }));
+    setIsStartBreakReasonDialogOpen(false);
+  };
+
+  const hasAttendance = attendance?.workSegments?.length > 0;
+
+  const shouldShowClockInButton =
+    !hasAttendance || (!isClockedInCurrently && isClockedOutForToday);
   return (
     <Tabs defaultValue="overview" className=" overflow-hidden h-full">
       <TabsList className="flex gap-3  px-1 dark:bg-black bg-white">
@@ -215,7 +410,6 @@ export default function Dashboard() {
           Dashboard
         </TabsTrigger>
       </TabsList>
-
       <TabsContent
         value="overview"
         className="w-full h-full overflow-hidden bg-[#e9e9e9] dark:bg-[#141414] font-normal relative "
@@ -286,15 +480,54 @@ export default function Dashboard() {
                     </p>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <button className="w-full py-2 border border-[#fa584f] text-[#fa584f] font-medium bg-white dark:bg-black cursor-pointer">
-                    BREAK
+                {shouldShowClockInButton ? (
+                  <button
+                    className="w-full py-2 bg-[#25bb3e] text-white font-medium hover:bg-[#25bb3ef1] cursor-pointer mb-4"
+                    onClick={onClockInAttempt}
+                    disabled={
+                      isLoading || isClockedInCurrently || loadingLocation
+                    }
+                  >
+                    CLOCK IN
                   </button>
-                  <button className="w-full py-2 bg-[#fa584f] text-white font-medium hover:bg-[#ff5050] cursor-pointer">
-                    CLOCK OUT
-                  </button>
-                </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    {!isBreakActive ? (
+                      <>
+                        <button
+                          className="w-full py-2 border border-[#fa584f] text-[#fa584f] font-medium bg-white dark:bg-black cursor-pointer"
+                          onClick={onStartBreakAttempt}
+                          disabled={
+                            isLoading ||
+                            !isClockedInCurrently ||
+                            isBreakActive ||
+                            loadingLocation
+                          }
+                        >
+                          BREAK
+                        </button>
+                        <Link
+                          href="/clock-out"
+                          className="w-full text-center py-2 bg-[#fa584f] text-white font-medium hover:bg-[#ff5050] cursor-pointer "
+                        >
+                          CLOCK OUT
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="w-full py-2 col-span-2 border-2 border-[#2ccc47] bg-white  font-medium text-[#2ccc47] cursor-pointer mb-4"
+                          onClick={onEndBreakAttempt}
+                          disabled={
+                            isLoading || !isBreakActive || loadingLocation
+                          }
+                        >
+                          Break Out
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex items-center justify-center gap-2 px-3 py-2 border rounded  text-sm text-sidebar-primary bg-white dark:bg-black">
                   <MdMyLocation size={20} />
@@ -329,25 +562,23 @@ export default function Dashboard() {
                     </span>
                   </div>
                   <div className="space-y-3 mt-4 max-h-[14rem] overflow-y-auto">
-                    {timeEntries.map((entry, index) => (
+                    {activities.map((activity, index) => (
                       <div key={index} className="flex items-center gap-2">
-                        {/* Left circular icon */}
                         <div className="flex items-center justify-center p-2 rounded-full border border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300">
-                          {entry.leftIcon}
+                          {activity.icon}
                         </div>
 
-                        {/* Time box */}
                         <div className="flex w-full items-center justify-between bg-zinc-50 dark:bg-zinc-950 px-4 py-3 rounded-md border border-zinc-200 dark:border-zinc-700">
                           <div>
                             <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                              {entry.time}
+                              {activity.time}
                             </p>
                             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                              {entry.label}
+                              {activity.label}
                             </p>
                           </div>
                           <div className="text-zinc-600 dark:text-zinc-300">
-                            {entry.rightIcon}
+                            {/* {activity.rightIcon} */}
                           </div>
                         </div>
                       </div>
@@ -359,7 +590,6 @@ export default function Dashboard() {
           </div>
         </div>
       </TabsContent>
-
       <TabsContent
         value="dashboard"
         className="w-full   bg-[#e9e9e9] dark:bg-[#141414] font-normal"
@@ -370,6 +600,34 @@ export default function Dashboard() {
           </div>
         </div>
       </TabsContent>
+      <Toaster /> {/* Toast container for the whole page */}
+      {/* Late Clock-In Reason Dialog (using reusable component) */}
+      <AttendanceReasonDialog
+        open={isReasonDialogOpen}
+        onOpenChange={setIsReasonDialogOpen}
+        title="Reason Required for Late Clock-In"
+        label={`You are clocking in after your shift's maximum clock-in time (${shift?.maxClockIn}). Please provide a reason.`}
+        buttonText="Submit Reason and Clock In"
+        onSubmit={handleLateClockIn}
+      />
+      {/* End Break Reason Dialog (using reusable component) */}
+      <AttendanceReasonDialog
+        open={isEndBreakReasonDialogOpen}
+        onOpenChange={setIsEndBreakReasonDialogOpen}
+        title="Reason Required for Ending Break"
+        label="You are ending a break that has exceeded 1 hour. Please provide a reason."
+        buttonText="Submit Reason and End Break"
+        onSubmit={handleEndBreakWithReason}
+      />
+      {/* Start Break Reason Dialog (using reusable component) */}
+      <AttendanceReasonDialog
+        open={isStartBreakReasonDialogOpen}
+        onOpenChange={setIsStartBreakReasonDialogOpen}
+        title="Reason Required for Starting Break"
+        label="You are starting a break that would exceed 1 hour. Please provide a reason."
+        buttonText="Submit Reason and Start Break"
+        onSubmit={handleStartBreakWithReason}
+      />
     </Tabs>
   );
 }

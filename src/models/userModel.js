@@ -1,3 +1,4 @@
+import "./Shift";
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
@@ -34,6 +35,10 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user',
   },
+  shiftId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Shift',
+  },
   forgotPasswordToken: {
     type: String,
     default: null,
@@ -50,6 +55,7 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+
 }, {
   timestamps: true,
 });

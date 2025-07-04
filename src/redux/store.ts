@@ -14,6 +14,12 @@ import personalDocumentsReducer from "./slices/personalDocumentsSlice";
 import imageUploadReducer from "./slices/imageUploadSlice";
 import profileImageReducer from "./slices/profileImageSlice";
 import userProfileReducer from "./slices/userProfileSlice";
+import clockInReducer from "./slices/clockInSlice";
+import clockOutReducer from "./slices/clockOutSlice";
+import breakReducer from "./slices/breakSlice";
+import statusReportReducer from "./slices/statusReportSlice";
+import monthlyAttendanceReducer from "./slices/monthlyAttendanceSlice";
+import monthlySummaryReducer from "./slices/monthlySummarySlice";
 
 export const store = configureStore({
   reducer: {
@@ -31,6 +37,12 @@ export const store = configureStore({
     imageUpload: imageUploadReducer,
     profileImage: profileImageReducer,
     userProfile: userProfileReducer,
+    clockIn: clockInReducer,
+    clockOut: clockOutReducer,
+    break: breakReducer,
+    statusReport: statusReportReducer,
+    monthlyAttendance: monthlyAttendanceReducer,
+    monthlySummary: monthlySummaryReducer,
   },
 });
 

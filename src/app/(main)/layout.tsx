@@ -7,6 +7,7 @@ import Navbar from "@/components/custom/Navbar";
 import Sidebar from "@/components/custom/Sidebar";
 import { ThemeProvider } from "next-themes";
 import ReduxProvider from "@/lib/redux-provider";
+import "leaflet/dist/leaflet.css";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -47,7 +48,7 @@ export default function RootLayout({
               </aside>
 
               {/* Main content area with left padding for sidebar */}
-              <div className="flex-1 flex flex-col md:pl-20">
+              <div className="flex-1 flex flex-col md:pl-20 h-screen">
                 {/* Sticky navbar */}
                 <Navbar />
                 {/* Scrollable content */}
