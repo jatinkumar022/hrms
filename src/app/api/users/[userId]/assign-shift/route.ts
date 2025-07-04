@@ -1,19 +1,17 @@
+// ✅ FIXED VERSION
+import { NextRequest } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import Shift from "@/models/Shift";
 import { getUserFromToken } from "@/lib/getUserFromToken";
-import { NextRequest } from "next/server";
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
-  const { userId } = params;
+type Params = { params: { userId: string } };
 
+export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     await connect();
 
-    const currentUser = await getUserFromToken(request);
+    const currentUser = await getUserFromToken(req);
     if (!currentUser) {
       return new Response(JSON.stringify({ error: "Not authenticated" }), {
         status: 401,
@@ -26,7 +24,7 @@ export async function PATCH(
       });
     }
 
-    const { shiftId } = await request.json();
+    const { shiftId } = await req.json();
     if (!shiftId) {
       return new Response(JSON.stringify({ error: "shiftId is required" }), {
         status: 400,
@@ -40,30 +38,30 @@ export async function PATCH(
       });
     }
 
-    const userToUpdate = await User.findById(userId);
-    if (!userToUpdate) {
+    const user = await User.findById(params.userId);
+    if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
       });
     }
 
-    userToUpdate.shiftId = shiftId;
-    await userToUpdate.save();
+    user.shiftId = shiftId;
+    await user.save();
 
     return new Response(
       JSON.stringify({
         message: "Shift assigned successfully",
         updatedUser: {
-          _id: userToUpdate._id,
-          email: userToUpdate.email,
-          shiftId: userToUpdate.shiftId,
-          role: userToUpdate.role,
+          _id: user._id,
+          email: user.email,
+          shiftId: user.shiftId,
+          role: user.role,
         },
       }),
       { status: 200 }
     );
-  } catch (err) {
-    console.error("Error in assign-shift:", err);
+  } catch (error) {
+    console.error("Assign shift error:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
     });
