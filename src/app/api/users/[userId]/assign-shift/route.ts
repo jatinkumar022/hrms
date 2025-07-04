@@ -1,12 +1,18 @@
 import { NextRequest } from "next/server";
-import { connect } from "@/dbConfig/dbConfig";
+import { getUserFromToken } from "@/lib/getUserFromToken";
 import User from "@/models/userModel";
 import Shift from "@/models/Shift";
-import { getUserFromToken } from "@/lib/getUserFromToken";
+import { connect } from "@/dbConfig/dbConfig";
 
-type Params = { params: { userId: string } };
+interface Context {
+  params: {
+    userId: string;
+  };
+}
 
-export async function PATCH(req: NextRequest, { params }: Params) {
+export async function PATCH(req: NextRequest, context: Context) {
+  const { userId } = context.params;
+
   try {
     await connect();
 
@@ -24,6 +30,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     const { shiftId } = await req.json();
+
     if (!shiftId) {
       return new Response(JSON.stringify({ error: "shiftId is required" }), {
         status: 400,
@@ -37,30 +44,30 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       });
     }
 
-    const user = await User.findById(params.userId);
-    if (!user) {
+    const userToUpdate = await User.findById(userId);
+    if (!userToUpdate) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
       });
     }
 
-    user.shiftId = shiftId;
-    await user.save();
+    userToUpdate.shiftId = shiftId;
+    await userToUpdate.save();
 
     return new Response(
       JSON.stringify({
         message: "Shift assigned successfully",
         updatedUser: {
-          _id: user._id,
-          email: user.email,
-          shiftId: user.shiftId,
-          role: user.role,
+          _id: userToUpdate._id,
+          email: userToUpdate.email,
+          shiftId: userToUpdate.shiftId,
+          role: userToUpdate.role,
         },
       }),
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Assign shift error:", error);
+  } catch (err) {
+    console.error("Error in assign-shift:", err);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
     });
