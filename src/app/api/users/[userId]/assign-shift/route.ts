@@ -5,13 +5,13 @@ import Shift from "@/models/Shift";
 import { connect } from "@/dbConfig/dbConfig";
 
 export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
+  req: Request,
+  context: { params: { userId: string } }
 ) {
   try {
     await connect();
 
-    const currentUser = await getUserFromToken(request);
+    const currentUser = await getUserFromToken(req);
     if (!currentUser) {
       return new Response(JSON.stringify({ error: "Not authenticated" }), {
         status: 401,
@@ -24,7 +24,7 @@ export async function PATCH(
       });
     }
 
-    const { shiftId } = await request.json();
+    const { shiftId } = await req.json();
     if (!shiftId) {
       return new Response(JSON.stringify({ error: "shiftId is required" }), {
         status: 400,
@@ -38,15 +38,16 @@ export async function PATCH(
       });
     }
 
-    const userToUpdate = await User.findById(params.userId);
+    const userToUpdate = await User.findById(context.params.userId);
     if (!userToUpdate) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
       });
     }
+
     userToUpdate.shiftId = shiftId;
     await userToUpdate.save();
-    console.log("Saved user:", userToUpdate);
+
     return new Response(
       JSON.stringify({
         message: "Shift assigned successfully",
