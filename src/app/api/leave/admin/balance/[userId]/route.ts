@@ -6,10 +6,7 @@ import User from "@/models/userModel";
 
 connect();
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function POST(request: NextRequest, context: any) {
   try {
     const adminUserId = await getUserFromToken(request);
     const adminUser = await User.findById(adminUserId);
@@ -20,8 +17,7 @@ export async function POST(
         { status: 403 }
       );
     }
-
-    const { userId } = await params;
+    const { userId } = context.params;
     const reqBody = await request.json();
     const { casualLeave, sickLeave, earnedLeave, leaveWithoutPay } = reqBody;
 
@@ -61,13 +57,10 @@ export async function POST(
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   try {
     const requestingUserId = await getUserFromToken(request);
-    const { userId } = params;
+    const { userId } = context.params;
 
     const requestingUser = await User.findById(requestingUserId);
 
@@ -75,7 +68,6 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Admins can fetch any user's leave balance, users can only fetch their own
     if (requestingUser.role !== "admin" && requestingUserId !== userId) {
       return NextResponse.json(
         { error: "Unauthorized to view other users' leave balance" },

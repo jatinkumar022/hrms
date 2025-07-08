@@ -4,10 +4,7 @@ import User from "@/models/userModel";
 import Shift from "@/models/Shift";
 import { connect } from "@/dbConfig/dbConfig";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: any) {
   const { userId } = params;
 
   try {

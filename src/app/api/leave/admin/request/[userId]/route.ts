@@ -8,10 +8,7 @@ import User from "@/models/userModel";
 
 connect();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(request: NextRequest, { params }: any) {
   try {
     const requestingUserId = await getUserFromToken(request);
     const { userId } = params;

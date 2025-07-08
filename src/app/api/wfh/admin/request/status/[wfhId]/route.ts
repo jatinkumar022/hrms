@@ -10,17 +10,14 @@ import dayjs from "dayjs";
 
 connect();
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { wfhId: string } }
-) {
+export async function PUT(request: NextRequest, context: any) {
   try {
     const user = await getUserFromToken(request);
     if (!user || user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { wfhId } = params;
+    const { wfhId } = context.params;
     const { status } = await request.json();
 
     if (!["approved", "rejected"].includes(status)) {

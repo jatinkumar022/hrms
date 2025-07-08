@@ -4,18 +4,13 @@ import Leave from "@/models/Leave";
 import { getUserFromToken } from "@/lib/getUserFromToken";
 
 connect();
-
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { leaveId: string } }
-) {
+export async function PATCH(request: NextRequest, context: any) {
   try {
     const userId = await getUserFromToken(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const { leaveId } = params;
-
+    const { leaveId } = context.params;
     const leaveRequest = await Leave.findOne({ _id: leaveId, userId });
 
     if (!leaveRequest) {

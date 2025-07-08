@@ -8,10 +8,7 @@ import Attendance from "@/models/Attendance";
 import dayjs from "dayjs";
 
 connect();
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { leaveId: string } }
-) {
+export async function PUT(request: NextRequest, context: any) {
   try {
     const userId = await getUserFromToken(request);
     const requestingUser = await User.findById(userId);
@@ -25,7 +22,7 @@ export async function PUT(
 
     const reqBody = await request.json();
     const { status } = reqBody;
-    const { leaveId } = params;
+    const { leaveId } = context.params;
     if (!leaveId || !status) {
       return NextResponse.json(
         { error: "Missing required fields: leaveId or status" },

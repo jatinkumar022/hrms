@@ -7,17 +7,14 @@ import { getUserFromToken } from "@/lib/getUserFromToken";
 
 connect();
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { wfhId: string } }
-) {
+export async function DELETE(request: NextRequest, context: any) {
   try {
     const user = await getUserFromToken(request);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { wfhId } = params;
+    const { wfhId } = context.params;
 
     const wfhRequest = await WorkFromHome.findOne({
       _id: wfhId,
