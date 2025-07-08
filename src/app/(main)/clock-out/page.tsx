@@ -18,6 +18,7 @@ import { useState } from "react";
 import AttendanceReasonDialog from "@/components/Dashboard/AttendanceReasonDialog";
 import { Toaster, toast } from "sonner";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import FullPageLoader from "@/components/loaders/FullPageLoader";
 
 dayjs.extend(minMax);
 
@@ -185,6 +186,7 @@ export default function FinalOutTimePage() {
 
   return (
     <div className="flex flex-col h-full w-full px-5 py-4 bg-gray-50 dark:bg-zinc-950">
+      <FullPageLoader show={isLoading} />
       {/* Header */}
       <div className="flex items-center gap-2 text-gray-700 dark:text-zinc-300 text-sm font-medium mb-4">
         <Link href={"/"} className="cursor-pointer flex items-center gap-1">
@@ -206,9 +208,7 @@ export default function FinalOutTimePage() {
           <div className="flex items-center gap-1">
             <CalendarIcon className="w-4 h-4 text-gray-500 dark:text-zinc-400" />
             <span className="text-gray-700 dark:text-zinc-300">
-              {report?.date
-                ? dayjs(report.date).format("MMM DD, YYYY")
-                : "Loading..."}
+              {report?.date && dayjs(report.date).format("MMM DD, YYYY")}
             </span>
           </div>
           <Button
@@ -240,7 +240,7 @@ export default function FinalOutTimePage() {
             className="p-4 border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 flex flex-col items-center justify-center shadow-md transition-all duration-200 hover:shadow-lg"
           >
             <div className={`font-semibold text-lg ${item.color}`}>
-              {isLoading ? "Loading..." : item.time}
+              {item.time}
             </div>
             <div className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
               {item.label}
@@ -263,11 +263,7 @@ export default function FinalOutTimePage() {
 
       {/* Empty State */}
       <div className="flex flex-col items-center justify-center flex-grow p-10 bg-white dark:bg-zinc-900 rounded-b-md shadow-sm">
-        {isLoading ? (
-          <p className="text-lg text-gray-500 dark:text-zinc-400">
-            Loading report...
-          </p>
-        ) : isError ? (
+        {isError ? (
           <div className="text-center">
             <p className="text-lg text-red-500 dark:text-red-400 mb-2">
               Error: {errorMessage}

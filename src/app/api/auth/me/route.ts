@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const decoded: any = verify(token, process.env.TOKEN_SECRET!);
-    const userId = decoded._id; // Get user ID from the decoded token
+    const userId = decoded.userId; // Get user ID from the decoded token
 
     // Find the user and populate the shiftId field
     const user = await User.findById(userId).populate("shiftId");

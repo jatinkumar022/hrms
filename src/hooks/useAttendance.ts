@@ -141,6 +141,7 @@ export function useAttendance() {
       isBreakLoading,
     isError: isReportError,
     errorMessage: reportErrorMessage,
+    isReportLoading,
   };
 }
 

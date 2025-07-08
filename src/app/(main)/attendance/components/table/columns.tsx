@@ -1,6 +1,4 @@
-// components/columns.tsx
 "use client";
-
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import Location from "@/assets/location.svg";
@@ -9,29 +7,33 @@ import { BsThreeDots } from "react-icons/bs";
 import { FaEye, FaFileInvoice } from "react-icons/fa6";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-dayjs.extend(duration);
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { MdDesktopMac, MdPhoneIphone } from "react-icons/md";
+import { secondsToDuration } from "@/lib/attendanceHelpers";
+
+// Wrap dayjs.extend calls to ensure they only run on the client
+if (typeof window !== "undefined") {
+  dayjs.extend(duration);
+}
 
 const DeviceIconWithTooltip = ({ device }: { device: string }) => {
-  const isDesktop = device === "desktop";
+  const Icon = device === "desktop" ? MdDesktopMac : MdPhoneIphone;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="text-[16px] text-gray-500">
-          {isDesktop ? <MdDesktopMac /> : <MdPhoneIphone />}
-        </div>
+        <Icon size={16} className="text-gray-500 cursor-pointer" />
       </TooltipTrigger>
-      <TooltipContent side="top">
-        Clocked in device: {isDesktop ? "Desktop" : "Mobile"}
+      <TooltipContent>
+        <p>{device}</p>
       </TooltipContent>
     </Tooltip>
   );
 };
+
 export type AttendanceRow = {
   date: string;
   user: { username: string };
@@ -49,18 +51,7 @@ export type AttendanceRow = {
     workSegments?: any[];
   };
 };
-function formatDuration(seconds: number) {
-  const h = Math.floor(seconds / 3600)
-    .toString()
-    .padStart(2, "0");
-  const m = Math.floor((seconds % 3600) / 60)
-    .toString()
-    .padStart(2, "0");
-  const s = Math.floor(seconds % 60)
-    .toString()
-    .padStart(2, "0");
-  return `${h}:${m}:${s}`;
-}
+
 export const columns: ColumnDef<AttendanceRow>[] = [
   {
     accessorKey: "date",
@@ -103,46 +94,66 @@ export const columns: ColumnDef<AttendanceRow>[] = [
             Absent
           </Badge>
         );
+      if (status === "on_leave")
+        return (
+          <Badge
+            variant="outline"
+            className="bg-orange-50 text-orange-500 border-none text-[11px] py-1 px-2 "
+          >
+            On Leave
+          </Badge>
+        );
       return status;
     },
   },
   {
     accessorKey: "attendance.lateIn",
     header: "Late In",
-    cell: ({ row }) =>
-      row.original.attendance.lateIn ? (
+    cell: ({ row }) => {
+      const status = row.original.attendance.status;
+      if (status === "absent" || status === "weekend") return "-";
+      return row.original.attendance.lateIn ? (
         <span className="text-red-500">Yes</span>
       ) : (
         <span className="text-green-500">No</span>
-      ),
+      );
+    },
   },
   {
     accessorKey: "attendance.earlyOut",
     header: "Early Out",
-    cell: ({ row }) =>
-      row.original.attendance.earlyOut ? (
+    cell: ({ row }) => {
+      const status = row.original.attendance.status;
+      if (status === "absent" || status === "weekend") return "-";
+      return row.original.attendance.earlyOut ? (
         <span className="text-red-500">Yes</span>
       ) : (
         <span className="text-green-500">No</span>
-      ),
+      );
+    },
   },
   {
     accessorKey: "attendance.workSegments",
     header: "Clock In",
     cell: ({ row, table }) => {
+      const status = row.original.attendance.status;
+      if (status === "absent" || status === "weekend") return "-";
       const ws = row.original.attendance.workSegments;
       if (!ws || ws.length === 0) return "-";
-
       const first = ws[0];
       const locationStr = first.clockInLocation;
-      const deviceType = first.clockInDeviceType;
-      const handleOpenMap = (table.options.meta as any).handleOpenMap;
-
       let latLng: [number, number] | null = null;
       if (locationStr && locationStr.includes(",")) {
-        const [lat, lng] = locationStr.split(",").map(Number);
-        if (!isNaN(lat) && !isNaN(lng)) latLng = [lat, lng];
+        const parts = locationStr.split(",").map(Number);
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          latLng = [parts[0], parts[1]];
+        }
       }
+      const handleOpenMap = (
+        table.options.meta as {
+          handleOpenMap: (lat: number, lng: number, label: string) => void;
+        }
+      ).handleOpenMap;
 
       return (
         <div className="text-[11px] flex items-center gap-1 text-[#8d8d8d]">
@@ -153,33 +164,39 @@ export const columns: ColumnDef<AttendanceRow>[] = [
               className="w-[14px] cursor-pointer"
               alt="Location"
               onClick={() =>
-                handleOpenMap(latLng[0], latLng[1], "Clock In Location")
+                handleOpenMap(latLng![0], latLng![1], "Clock In Location")
               }
             />
           )}
-          {deviceType && <DeviceIconWithTooltip device={deviceType} />}
+          {first.clockInDeviceType && (
+            <DeviceIconWithTooltip device={first.clockInDeviceType} />
+          )}
         </div>
       );
     },
   },
-
   {
     accessorKey: "attendance.workSegments",
     header: "Clock Out",
     cell: ({ row, table }) => {
+      const status = row.original.attendance.status;
+      if (status === "absent" || status === "weekend") return "-";
       const ws = row.original.attendance.workSegments;
       if (!ws || ws.length === 0) return "-";
-
       const last = ws[ws.length - 1];
       const locationStr = last.clockOutLocation;
-      const deviceType = last.clockOutDeviceType;
-      const handleOpenMap = (table.options.meta as any).handleOpenMap;
-
       let latLng: [number, number] | null = null;
       if (locationStr && locationStr.includes(",")) {
-        const [lat, lng] = locationStr.split(",").map(Number);
-        if (!isNaN(lat) && !isNaN(lng)) latLng = [lat, lng];
+        const parts = locationStr.split(",").map(Number);
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          latLng = [parts[0], parts[1]];
+        }
       }
+      const handleOpenMap = (
+        table.options.meta as {
+          handleOpenMap: (lat: number, lng: number, label: string) => void;
+        }
+      ).handleOpenMap;
 
       return (
         <div className="text-[11px] flex items-center gap-1 text-[#8d8d8d]">
@@ -190,20 +207,23 @@ export const columns: ColumnDef<AttendanceRow>[] = [
               className="w-[14px] cursor-pointer"
               alt="Location"
               onClick={() =>
-                handleOpenMap(latLng[0], latLng[1], "Clock Out Location")
+                handleOpenMap(latLng![0], latLng![1], "Clock Out Location")
               }
             />
           )}
-          {deviceType && <DeviceIconWithTooltip device={deviceType} />}
+          {last.clockOutDeviceType && (
+            <DeviceIconWithTooltip device={last.clockOutDeviceType} />
+          )}
         </div>
       );
     },
   },
-
   {
     accessorKey: "attendance.totalDuration",
     header: "Total Time",
     cell: ({ row }) => {
+      const status = row.original.attendance.status;
+      if (status === "absent" || status === "weekend") return "-";
       const attendanceObj = row.original.attendance;
       let cumulativeWorkDurationSeconds = 0;
       const now = dayjs();
@@ -221,19 +241,24 @@ export const columns: ColumnDef<AttendanceRow>[] = [
           }
         }
       }
-      const totalDuration = formatDuration(cumulativeWorkDurationSeconds);
-      return totalDuration || "-";
+      return secondsToDuration(cumulativeWorkDurationSeconds) || "-";
     },
   },
   {
     accessorKey: "attendance.breakDuration",
     header: "Break Duration",
-    cell: ({ row }) => row.original.attendance.breakDuration || "-",
+    cell: ({ row }) => {
+      const status = row.original.attendance.status;
+      if (status === "absent" || status === "weekend") return "-";
+      return row.original.attendance.breakDuration || "-";
+    },
   },
   {
     accessorKey: "attendance.productiveDuration",
     header: "Productive Duration",
     cell: ({ row }) => {
+      const status = row.original.attendance.status;
+      if (status === "absent" || status === "weekend") return "-";
       const attendanceObj = row.original.attendance;
       let cumulativeProductiveDurationSeconds = 0;
       const now = dayjs();
@@ -254,10 +279,7 @@ export const columns: ColumnDef<AttendanceRow>[] = [
           }
         }
       }
-      const productiveDuration = dayjs
-        .duration(cumulativeProductiveDurationSeconds, "seconds")
-        .format("HH:mm:ss");
-      return productiveDuration || "-";
+      return secondsToDuration(cumulativeProductiveDurationSeconds) || "-";
     },
   },
   {

@@ -20,6 +20,12 @@ import breakReducer from "./slices/breakSlice";
 import statusReportReducer from "./slices/statusReportSlice";
 import monthlyAttendanceReducer from "./slices/monthlyAttendanceSlice";
 import monthlySummaryReducer from "./slices/monthlySummarySlice";
+import userLeaveReducer from "./slices/leave/user/userLeaveSlice";
+import adminLeaveReducer from "./slices/leave/admin/adminLeaveSlice";
+import allUsersReducer from "./slices/users/allUsersSlice";
+import userWfhReducer from "./slices/wfh/userWfhSlice";
+import adminWfhReducer from "./slices/wfh/adminWfhSlice";
+import updateUserProfileImage from "./slices/updateUserProfileImageSlice";
 
 export const store = configureStore({
   reducer: {
@@ -43,6 +49,12 @@ export const store = configureStore({
     statusReport: statusReportReducer,
     monthlyAttendance: monthlyAttendanceReducer,
     monthlySummary: monthlySummaryReducer,
+    userLeave: userLeaveReducer,
+    adminLeave: adminLeaveReducer,
+    allUsers: allUsersReducer,
+    userWfh: userWfhReducer,
+    adminWfh: adminWfhReducer,
+    updateUserProfileImage: updateUserProfileImage,
   },
 });
 

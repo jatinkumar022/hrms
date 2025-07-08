@@ -1,5 +1,6 @@
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
+import UserProfile from "@/models/userProfile";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 
@@ -27,11 +28,26 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
     });
 
-    const user = await newUser.save();
+    const savedUser = await newUser.save();
+
+    // Create a corresponding user profile
+    const newUserProfile = new UserProfile({
+      user: savedUser._id,
+      contact: {
+        officialEmail: savedUser.email,
+      },
+      contactSocialLinks: {
+        officialEmail: savedUser.email,
+      },
+      firstName: savedUser.username,
+    });
+
+    await newUserProfile.save();
+
     return NextResponse.json({
       success: true,
       message: "User created successfully",
-      user,
+      user: savedUser,
     });
   } catch (error) {
     return NextResponse.json(

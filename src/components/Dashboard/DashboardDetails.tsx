@@ -20,125 +20,153 @@ interface SectionProps {
   rightControl?: ReactNode;
 }
 
-const onLeave = [
-  {
-    name: "Jagdish Koladiya",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg",
-    range: "Jun 16 – Jun 25, 2025",
-    leave: "full",
-  },
-  {
-    name: "Jagdish Koladiya",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg",
-    range: "Jun 16 – Jun 25, 2025",
-    leave: "1st half",
-  },
-  {
-    name: "Jagdish Koladiya",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg",
-    range: "Jun 16 – Jun 25, 2025",
-    leave: "2nd half ",
-  },
-  {
-    name: "Jagdish Koladiya",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg",
-    range: "Jun 16 – Jun 25, 2025",
-    leave: "full",
-  },
-  {
-    name: "Jagdish Koladiya",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg",
-    range: "Jun 16 – Jun 25, 2025",
-    leave: "1st half",
-  },
-  {
-    name: "Jagdish Koladiya",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/men/23.jpg",
-    range: "Jun 16 – Jun 25, 2025",
-    leave: "2nd half ",
-  },
+interface LeaveUser {
+  name: string;
+  role: string;
+  avatar: string;
+  range: string;
+  leave: string;
+}
+
+interface AbsentUser {
+  name: string;
+  role: string;
+  avatar: string;
+}
+
+interface BirthdayUser {
+  name: string;
+  role: string;
+  avatar: string;
+  date: string;
+}
+
+interface RemoteWorkUser {
+  name: string;
+  role: string;
+  avatar: string;
+  range: string;
+}
+
+const onLeave: LeaveUser[] = [
+  // {
+  //   name: "Jagdish Koladiya",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/men/23.jpg",
+  //   range: "Jun 16 – Jun 25, 2025",
+  //   leave: "full",
+  // },
+  // {
+  //   name: "Jagdish Koladiya",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/men/23.jpg",
+  //   range: "Jun 16 – Jun 25, 2025",
+  //   leave: "1st half",
+  // },
+  // {
+  //   name: "Jagdish Koladiya",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/men/23.jpg",
+  //   range: "Jun 16 – Jun 25, 2025",
+  //   leave: "2nd half ",
+  // },
+  // {
+  //   name: "Jagdish Koladiya",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/men/23.jpg",
+  //   range: "Jun 16 – Jun 25, 2025",
+  //   leave: "full",
+  // },
+  // {
+  //   name: "Jagdish Koladiya",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/men/23.jpg",
+  //   range: "Jun 16 – Jun 25, 2025",
+  //   leave: "1st half",
+  // },
+  // {
+  //   name: "Jagdish Koladiya",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/men/23.jpg",
+  //   range: "Jun 16 – Jun 25, 2025",
+  //   leave: "2nd half ",
+  // },
 ];
 
-const absentToday = [
-  {
-    name: "Dhruvik",
-    role: "Software Engineer | Trainee",
-    avatar: "https://randomuser.me/api/portraits/men/12.jpg",
-  },
-  {
-    name: "Hasmukh Mevada",
-    role: "Project Manager",
-    avatar: "https://randomuser.me/api/portraits/men/45.jpg",
-  },
-  {
-    name: "Piyush Dabhi",
-    role: "Senior Software Engineer | Node Developer",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    name: "Trushali Thummar",
-    role: "Software Engineer | React Developer",
-    avatar: "https://randomuser.me/api/portraits/women/22.jpg",
-  },
-  {
-    name: "Dhruvik",
-    role: "Software Engineer | Trainee",
-    avatar: "https://randomuser.me/api/portraits/men/12.jpg",
-  },
-  {
-    name: "Hasmukh Mevada",
-    role: "Project Manager",
-    avatar: "https://randomuser.me/api/portraits/men/45.jpg",
-  },
-  {
-    name: "Piyush Dabhi",
-    role: "Senior Software Engineer | Node Developer",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-  },
-  {
-    name: "Trushali Thummar",
-    role: "Software Engineer | React Developer",
-    avatar: "https://randomuser.me/api/portraits/women/22.jpg",
-  },
+const absentToday: AbsentUser[] = [
+  // {
+  //   name: "Dhruvik",
+  //   role: "Software Engineer | Trainee",
+  //   avatar: "https://randomuser.me/api/portraits/men/12.jpg",
+  // },
+  // {
+  //   name: "Hasmukh Mevada",
+  //   role: "Project Manager",
+  //   avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+  // },
+  // {
+  //   name: "Piyush Dabhi",
+  //   role: "Senior Software Engineer | Node Developer",
+  //   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+  // },
+  // {
+  //   name: "Trushali Thummar",
+  //   role: "Software Engineer | React Developer",
+  //   avatar: "https://randomuser.me/api/portraits/women/22.jpg",
+  // },
+  // {
+  //   name: "Dhruvik",
+  //   role: "Software Engineer | Trainee",
+  //   avatar: "https://randomuser.me/api/portraits/men/12.jpg",
+  // },
+  // {
+  //   name: "Hasmukh Mevada",
+  //   role: "Project Manager",
+  //   avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+  // },
+  // {
+  //   name: "Piyush Dabhi",
+  //   role: "Senior Software Engineer | Node Developer",
+  //   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+  // },
+  // {
+  //   name: "Trushali Thummar",
+  //   role: "Software Engineer | React Developer",
+  //   avatar: "https://randomuser.me/api/portraits/women/22.jpg",
+  // },
 ];
 
-const upcomingBirthdays = [
-  {
-    name: "Tushar Kyada",
-    role: "Software Engineer | Designer",
-    avatar: "https://randomuser.me/api/portraits/men/64.jpg",
-    date: "Mon 23 Jun",
-  },
-  {
-    name: "Piyush Dabhi",
-    role: "Senior Software Engineer | Node Developer",
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    date: "Sat 28 Jun",
-  },
-  {
-    name: "Ankit Vasita",
-    role: "Senior Software Engineer | React Developer",
-    avatar: "https://randomuser.me/api/portraits/men/41.jpg",
-    date: "Sun 29 Jun",
-  },
-  {
-    name: "Yash Singhvi",
-    role: "Team Lead",
-    avatar: "https://randomuser.me/api/portraits/men/56.jpg",
-    date: "Sun 29 Jun",
-  },
-  {
-    name: "Rushita Sanghani",
-    role: "BDM",
-    avatar: "https://randomuser.me/api/portraits/women/33.jpg",
-    date: "Fri 04 Jul",
-  },
+const upcomingBirthdays: BirthdayUser[] = [
+  // {
+  //   name: "Tushar Kyada",
+  //   role: "Software Engineer | Designer",
+  //   avatar: "https://randomuser.me/api/portraits/men/64.jpg",
+  //   date: "Mon 23 Jun",
+  // },
+  // {
+  //   name: "Piyush Dabhi",
+  //   role: "Senior Software Engineer | Node Developer",
+  //   avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+  //   date: "Sat 28 Jun",
+  // },
+  // {
+  //   name: "Ankit Vasita",
+  //   role: "Senior Software Engineer | React Developer",
+  //   avatar: "https://randomuser.me/api/portraits/men/41.jpg",
+  //   date: "Sun 29 Jun",
+  // },
+  // {
+  //   name: "Yash Singhvi",
+  //   role: "Team Lead",
+  //   avatar: "https://randomuser.me/api/portraits/men/56.jpg",
+  //   date: "Sun 29 Jun",
+  // },
+  // {
+  //   name: "Rushita Sanghani",
+  //   role: "BDM",
+  //   avatar: "https://randomuser.me/api/portraits/women/33.jpg",
+  //   date: "Fri 04 Jul",
+  // },
 ];
 
 const quickLinks = [
@@ -151,34 +179,34 @@ const quickLinks = [
 ];
 
 const workAnniversary = [
-  { name: "Gopal Sakhiya", label: "Today", years: "1 Year" },
-  { name: "Nitin Ukani", label: "Sat, 21 June", years: "7 Years" },
-  { name: "Tushar Kyada", label: "Sun, 22 June", years: "3 Years" },
-  { name: "Dikshita Domadiya", label: "Fri, 27 June", years: "2 Years" },
-  { name: "Rudrika Fichadiya", label: "Tue, 01 July", years: "1 Year" },
+  { name: "Gopal Sakhiya", label: "Today", years: "1 Year" },
+  { name: "Nitin Ukani", label: "Sat, 21 June", years: "7 Years" },
+  { name: "Tushar Kyada", label: "Sun, 22 June", years: "3 Years" },
+  { name: "Dikshita Domadiya", label: "Fri, 27 June", years: "2 Years" },
+  { name: "Rudrika Fichadiya", label: "Tue, 01 July", years: "1 Year" },
 ];
 
 const recentSocial = [
-  { name: "Gopal Sakhiya", type: "Work Anniversary", date: "Tue 17 Jun, 2025" },
-  { name: "Deep Hanani", type: "Birthday", date: "Tue 03 Jun, 2025" },
-  { name: "Jatin Ramani", type: "Birthday", date: "Thu 22 May, 2025" },
-  { name: "Aayushi Talaviya", type: "New Joinee", date: "Fri 16 May, 2025" },
-  { name: "Gautam Bhesaniya", type: "Birthday", date: "Fri 16 May, 2025" },
+  { name: "Gopal Sakhiya", type: "Work Anniversary", date: "Tue 17 Jun, 2025" },
+  { name: "Deep Hanani", type: "Birthday", date: "Tue 03 Jun, 2025" },
+  { name: "Jatin Ramani", type: "Birthday", date: "Thu 22 May, 2025" },
+  { name: "Aayushi Talaviya", type: "New Joinee", date: "Fri 16 May, 2025" },
+  { name: "Gautam Bhesaniya", type: "Birthday", date: "Fri 16 May, 2025" },
 ];
 
-const remoteWork = [
-  {
-    name: "Ashav Suthar",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/men/88.jpg",
-    range: "Jun 17 – Jun 17, 2025",
-  },
-  {
-    name: "Zarana Savaliya",
-    role: "Research and Development",
-    avatar: "https://randomuser.me/api/portraits/women/18.jpg",
-    range: "Jun 17 – Jun 17, 2025",
-  },
+const remoteWork: RemoteWorkUser[] = [
+  // {
+  //   name: "Ashav Suthar",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/men/88.jpg",
+  //   range: "Jun 17 – Jun 17, 2025",
+  // },
+  // {
+  //   name: "Zarana Savaliya",
+  //   role: "Research and Development",
+  //   avatar: "https://randomuser.me/api/portraits/women/18.jpg",
+  //   range: "Jun 17 – Jun 17, 2025",
+  // },
 ];
 const getLeaveBadge = (type: string) => {
   const t = type.toLowerCase();

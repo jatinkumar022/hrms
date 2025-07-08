@@ -8,6 +8,7 @@ import Sidebar from "@/components/custom/Sidebar";
 import { ThemeProvider } from "next-themes";
 import ReduxProvider from "@/lib/redux-provider";
 import "leaflet/dist/leaflet.css";
+import AuthInitializer from "@/components/custom/AuthInitializer";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({
         style={{ fontFamily: "var(--font-open-sans), sans-serif" }}
       >
         <ReduxProvider>
+          <AuthInitializer />
           <ThemeProvider
             attribute="class"
             defaultTheme="light"

@@ -12,38 +12,52 @@ import { IoBriefcaseOutline } from "react-icons/io5";
 import { IoMdLogOut } from "react-icons/io";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import isSameOrBefore from "dayjs/plugin/isSameOrBefore"; // 👈 add
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import weekday from "dayjs/plugin/weekday";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  submitLeaveRequest,
+  fetchUserLeaveBalance,
+} from "@/redux/slices/leave/user/userLeaveSlice";
+import { fetchProfileImage } from "@/redux/slices/profileImageSlice";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Spin } from "antd";
+import FullPageLoader from "@/components/loaders/FullPageLoader";
+
 dayjs.extend(isBetween);
-dayjs.extend(isSameOrBefore); // 👈 add
+dayjs.extend(isSameOrBefore);
 dayjs.extend(weekday);
+
 const leaveCatalog = {
   lwp: {
     name: "Leave without pay",
     icon: <PiAirplaneTakeoffLight className="text-[#08a34e]" size={18} />,
-    balance: "Unlimited",
     color: "#08a34e",
+    balanceKey: "lwp",
   },
   el: {
     name: "Earn leave",
     icon: <FaHandshakeAngle className="text-[#1dd454]" size={18} />,
-    balance: 0,
     color: "#1dd454",
+    balanceKey: "el",
   },
   sl: {
     name: "Sick leave",
     icon: <PiStethoscopeFill className="text-[#ffa801]" size={18} />,
-    balance: 0.5,
     color: "#ffa801",
+    balanceKey: "sl",
   },
   cl: {
     name: "Casual leave",
     icon: <IoBriefcaseOutline className="text-[#73788b]" size={18} />,
-    balance: 0.5,
     color: "#73788b",
+    balanceKey: "cl",
   },
 } as const;
+
 type LeaveKey = keyof typeof leaveCatalog;
+
 const teamOutToday = [
   {
     name: "Jagdish Koladiya",
@@ -63,22 +77,42 @@ const teamOutToday = [
     remark: "Jun 23 (First Half)",
     color: "#fff5f5",
   },
-  // ...
 ];
 export default function ApplyLeavePage() {
   const router = useRouter();
   const params = useParams();
+
+  const dispatch = useAppDispatch();
+  const { status: leaveStatus, myLeaveBalance } = useAppSelector(
+    (state) => state.userLeave
+  );
+  const { user } = useAppSelector((state) => state.login);
+  const { profileImage, isLoading: isProfileImageLoading } = useAppSelector(
+    (state) => state.profileImage
+  );
+
+  useEffect(() => {
+    dispatch(fetchUserLeaveBalance());
+    dispatch(fetchProfileImage());
+  }, [dispatch]);
+
   const routeLeave = (params?.type ?? "sl") as LeaveKey;
+
   const [leaveType, setLeaveType] = useState<LeaveKey>(routeLeave);
   const [multiDay, setMultiDay] = useState(false);
-  const [fromDate, setFromDate] = useState<Date | null>(new Date());
-  const [toDate, setToDate] = useState<Date | null>(null);
+  const [fromDate, setFromDate] = useState<Date | undefined>(new Date());
+  const [toDate, setToDate] = useState<Date | undefined>(undefined);
+  const [reason, setReason] = useState("");
+  const [halfDayTime, setHalfDayTime] = useState<"First Half" | "Second Half">(
+    "First Half"
+  );
   const [slotsPerDay, setSlotsPerDay] = useState<
     Record<string, "FULL" | "HALF">
   >({});
 
   useEffect(() => {
-    if (routeLeave !== leaveType) router.replace(`/apply-leave/${leaveType}`);
+    if (routeLeave !== leaveType)
+      router.replace(`/leave/my-leaves/${leaveType}`);
   }, [leaveType, routeLeave, router]);
   const leaveOpts = Object.entries(leaveCatalog).map(([key, v]) => ({
     label: v.name,
@@ -95,13 +129,24 @@ export default function ApplyLeavePage() {
     if (multiDay && toDate) {
       let cur = start.add(1, "day");
       const end = dayjs(toDate);
-      while (cur.isSameOrBefore(end)) {
+      if (end.isBefore(start)) return out;
+      while (cur.isSameOrBefore(end, "day")) {
         out.push(cur.format("YYYY-MM-DD"));
         cur = cur.add(1, "day");
       }
     }
     return out;
   }, [fromDate, toDate, multiDay]);
+
+  const totalLeaveDays = useMemo(() => {
+    return selectedDates.reduce((acc, date) => {
+      const dayType = slotsPerDay[date];
+      if (dayType === "FULL") return acc + 1;
+      if (dayType === "HALF") return acc + 0.5;
+      return acc;
+    }, 0);
+  }, [selectedDates, slotsPerDay]);
+
   useEffect(() => {
     if (!selectedDates.length) return;
     setSlotsPerDay((prev) => {
@@ -121,32 +166,108 @@ export default function ApplyLeavePage() {
     }));
   };
 
+  const handleSubmit = async () => {
+    if (!fromDate || !reason) {
+      toast.error("From date and reason are required.");
+      return;
+    }
+
+    const typeMap = {
+      lwp: "LWP",
+      el: "Earned Leave",
+      sl: "Sick Leave",
+      cl: "Casual Leave",
+    } as const;
+
+    const leaveDayType = multiDay
+      ? "Full Day"
+      : slotsPerDay[dayjs(fromDate).format("YYYY-MM-DD")] === "HALF"
+      ? "Half Day"
+      : "Full Day";
+
+    const leaveData: any = {
+      startDate: dayjs(fromDate).format("YYYY-MM-DD"),
+      endDate: dayjs(multiDay && toDate ? toDate : fromDate).format(
+        "YYYY-MM-DD"
+      ),
+      numberOfDays: totalLeaveDays,
+      leaveDayType,
+      type: typeMap[leaveType],
+      reason,
+    };
+
+    if (leaveDayType === "Half Day") {
+      leaveData.halfDayTime = halfDayTime;
+    }
+
+    try {
+      await dispatch(submitLeaveRequest(leaveData)).unwrap();
+      toast.success("Leave request submitted successfully!");
+      router.push("/leave/my-leaves");
+    } catch (err: any) {
+      toast.error(err.error || "Failed to submit leave request.");
+      console.error("Failed to submit leave request:", err);
+    }
+  };
+
+  const dynamicLeaveCatalog = useMemo(() => {
+    return Object.entries(leaveCatalog).map(([key, value]) => {
+      let displayBalance: string | number = 0;
+      const balanceKey = value.balanceKey;
+
+      if (balanceKey === "lwp") {
+        displayBalance = "Unlimited";
+      } else if (myLeaveBalance) {
+        const balanceKeyMap = {
+          el: "earnedLeave",
+          sl: "sickLeave",
+          cl: "casualLeave",
+        } as const;
+        displayBalance =
+          myLeaveBalance[
+            balanceKeyMap[balanceKey as keyof typeof balanceKeyMap]
+          ]?.balance ?? 0;
+      }
+
+      return {
+        ...value,
+        key: key as LeaveKey,
+        displayBalance,
+      };
+    });
+  }, [myLeaveBalance]);
+
   return (
     <div>
+      <FullPageLoader
+        show={leaveStatus === "loading" || isProfileImageLoading}
+      />
       {/* =============================== LEFT FORM =============================== */}
       <div className="flex justify-between items-center p-4 border-b">
         <div className="flex gap-3 items-center">
           <Image
-            src={me}
+            src={profileImage || me}
             alt="avatar"
             width={36}
             height={36}
             className="rounded-full"
           />
           <div>
-            <div className="font-medium text-sm">Jatin Ramani</div>
-            <div className="text-xs text-muted-foreground">
-              Software Engineer | React Developer
-            </div>
+            <div className="font-medium text-sm">{user?.username}</div>
+            <div className="text-xs text-muted-foreground">{"Employee"}</div>
           </div>
         </div>
         <div className="flex gap-3 text-xs">
-          <button className="w-24 py-[6px] border border-gray-300 rounded-xs hover:bg-gray-50">
+          <Button
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={leaveStatus === "loading"}
+          >
             Discard
-          </button>
-          <button className="w-24 py-[6px] bg-blue-600 text-white rounded-xs hover:opacity-90">
-            Save
-          </button>
+          </Button>
+          <Button onClick={handleSubmit} disabled={leaveStatus === "loading"}>
+            {leaveStatus === "loading" ? "Submitting..." : "Save"}
+          </Button>
         </div>
       </div>
       <div className="flex w-full h-screen overflow-hidden flex-col  lg:flex-row ">
@@ -164,14 +285,14 @@ export default function ApplyLeavePage() {
               <DatePickerWithLabel
                 label="From *"
                 value={fromDate}
-                onChange={setFromDate}
+                onChange={(date) => setFromDate(date ?? undefined)}
                 className="lg:min-w-1/2"
               />
               {multiDay && (
                 <DatePickerWithLabel
                   label="To"
                   value={toDate}
-                  onChange={setToDate}
+                  onChange={(date) => setToDate(date ?? undefined)}
                   className="lg:max-w-1/2"
                 />
               )}
@@ -194,6 +315,24 @@ export default function ApplyLeavePage() {
                 FOR ONE DAY?
               </button>
             )}
+            {!multiDay &&
+              slotsPerDay[
+                dayjs(fromDate || new Date()).format("YYYY-MM-DD")
+              ] === "HALF" && (
+                <div className="lg:max-w-1/2">
+                  <FloatingSelect
+                    label="Half Day Time"
+                    value={halfDayTime}
+                    options={[
+                      { label: "First Half", value: "First Half" },
+                      { label: "Second Half", value: "Second Half" },
+                    ]}
+                    onChange={(v) =>
+                      setHalfDayTime(v as "First Half" | "Second Half")
+                    }
+                  />
+                </div>
+              )}
             <Card className="rounded-sm shadow-none w-full mt-4 p-4">
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedDates.map((dateStr) => (
@@ -222,6 +361,8 @@ export default function ApplyLeavePage() {
               <textarea
                 placeholder="Reason For Leave *"
                 className="w-full lg:w-1/2 h-28 border border-gray-300 rounded p-4 outline-none resize-none focus:ring-1 focus:ring-blue-500"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
               />
               {/* Attachment */}
               <button
@@ -248,45 +389,40 @@ export default function ApplyLeavePage() {
                     style={{ background: p.color }}
                   >
                     <div className="flex items-center gap-3">
-                      {p.avatar ? ( // ✅ render <Image> only if URL
-                        <Image
-                          src={p.avatar}
-                          alt={p.name}
-                          width={22}
-                          height={22}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-pink-500 text-white flex items-center justify-center text-[11px] uppercase">
-                          {p.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                      <Image
+                        src={p.avatar ? p.avatar : me}
+                        alt="avatar"
+                        width={28}
+                        height={28}
+                        className="rounded-full"
+                      />
+                      <div>
+                        <div className="font-medium text-[13px]">{p.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {p.remark}
                         </div>
-                      )}
-                      <span>{p.name}</span>
+                      </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {p.remark}
-                    </span>
+                    <div>
+                      <IoMdLogOut size={16} />
+                    </div>
                   </div>
                 ))}
               </Card>
             </div>
           </div>
         </div>
-        {/* =========================== RIGHT SIDEBAR ============================== */}
         <div className=" lg:w-1/3 border-l shrink-0 ">
           <div className="p-4 border-b font-medium bg-[#f5f6fa]">
             Leave Type
           </div>
-          {Object.entries(leaveCatalog).map(([key, v]) => (
+          {dynamicLeaveCatalog.map((v) => (
             <div
-              key={key}
+              key={v.key}
               className={`flex justify-between items-center px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 border-b ${
-                key === leaveType ? "bg-gray-100" : ""
+                v.key === leaveType ? "bg-gray-100" : ""
               }`}
-              onClick={() => setLeaveType(key as LeaveKey)}
+              onClick={() => setLeaveType(v.key)}
             >
               <div className="flex items-center gap-2">
                 {v.icon}
@@ -294,37 +430,22 @@ export default function ApplyLeavePage() {
               </div>
               <span
                 className={`font-medium ${
-                  v.balance === 0
+                  v.displayBalance === 0
                     ? "text-red-500"
-                    : v.balance === "Unlimited"
+                    : v.displayBalance === "Unlimited"
                     ? "text-green-600"
                     : "text-gray-700"
                 }`}
               >
-                {v.balance}
+                {v.displayBalance}
               </span>
             </div>
           ))}
           <div className="p-4 border-b font-medium bg-[#f5f6fa]">
-            As of Mon 23 Jun, 2025
+            As of {dayjs().format("ddd DD MMM, YYYY")}
           </div>
           <div
-            className={`flex justify-between items-center px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 border-b `}
-          >
-            <div className="flex items-center gap-2">
-              <FaHandshakeAngle className="text-[#1dd454]" size={18} />
-              Earn leave
-            </div>
-            <span
-              className={`font-medium ${
-                0 === 0 ? "text-red-500" : "text-gray-700"
-              }`}
-            >
-              {0}
-            </span>
-          </div>
-          <div
-            className={`flex justify-between items-center px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 border-b `}
+            className={`flex justify-between items-center px-4 py-3 text-sm`}
           >
             <div className="flex items-center gap-2">
               <IoMdLogOut className="text-[#000000]" size={18} />
@@ -332,24 +453,38 @@ export default function ApplyLeavePage() {
             </div>
             <span
               className={`font-medium ${
-                0 === 0 ? "text-red-500" : "text-gray-700"
+                totalLeaveDays > 0 ? "text-blue-600" : "text-gray-700"
               }`}
             >
-              {0}
+              {totalLeaveDays}
             </span>
           </div>
-          <div
-            className={`flex justify-between items-center p-4 border-b font-medium bg-[#f5f6fa] text-sidebar-primary `}
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-[27.3rem] w-[45.2rem] flex items-center justify-between px-5 py-4 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 shadow-lg">
+        <div>
+          <span className="text-xs text-muted-foreground">
+            Applying for <span className="font-bold">{totalLeaveDays}</span>{" "}
+            day(s)
+          </span>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="w-40 text-center py-2 border-[#727272] text-[#727272] font-medium  cursor-pointer"
+            onClick={() => router.back()}
+            disabled={leaveStatus === "loading"}
           >
-            <div className="flex items-center gap-2">Selected Days</div>
-            <span
-              className={`font-medium ${
-                0 === 0 ? "text-red-500" : "text-gray-700"
-              }`}
-            >
-              {0}
-            </span>
-          </div>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            className="w-full"
+            disabled={leaveStatus === "loading"}
+          >
+            {leaveStatus === "loading" ? <Spin /> : "Submit Request"}
+          </Button>
         </div>
       </div>
     </div>

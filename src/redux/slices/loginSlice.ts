@@ -2,8 +2,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  role: "user" | "admin";
+}
+
 interface LoginState {
-  user: any | null;
+  user: User | null;
   isLoading: boolean;
   isError: boolean;
   errorMessage: string | null;
@@ -25,9 +32,34 @@ export const loginUser = createAsyncThunk(
   ) => {
     try {
       const res = await axios.post("/api/users/login", { email, password });
-      return res.data;
+      return res.data.user; // Assuming your login API returns user data directly
     } catch (err: any) {
       return rejectWithValue(err?.response?.data?.message || "Login failed");
+    }
+  }
+);
+
+export const fetchMe = createAsyncThunk(
+  "auth/fetchMe",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get("/api/auth/me");
+      return res.data.user;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data?.message || "Fetch failed");
+    }
+  }
+);
+
+// Async thunk for logout
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.post("/api/auth/logout");
+      return res.data;
+    } catch (err: any) {
+      return rejectWithValue(err?.response?.data?.message || "Logout failed");
     }
   }
 );
@@ -35,11 +67,7 @@ export const loginUser = createAsyncThunk(
 const loginSlice = createSlice({
   name: "login",
   initialState,
-  reducers: {
-    logout(state) {
-      state.user = null;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state) => {
@@ -55,9 +83,22 @@ const loginSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.errorMessage = action.payload as string;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isLoading = false;
+        state.isError = false;
+        state.errorMessage = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.errorMessage = action.payload as string;
+      })
+      .addCase(fetchMe.fulfilled, (state, action) => {
+        state.user = action.payload;
       });
   },
 });
 
-export const { logout } = loginSlice.actions;
 export default loginSlice.reducer;

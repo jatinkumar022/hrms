@@ -414,7 +414,7 @@ const employees = [
     email: "zubin.doshi@example.com",
     mobile: "9448887776",
   },
-  // IDs 51-70 follow the same pattern:
+
   {
     id: 51,
     name: "Akshay Bhatt",

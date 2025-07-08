@@ -1,6 +1,6 @@
 "use client";
 import DatePreset from "@/lib/DatePreset";
-import { DatePicker, Select, Spin, Alert, Input } from "antd";
+import { DatePicker, Select, Alert, Input } from "antd";
 import { useState, useEffect, useMemo } from "react";
 import DataSummery from "../components/DataSummery/DataSummery";
 import { DataTable } from "../components/table/DataTable";
@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import MapModal from "../components/DataSummery/MapModal";
+import FullPageLoader from "@/components/loaders/FullPageLoader";
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 export default function MyAttendance() {
@@ -29,16 +30,16 @@ export default function MyAttendance() {
   const [selectedPerson, setSelectedPerson] = useState<string | undefined>(
     undefined
   );
-  const [mapOpen, setMapOpen] = useState(false);
-  const [selectedLatLng, setSelectedLatLng] = useState<[number, number] | null>(
-    null
-  );
-  const [locationLabel, setLocationLabel] = useState<string>("");
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [mapModalLat, setMapModalLat] = useState(0);
+  const [mapModalLng, setMapModalLng] = useState(0);
+  const [mapModalLabel, setMapModalLabel] = useState("");
 
   const handleOpenMap = (lat: number, lng: number, label: string) => {
-    setSelectedLatLng([lat, lng]);
-    setLocationLabel(label);
-    setMapOpen(true);
+    setMapModalLat(lat);
+    setMapModalLng(lng);
+    setMapModalLabel(label);
+    setMapModalOpen(true);
   };
 
   // Fetch current month attendance on mount
@@ -89,6 +90,7 @@ export default function MyAttendance() {
 
   return (
     <div>
+      <FullPageLoader show={isLoading} />
       <div className="flex justify-between p-3 border-b items-center">
         <div className="font-medium ">My Attendance</div>
         <div className="flex items-center gap-3">
@@ -100,7 +102,11 @@ export default function MyAttendance() {
               onChange={onChange}
               allowClear
               options={Array.from(
-                new Set(records.map((r: any) => r.user.username))
+                new Set(
+                  records && records?.length > 0
+                    ? records.map((r: any) => r.user.username)
+                    : []
+                )
               ).map((username) => ({
                 value: username,
                 label: username,
@@ -138,9 +144,7 @@ export default function MyAttendance() {
         <DataSummery />
       </div>
       <div>
-        {isLoading ? (
-          <Spin className="my-8" />
-        ) : isError ? (
+        {isError ? (
           <Alert type="error" message={errorMessage} />
         ) : (
           <DataTable
@@ -148,21 +152,19 @@ export default function MyAttendance() {
             data={filteredData}
             meta={{
               handleView: (row: any) => setOpenDrawer(row),
-              handleOpenMap,
+              handleOpenMap: handleOpenMap,
             }}
           />
         )}
       </div>
       <TimesheetDrawer open={openDrawer} onClose={() => setOpenDrawer(false)} />
-      {selectedLatLng && (
-        <MapModal
-          open={mapOpen}
-          onOpenChange={setMapOpen}
-          lat={selectedLatLng[0]}
-          lng={selectedLatLng[1]}
-          label={locationLabel}
-        />
-      )}
+      <MapModal
+        open={mapModalOpen}
+        onOpenChange={setMapModalOpen}
+        lat={mapModalLat}
+        lng={mapModalLng}
+        label={mapModalLabel}
+      />
     </div>
   );
 }

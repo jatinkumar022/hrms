@@ -4,23 +4,46 @@ import { Schema, model, models, Types } from "mongoose";
 const LeaveSchema = new Schema(
   {
     userId: { type: Types.ObjectId, ref: "User", required: true },
-    date: { type: String, required: true }, // "YYYY-MM-DD"
-    type: {
+    startDate: { type: String, required: true }, // "YYYY-MM-DD"
+    endDate: { type: String, required: true }, // "YYYY-MM-DD"
+    numberOfDays: { type: Number, required: true },
+    leaveDayType: {
       type: String,
-      enum: ["paid", "unpaid", "half-day", "hourly"],
+      enum: ["Full Day", "Half Day", "Hourly"],
       required: true,
     },
-    duration: { type: String }, // "04:00" — for hourly
-    reason: { type: String },
+    halfDayTime: {
+      type: String,
+      enum: ["First Half", "Second Half"],
+      required: function (this: any) {
+        return this.leaveDayType === "Half Day";
+      },
+    },
+    type: {
+      type: String,
+      enum: ["LWP", "Casual Leave", "Sick Leave", "Earned Leave"],
+      required: true,
+    },
+    duration: {
+      type: String,
+      required: function (this: any) {
+        return this.leaveDayType === "Hourly";
+      },
+    }, // "04:00" — for hourly
+    reason: { type: String, required: true },
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "cancelled"],
       default: "pending",
+    },
+    approvedBy: {
+      type: Types.ObjectId,
+      ref: "User",
     },
   },
   { timestamps: true }
 );
 
-LeaveSchema.index({ userId: 1, date: 1 }, { unique: false });
+LeaveSchema.index({ userId: 1, startDate: 1 }, { unique: false });
 
 export default models.Leave || model("Leave", LeaveSchema);

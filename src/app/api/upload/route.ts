@@ -1,7 +1,15 @@
-// app/api/upload/route.ts
 import { NextResponse } from "next/server";
-import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from "cloudinary";
-const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
+import {
+  v2 as cloudinary,
+  UploadApiResponse,
+  UploadApiErrorResponse,
+} from "cloudinary";
+import { getUserFromToken } from "@/lib/getUserFromToken";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import User from "@/models/userModel";
+import { NextRequest } from "next/server";
+const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+  process.env;
 
 if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
   throw new Error("Missing Cloudinary environment variables");
@@ -15,7 +23,14 @@ cloudinary.config({
 
 export async function POST(req: Request): Promise<NextResponse> {
   try {
-    const formData = await req.formData();
+    // Cast req to NextRequest to use getUserFromToken
+    const nextReq = req as NextRequest;
+    const userId = await getUserFromToken(nextReq);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const formData = await nextReq.formData();
     const file = formData.get("file");
 
     if (!(file instanceof File)) {
@@ -26,18 +41,23 @@ export async function POST(req: Request): Promise<NextResponse> {
     const buffer = Buffer.from(arrayBuffer);
 
     // Upload buffer to Cloudinary using upload_stream
-    const uploadResult: UploadApiResponse = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "uploads" },
-        (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
-          if (error) return reject(error);
-          if (!result) return reject(new Error("No result from Cloudinary"));
-          resolve(result);
-        }
-      );
+    const uploadResult: UploadApiResponse = await new Promise(
+      (resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "uploads" },
+          (
+            error: UploadApiErrorResponse | undefined,
+            result: UploadApiResponse | undefined
+          ) => {
+            if (error) return reject(error);
+            if (!result) return reject(new Error("No result from Cloudinary"));
+            resolve(result);
+          }
+        );
 
-      stream.end(buffer);
-    });
+        stream.end(buffer);
+      }
+    );
 
     return NextResponse.json({ url: uploadResult.secure_url });
   } catch (error: any) {

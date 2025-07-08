@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
         $lte: today.format("YYYY-MM-DD"),
       },
     }).sort({ date: 1 });
-
+    console.log(attendanceRecords);
     let workingSeconds = 0;
     let clockInDays = 0;
     let payrollPresentDays = 0;

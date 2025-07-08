@@ -95,3 +95,4 @@ export const useGeolocation = (): UseGeolocationResult => {
 
   return { location, loading, error, getLocation };
 };
+ 
