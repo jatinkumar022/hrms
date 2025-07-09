@@ -22,6 +22,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { SearchInput } from "@/components/ui/searchbox";
+import { useState, useMemo } from "react";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { FaFilter } from "react-icons/fa";
 
 const employees = [
   {
@@ -677,74 +687,164 @@ const employees = [
   },
 ];
 
-const groupedEmployees = employees.reduce((acc, emp) => {
-  const firstLetter = emp.name.charAt(0).toUpperCase();
-  acc[firstLetter] = acc[firstLetter] || [];
-  acc[firstLetter].push(emp);
-  return acc;
-}, {} as Record<string, typeof employees>);
-
 export default function EmployeeDirectory() {
+  const isMobile = useMediaQuery("(max-width: 1045px)");
+  const [filters, setFilters] = useState({
+    search: "",
+    sort: "",
+    department: "",
+    jobTitle: "",
+    location: "",
+  });
+
+  const handleFilterChange = (name: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const { departments, jobTitles, locations } = useMemo(() => {
+    const departments = [...new Set(employees.map((e) => e.department))].sort();
+    const jobTitles = [...new Set(employees.map((e) => e.title))].sort();
+    const locations = [...new Set(employees.map((e) => e.workLocation))].sort();
+    return { departments, jobTitles, locations };
+  }, []);
+
+  const filteredEmployees = useMemo(() => {
+    let employeesToFilter = employees.filter((emp) => {
+      const searchMatch =
+        !filters.search ||
+        emp.name.toLowerCase().includes(filters.search.toLowerCase());
+      const departmentMatch =
+        !filters.department || emp.department === filters.department;
+      const jobTitleMatch = !filters.jobTitle || emp.title === filters.jobTitle;
+      const locationMatch =
+        !filters.location || emp.workLocation === filters.location;
+      return searchMatch && departmentMatch && jobTitleMatch && locationMatch;
+    });
+
+    if (filters.sort === "asc") {
+      employeesToFilter.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (filters.sort === "desc") {
+      employeesToFilter.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    return employeesToFilter;
+  }, [filters]);
+
+  const groupedEmployees = useMemo(() => {
+    return filteredEmployees.reduce((acc, emp) => {
+      const firstLetter = emp.name.charAt(0).toUpperCase();
+      acc[firstLetter] = acc[firstLetter] || [];
+      acc[firstLetter].push(emp);
+      return acc;
+    }, {} as Record<string, typeof employees>);
+  }, [filteredEmployees]);
+
+  const Filters = () => (
+    <div className="flex flex-col md:flex-row items-center gap-2">
+      <SearchInput
+        placeholder="Search"
+        className="md:w-56 !h-8"
+        value={filters.search}
+        onChange={(e) => handleFilterChange("search", e.target.value)}
+      />
+      <Select
+        value={filters.sort}
+        onValueChange={(value) => handleFilterChange("sort", value)}
+      >
+        <SelectTrigger className="!h-8 w-full md:w-32 text-sm !text-[#8d8d8d] !dark:text-[#c9c7c7]">
+          <SelectValue placeholder="Name" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="asc">A-Z</SelectItem>
+          <SelectItem value="desc">Z-A</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
+        value={filters.department}
+        onValueChange={(value) => handleFilterChange("department", value)}
+      >
+        <SelectTrigger className="!h-8 w-full md:w-32 text-sm !text-[#8d8d8d] !dark:text-[#c9c7c7]">
+          <SelectValue placeholder="Department" />
+        </SelectTrigger>
+        <SelectContent>
+          {departments.map((dep) => (
+            <SelectItem key={dep} value={dep}>
+              {dep}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={filters.jobTitle}
+        onValueChange={(value) => handleFilterChange("jobTitle", value)}
+      >
+        <SelectTrigger className="!h-8 w-full md:w-32 text-sm !text-[#8d8d8d] !dark:text-[#c9c7c7]">
+          <SelectValue placeholder="Job Title" />
+        </SelectTrigger>
+        <SelectContent>
+          {jobTitles.map((title) => (
+            <SelectItem key={title} value={title}>
+              {title}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={filters.location}
+        onValueChange={(value) => handleFilterChange("location", value)}
+      >
+        <SelectTrigger className="!h-8 w-full md:w-32 text-sm !text-[#8d8d8d] !dark:text-[#c9c7c7]">
+          <SelectValue placeholder="Location" />
+        </SelectTrigger>
+        <SelectContent>
+          {locations.map((loc) => (
+            <SelectItem key={loc} value={loc}>
+              {loc}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
   return (
-    <div className=" ">
-      <div className="flex flex-wrap gap-2 justify-between items-center">
-        <h2 className="font-medium text-sm whitespace-nowrap p-5">
-          {employees.length} Employees
+    <div className="">
+      <div className="flex flex-wrap gap-2 justify-between items-center border-b px-5 py-2">
+        <h2 className="font-medium text-sm whitespace-nowrap">
+          {filteredEmployees.length} Employees
         </h2>
-        <div className="flex  items-center gap-2">
-          <Input placeholder="Search" className=" text-xs" />
-          <Select>
-            <SelectTrigger className="h-8 w-32 text-xs">
-              <SelectValue placeholder="Name" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="asc">A-Z</SelectItem>
-              <SelectItem value="desc">Z-A</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select>
-            <SelectTrigger className="h-8 w-32 text-xs">
-              <SelectValue placeholder="Department" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="rnd">Research</SelectItem>
-              <SelectItem value="design">Design</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select>
-            <SelectTrigger className="h-8 w-32 text-xs">
-              <SelectValue placeholder="Job Title" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="developer">Developer</SelectItem>
-              <SelectItem value="tester">QA</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select>
-            <SelectTrigger className="h-8 w-32 text-xs">
-              <SelectValue placeholder="Location" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ahmedabad">Ahmedabad</SelectItem>
-              <SelectItem value="surat">Surat</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {isMobile ? (
+          <Popover>
+            <PopoverTrigger asChild>
+              <PopoverTrigger asChild>
+                <button className="border-none outline-none cursor-pointer">
+                  <div className="flex items-center gap-2 rounded-xs border  text-xs font-medium px-2 py-1">
+                    <FaFilter className="mr-2" /> Filters
+                  </div>
+                </button>
+              </PopoverTrigger>
+            </PopoverTrigger>
+            <PopoverContent className="w-60">
+              <Filters />
+            </PopoverContent>
+          </Popover>
+        ) : (
+          <Filters />
+        )}
       </div>
 
-      <ScrollArea className="h-[calc(100vh-140px)]">
+      <ScrollArea className="h-[calc(100vh-140px)] dark:bg-[#141414]  dark:text-white">
         {Object.entries(groupedEmployees)
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([letter, group]) => (
             <div key={letter} className="">
-              <h3 className="font-semibold  text-gray-900 bg-[#f5f6fa] p-2 px-5 ">
+              <h3 className="font-semibold  p-2 px-5 bg-[#fafafa] dark:bg-[#0c0c0c] dark:text-white">
                 {letter}
               </h3>
-              <div className="py-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-5">
+              <div className="py-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-5">
                 {group.map((emp) => (
                   <Card
                     key={emp.id}
-                    className="p-4 space-y-2 text-xs rounded-[5px] shadow-none"
+                    className="p-4 space-y-2 text-xs rounded-[5px] shadow-none bg-white dark:bg-[#0c0c0c]"
                   >
                     <div className="flex items-center gap-3">
                       <Image
@@ -763,7 +863,7 @@ export default function EmployeeDirectory() {
                         </div>
                       </div>
                     </div>
-                    <div className="w-full border-t pt-2 text-sm text-[#53575fcc] font-medium space-y-4">
+                    <div className="w-full border-t pt-2 text-sm text-[#53575fcc] dark:text-[#b3b3b3] font-medium space-y-4">
                       {/* Row 1 */}
                       <div className="flex justify-between items-center">
                         <div className="flex gap-2 items-center w-[50%] truncate">
@@ -798,15 +898,15 @@ export default function EmployeeDirectory() {
                       <div className="flex gap-2 items-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-2 text-muted-foreground cursor-pointer truncate">
+                            <div className="flex items-center gap-2  cursor-pointer truncate">
                               <RiUserLocationFill size={16} />
                               <span className="truncate">
                                 Previous Experience: {emp.prevExperience}
                               </span>
                             </div>
                           </TooltipTrigger>
-                          <TooltipContent className="text-xs">
-                            <div>
+                          <TooltipContent className="text-sm bg-[#616161]  dark:bg-[#292929] dark:text-white">
+                            <div className="space-y-2">
                               <div>Joining Date: {emp.curExperience}</div>
                               <div>
                                 Current Experience:{" "}

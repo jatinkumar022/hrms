@@ -39,9 +39,9 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="overflow-x-auto mt-1 w-screen md:w-[calc(100vw-5rem)]">
-      <Table className="min-w-[800px] text-xs border-b">
-        <TableHeader className="bg-[#fafafb]">
+    <div className="overflow-x-auto mt-1 w-screen md:w-[calc(100vw-5rem)] h-full">
+      <Table className="min-w-[800px] text-xs border-b ">
+        <TableHeader className="bg-[#fafafb] dark:bg-[#111111]  ">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -64,7 +64,10 @@ export function DataTable<TData, TValue>({
         </TableHeader>
         <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className="hover:bg-white extraTime group">
+            <TableRow
+              key={row.id}
+              className="hover:bg-[#fafafb] dark:hover:bg-[#111111]  extraTime group"
+            >
               {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}

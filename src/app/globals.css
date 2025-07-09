@@ -251,6 +251,58 @@ input[type=number] {
   font-size: 15px !important;
 }
 
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector {
+  background-color: #0b0b0b !important;
+  border-color: #161616 !important;
+  color: #fff !important;
+  transition: none !important;
+}
+
+.dark .ant-select-show-search:where(.css-dev-only-do-not-override-pjilya).ant-select:not(.ant-select-customize-input) .ant-select-selector input {
+  color: #fff !important;
+}
+
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-select-single.ant-select-show-arrow .ant-select-selection-item,
+:where(.css-dev-only-do-not-override-pjilya).ant-select-single.ant-select-show-arrow .ant-select-selection-search,
+:where(.css-dev-only-do-not-override-pjilya).ant-select-single.ant-select-show-arrow .ant-select-selection-placeholder {
+  color: #c9c7c7 !important;
+}
+
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-outlined {
+  background-color: #0b0b0b !important;
+  border-color: #161616 !important;
+  color: #fff !important;
+  transition: none !important;
+}
+
+:where(.css-dev-only-do-not-override-pjilya).ant-picker .ant-picker-input>input:placeholder-shown {
+  color: #c9c7c7 !important;
+}
+
+
+.dark .custom-range-picker .ant-picker-input input::placeholder {
+  color: #c9c7c7 !important;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @layer utilities {
   .orbit-spin {
     animation: orbit 19s linear infinite;
