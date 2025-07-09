@@ -6,7 +6,6 @@ import Image from "next/image";
 import { BsThreeDots } from "react-icons/bs";
 import { FaEye, FaFileInvoice } from "react-icons/fa6";
 import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
 import {
   Tooltip,
   TooltipContent,
@@ -14,11 +13,6 @@ import {
 } from "@/components/ui/tooltip";
 import { MdDesktopMac, MdPhoneIphone } from "react-icons/md";
 import { secondsToDuration } from "@/lib/attendanceHelpers";
-
-// Wrap dayjs.extend calls to ensure they only run on the client
-if (typeof window !== "undefined") {
-  dayjs.extend(duration);
-}
 
 const DeviceIconWithTooltip = ({ device }: { device: string }) => {
   const Icon = device === "desktop" ? MdDesktopMac : MdPhoneIphone;

@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect } from "react";
 import { Info } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";

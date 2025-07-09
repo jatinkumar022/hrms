@@ -13,10 +13,16 @@ import { fetchMonthlyAttendance } from "@/redux/slices/monthlyAttendanceSlice";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import MapModal from "../components/DataSummery/MapModal";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
+import dynamic from "next/dynamic";
+
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
+
+const MapModal = dynamic(() => import("../components/DataSummery/MapModal"), {
+  ssr: false,
+});
+
 export default function MyAttendance() {
   const dispatch = useAppDispatch();
   const { records, isLoading, isError, errorMessage } = useAppSelector(

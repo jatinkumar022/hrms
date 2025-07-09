@@ -1,12 +1,14 @@
+"use client";
+
 import dayjs from "dayjs";
 import { DatePresetProps, DateRangePreset } from "@/lib/types";
+import { useMemo } from "react";
 
 const getLastMonthRange = (): [dayjs.Dayjs, dayjs.Dayjs] => {
   const startOfCurrentMonth = dayjs().startOf("month");
   const startOfLastMonth = startOfCurrentMonth.subtract(1, "month");
   const endOfLastMonth = startOfCurrentMonth.subtract(1, "day");
-
-  return [startOfLastMonth, endOfLastMonth] as [dayjs.Dayjs, dayjs.Dayjs];
+  return [startOfLastMonth, endOfLastMonth];
 };
 
 const getLast12MonthsRange = (): [dayjs.Dayjs, dayjs.Dayjs] => {
@@ -15,17 +17,17 @@ const getLast12MonthsRange = (): [dayjs.Dayjs, dayjs.Dayjs] => {
     .subtract(12, "month")
     .startOf("month");
   const endOfLast12Months = dayjs().endOf("month");
-
-  return [startOfLast12Months, endOfLast12Months] as [dayjs.Dayjs, dayjs.Dayjs];
+  return [startOfLast12Months, endOfLast12Months];
 };
 
 const getLastYearRange = (): [dayjs.Dayjs, dayjs.Dayjs] => {
   const startOfLastYear = dayjs().subtract(1, "year").startOf("year");
   const endOfLastYear = dayjs().subtract(1, "year").endOf("year");
-
-  return [startOfLastYear, endOfLastYear] as [dayjs.Dayjs, dayjs.Dayjs];
+  return [startOfLastYear, endOfLastYear];
 };
-const rangePresets: DateRangePreset[] = [
+
+// ❌ Avoid top-level evaluation – use inside useMemo
+const getRangePresets = (): DateRangePreset[] => [
   {
     label: "Today",
     value: {
@@ -102,6 +104,8 @@ const DatePreset: React.FC<DatePresetProps> = ({
   isActive,
   handlePresetClick,
 }) => {
+  const rangePresets = useMemo(() => getRangePresets(), []);
+
   return (
     <div className="ant-picker-presets">
       <ul>
