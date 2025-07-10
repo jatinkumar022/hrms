@@ -11,6 +11,7 @@ interface DatePickerWithLabelProps {
   onChange?: (date: Date | null) => void;
   readOnly?: boolean;
   className?: string;
+  showFooter?: boolean;
 }
 export function DatePickerWithLabel({
   label,
@@ -18,6 +19,7 @@ export function DatePickerWithLabel({
   onChange,
   readOnly = false,
   className = "h-fit",
+  showFooter = true,
 }: DatePickerWithLabelProps) {
   const [date, setDate] = useState<Date | null | undefined>(value);
   const [tempDate, setTempDate] = useState<Date | null | undefined>(value);
@@ -47,14 +49,17 @@ export function DatePickerWithLabel({
         onBlur={() => setFocused(false)}
         disabled={readOnly}
         format="DD/MM/YYYY"
-        allowClear={true} // disable default clear button
-        className={`w-full h-[44.6px] rounded-[5px] border pl-3 pr-10  font-medium
-          ${
-            isActive || isDate
-              ? "border-sidebar-primary text-sidebar-primary"
-              : "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700"
-          }`}
         placeholder=" "
+        allowClear={true} // disable default clear button
+        className={`w-full h-[44.6px] !bg-transparent rounded-[5px] border pl-3 pr-10  font-medium
+          ${
+            isActive
+              ? "!border-sidebar-primary !text-sidebar-primary"
+              : "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700"
+          }
+         
+          `}
+        dropdownClassName={`${showFooter ? "" : "hideFooter"}`}
         style={{ background: "transparent" }}
       />
 

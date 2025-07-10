@@ -30,6 +30,15 @@ export async function PUT(request: NextRequest, context: any) {
       );
     }
 
+    const originalLeave = await Leave.findById(leaveId);
+    if (!originalLeave) {
+      return NextResponse.json(
+        { error: "Leave request not found" },
+        { status: 404 }
+      );
+    }
+    const wasPreviouslyApproved = originalLeave.status === "approved";
+
     const updatedLeave = await Leave.findByIdAndUpdate(
       leaveId,
       { status, approvedBy: status === "approved" ? userId : undefined },
@@ -39,114 +48,95 @@ export async function PUT(request: NextRequest, context: any) {
       .populate("approvedBy", "username");
 
     if (!updatedLeave) {
+      // This should theoretically not be reached if originalLeave was found, but as a safeguard.
       return NextResponse.json(
         { error: "Leave request not found" },
         { status: 404 }
       );
     }
 
-    if (status === "approved") {
-      const {
-        userId: leaveUserId,
-        type,
-        numberOfDays,
-        leaveDayType,
-        duration,
-        startDate,
-        endDate,
-      } = updatedLeave;
+    const {
+      userId: leaveUserId,
+      type,
+      numberOfDays,
+      startDate,
+      endDate,
+    } = updatedLeave;
 
-      const user = await User.findById(leaveUserId);
-      if (!user) {
-        console.error(`User with ID ${leaveUserId} not found.`);
-        return NextResponse.json(
-          { error: "User not found for leave request" },
-          { status: 404 }
-        );
-      }
+    const balanceMap: Record<
+      string,
+      "casualLeave" | "sickLeave" | "earnedLeave" | "leaveWithoutPay"
+    > = {
+      "Casual Leave": "casualLeave",
+      "Sick Leave": "sickLeave",
+      "Earned Leave": "earnedLeave",
+      LWP: "leaveWithoutPay",
+    };
+    const balancePath = balanceMap[type];
 
-      const shiftId = user.shiftId; // Assuming shiftId is stored in the User model
-      if (!shiftId) {
-        console.error(
-          `Shift ID not found for user ${leaveUserId}. Cannot create attendance record.`
-        );
-        return NextResponse.json(
-          { error: "Shift ID not found for user" },
-          { status: 500 }
-        );
-      }
-      let daysToDeduct = numberOfDays;
-
-      if (leaveDayType === "Hourly" && duration) {
-        const [hours, minutes] = duration.split(":").map(Number);
-        const totalMinutes = hours * 60 + minutes;
-
-        daysToDeduct = totalMinutes / 480;
-      }
-
-      let fieldToUpdate = "";
-
-      if (type === "Casual Leave") {
-        fieldToUpdate = "casualLeave.booked";
-      } else if (type === "Sick Leave") {
-        fieldToUpdate = "sickLeave.booked";
-      } else if (type === "Earned Leave") {
-        fieldToUpdate = "earnedLeave.booked";
-      } else if (type === "LWP") {
-        fieldToUpdate = "leaveWithoutPay.booked";
-      }
-
-      if (fieldToUpdate) {
+    if (balancePath) {
+      if (status === "approved" && !wasPreviouslyApproved) {
+        // Move from booked to used
         await LeaveBalance.findOneAndUpdate(
           { userId: leaveUserId },
           {
             $inc: {
-              [fieldToUpdate]: daysToDeduct,
-              [`${fieldToUpdate.replace(".booked", ".balance")}`]:
-                -daysToDeduct,
+              [`${balancePath}.booked`]: -numberOfDays,
+              [`${balancePath}.used`]: numberOfDays,
             },
-          },
-          { upsert: true, new: true }
+          }
         );
-      }
-
-      const start = dayjs(startDate);
-      const end = dayjs(endDate);
-      let currentDate = start;
-
-      while (currentDate.isBefore(end) || currentDate.isSame(end, "day")) {
-        const dateString = currentDate.format("YYYY-MM-DD");
-        console.log(
-          `Processing attendance for userId: ${leaveUserId}, date: ${dateString}`
-        );
-
-        try {
-          const updatedAttendance = await Attendance.findOneAndUpdate(
-            { userId: leaveUserId, date: dateString },
-            {
-              status: "on_leave",
-              shiftId: shiftId,
-              workSegments: [],
-              breaks: [],
-              lateIn: false,
-              lateInReason: undefined,
-              earlyOut: false,
-              earlyOutReason: undefined,
-            },
-            { upsert: true, new: true }
-          );
-          console.log(
-            `Attendance update result for ${dateString}:`,
-            updatedAttendance
-          );
-        } catch (attendanceError: any) {
-          console.error(
-            `Error updating attendance for ${dateString}:`,
-            attendanceError
-          );
+        // Create attendance records
+        const user = await User.findById(leaveUserId);
+        if (user && user.shiftId) {
+          let currentDate = dayjs(startDate);
+          while (
+            currentDate.isBefore(endDate) ||
+            currentDate.isSame(endDate, "day")
+          ) {
+            const dateString = currentDate.format("YYYY-MM-DD");
+            await Attendance.findOneAndUpdate(
+              { userId: leaveUserId, date: dateString },
+              {
+                status: "on_leave",
+                shiftId: user.shiftId,
+                workSegments: [],
+                breaks: [],
+                lateIn: false,
+                lateInReason: undefined,
+                earlyOut: false,
+                earlyOutReason: undefined,
+              },
+              { upsert: true, new: true }
+            );
+            currentDate = currentDate.add(1, "day");
+          }
         }
-
-        currentDate = currentDate.add(1, "day");
+      } else if (status === "rejected" && !wasPreviouslyApproved) {
+        // Return from booked to balance
+        await LeaveBalance.findOneAndUpdate(
+          { userId: leaveUserId },
+          {
+            $inc: {
+              [`${balancePath}.booked`]: -numberOfDays,
+              [`${balancePath}.balance`]: numberOfDays,
+            },
+          }
+        );
+      } else if (
+        (status === "rejected" || status === "cancelled") &&
+        wasPreviouslyApproved
+      ) {
+        // Return from used to balance
+        await LeaveBalance.findOneAndUpdate(
+          { userId: leaveUserId },
+          {
+            $inc: {
+              [`${balancePath}.used`]: -numberOfDays,
+              [`${balancePath}.balance`]: numberOfDays,
+            },
+          }
+        );
       }
     }
 

@@ -105,7 +105,7 @@ export default function Navbar() {
               onOpenChange={setIsDrawerOpen}
             >
               <DrawerTrigger asChild>
-                <span className="block md:hidden rounded-md p-1 cursor-pointer hover:bg-[#e4e4e4]">
+                <span className="block md:hidden rounded-md p-1 cursor-pointer hover:bg-[#e4e4e4] dark:hover:bg-[#3f3f3f4f]">
                   <CgMenuLeft size={20} />
                 </span>
               </DrawerTrigger>

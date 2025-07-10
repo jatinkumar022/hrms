@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
       startTime,
       endTime,
       reason,
+      attachment,
     } = reqBody;
 
     const newWorkFromHomeRequest = new WorkFromHome({
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
       startTime,
       endTime,
       reason,
+      attachment,
     });
 
     const savedRequest = await newWorkFromHomeRequest.save();

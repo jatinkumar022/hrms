@@ -51,15 +51,18 @@ function DataSummery() {
   const renderMetric = (metric: any) => (
     <div
       key={metric.key}
-      className="flex justify-between items-center w-full border-b last:border-b-0 py-2"
+      className="flex justify-between items-center w-full border-b last:border-b-0 py-2 "
     >
-      <div className="text-gray-500 flex items-center gap-1">
+      <div className="text-gray-500 dark:text-[#c9c7c7] flex items-center gap-1">
         <span>{metric.label}</span>
         {metric.hasInfo && (
-          <Info size={14} className="text-gray-400 cursor-pointer" />
+          <Info
+            size={14}
+            className="text-gray-400 dark:text-[#c9c7c7] cursor-pointer"
+          />
         )}
       </div>
-      <div className={cn("font-semibold text-gray-800", metric.color)}>
+      <div className={cn("font-semibold ", metric.color)}>
         {summary[metric.key] ?? "-"}
       </div>
     </div>
@@ -67,7 +70,7 @@ function DataSummery() {
 
   if (isMobile) {
     return (
-      <div className="flex flex-col w-full text-sm">
+      <div className="flex flex-col w-full text-sm dark:text-white">
         {metricLabels.map(renderMetric)}
       </div>
     );
@@ -80,7 +83,7 @@ function DataSummery() {
           key={metric.key}
           className="whitespace-nowrap px-3 py-1 border-r last:border-r-0 flex flex-col"
         >
-          <div className={cn("font-semibold dark:text-white", metric.color)}>
+          <div className={cn("font-semibold ", metric.color)}>
             {summary[metric.key] ?? "-"}
           </div>
           <div className="text-gray-500 dark:text-[#c9c7c7] flex items-center gap-1 whitespace-nowrap">

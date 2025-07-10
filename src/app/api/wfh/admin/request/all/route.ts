@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
           status: 1,
           reason: 1,
           createdAt: 1,
+          attachment: 1,
           userId: {
             _id: "$userDetails._id",
             username: "$userDetails.username",

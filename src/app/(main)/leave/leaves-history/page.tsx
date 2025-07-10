@@ -29,6 +29,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getColumns, LeaveRow } from "./leaveData";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchMyLeaveRequests } from "@/redux/slices/leave/user/userLeaveSlice";
+import { updateLeaveRequestStatus } from "@/redux/slices/leave/admin/adminLeaveSlice";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 
 export default function LeaveHistoryTable() {
@@ -72,6 +73,14 @@ export default function LeaveHistoryTable() {
     }
     return data;
   }, [myLeaveRequests, globalFilter, yearFilter, statusFilter, typeFilter]);
+
+  const handleApprove = (leaveId: string) => {
+    dispatch(updateLeaveRequestStatus({ leaveId, status: "approved" }));
+  };
+
+  const handleReject = (leaveId: string) => {
+    dispatch(updateLeaveRequestStatus({ leaveId, status: "rejected" }));
+  };
 
   const handleView = (row: LeaveRow) => {
     // Implement view logic, e.g., open a modal with leave details

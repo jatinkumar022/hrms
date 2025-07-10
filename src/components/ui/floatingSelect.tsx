@@ -56,7 +56,7 @@ export function FloatingSelect({
         onOpenChange={setOpen}
       >
         <SelectTrigger
-          className={`w-full !h-[43.73px] rounded-[5px] bg-transparent border text-left
+          className={`w-full !h-[43.73px] rounded-[5px] !bg-transparent border text-left
             appearance-none transition-colors duration-200
             ${
               isActive

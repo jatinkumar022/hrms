@@ -24,6 +24,7 @@ export type WfhRow = {
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   approvedBy?: { username: string };
+  attachment?: string;
 };
 
 export const getColumns = ({
@@ -102,6 +103,24 @@ export const getColumns = ({
         >
           {status}
         </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "attachment",
+    header: "Attachment",
+    cell: ({ row }) => {
+      const attachmentUrl = row.original.attachment;
+      if (!attachmentUrl) return "N/A";
+      return (
+        <a
+          href={attachmentUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          View
+        </a>
       );
     },
   },

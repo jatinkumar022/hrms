@@ -10,6 +10,8 @@ import { submitWfhRequest } from "@/redux/slices/wfh/userWfhSlice";
 import { toast } from "sonner";
 import { Spin } from "antd";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
+import FileUpload from "@/components/ui/FileUpload";
+import axios from "axios";
 
 export default function ApplyWfhPage() {
   const router = useRouter();
@@ -28,6 +30,8 @@ export default function ApplyWfhPage() {
   const [startTime, setStartTime] = useState<string>("00:00");
   const [endTime, setEndTime] = useState<string>("00:00");
   const [multiDay, setMultiDay] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const isHourly = dayType === "Hourly";
 
@@ -64,6 +68,26 @@ export default function ApplyWfhPage() {
       return;
     }
 
+    let attachmentUrl: string | undefined;
+    if (file) {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "wfh-attachments");
+
+      try {
+        const response = await axios.post("/api/upload", formData);
+        attachmentUrl = response.data.url;
+      } catch (error) {
+        toast.error("File upload failed. Please try again.");
+        console.error(error);
+        setIsUploading(false);
+        return;
+      } finally {
+        setIsUploading(false);
+      }
+    }
+
     const wfhData: any = {
       startDate: dayjs(fromDate).format("YYYY-MM-DD"),
       endDate: dayjs(multiDay && toDate ? toDate : fromDate).format(
@@ -72,6 +96,7 @@ export default function ApplyWfhPage() {
       numberOfDays: numberOfDays,
       dayType: dayType,
       reason: reason,
+      attachment: attachmentUrl,
     };
 
     if (dayType === "Half Day") {
@@ -225,6 +250,9 @@ export default function ApplyWfhPage() {
               onChange={(e) => setReason(e.target.value)}
               className="flex-1 min-h-[120px] w-full border border-gray-300 rounded p-4 outline-none focus:ring-1 focus:ring-primary resize-none"
             />
+          </div>
+          <div className="lg:w-1/2 w-full">
+            <FileUpload file={file} onChange={setFile} label="Attachment" />
           </div>
         </div>
       </div>

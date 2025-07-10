@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const leaveRequests = await Leave.find({ userId: user._id })
       .select(
-        "startDate endDate type leaveDayType status reason rejectionReason halfDayTime numberOfDays createdAt updatedAt"
+        "startDate endDate type days status reason rejectionReason numberOfDays createdAt updatedAt attachment"
       )
       .sort({
         createdAt: -1,

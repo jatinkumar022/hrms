@@ -8,10 +8,11 @@ interface LeaveRequest {
   startDate: string;
   endDate: string;
   numberOfDays: number;
-  leaveDayType: "Full Day" | "Half Day" | "Hourly";
-  halfDayTime?: "First Half" | "Second Half";
+  days: {
+    date: string;
+    dayType: "Full Day" | "First Half" | "Second Half";
+  }[];
   type: string;
-  duration?: string;
   reason: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
@@ -21,10 +22,10 @@ interface LeaveRequest {
 interface LeaveBalance {
   _id: string;
   userId: string;
-  casualLeave: { balance: number; booked: number };
-  sickLeave: { balance: number; booked: number };
-  earnedLeave: { balance: number; booked: number };
-  leaveWithoutPay: { balance: number; booked: number };
+  casualLeave: { balance: number; booked: number; used: number };
+  sickLeave: { balance: number; booked: number; used: number };
+  earnedLeave: { balance: number; booked: number; used: number };
+  leaveWithoutPay: { balance: number; booked: number; used: number };
 }
 
 interface AdminLeaveState {

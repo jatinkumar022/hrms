@@ -2,10 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 interface LeaveBalance {
-  casualLeave: { balance: number; booked: number };
-  sickLeave: { balance: number; booked: number };
-  earnedLeave: { balance: number; booked: number };
-  leaveWithoutPay: { balance: number; booked: number };
+  casualLeave: { balance: number; booked: number; used: number };
+  sickLeave: { balance: number; booked: number; used: number };
+  earnedLeave: { balance: number; booked: number; used: number };
+  leaveWithoutPay: { balance: number; booked: number; used: number };
 }
 
 interface MyLeaveRequest {
@@ -16,18 +16,43 @@ interface MyLeaveRequest {
   reason: string;
   rejectionReason?: string;
   type: string;
-  leaveDayType: "Full Day" | "Half Day" | "Hourly";
-  halfDayTime?: "First Half" | "Second Half";
+  days: {
+    date: string;
+    dayType: "Full Day" | "First Half" | "Second Half";
+  }[];
   numberOfDays: number;
   createdAt: string;
   updatedAt: string;
 }
 
+interface UpcomingLeave {
+  _id: string;
+  user: {
+    _id: string;
+    username: string;
+    email: string;
+    profileImage?: string;
+  };
+  startDate: string;
+  endDate: string;
+  numberOfDays: number;
+  days: {
+    date: string;
+    dayType: "Full Day" | "First Half" | "Second Half";
+  }[];
+  type: "LWP" | "Earned Leave" | "Sick Leave" | "Casual Leave";
+  reason: string;
+  status: "pending" | "approved" | "rejected";
+  attachment?: string;
+}
 interface UserLeaveState {
   myLeaveRequests: MyLeaveRequest[];
   myLeaveBalance: LeaveBalance | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+  upcomingLeaves: UpcomingLeave[];
+  upcomingLeavesStatus: "idle" | "loading" | "succeeded" | "failed";
+  upcomingLeavesError: string | null;
 }
 
 const initialState: UserLeaveState = {
@@ -35,41 +60,33 @@ const initialState: UserLeaveState = {
   myLeaveBalance: null,
   status: "idle",
   error: null,
+  upcomingLeaves: [],
+  upcomingLeavesStatus: "idle",
+  upcomingLeavesError: null,
 };
+
+// Define the type for the leave request payload
+export interface SubmitLeaveRequestPayload {
+  startDate: string;
+  endDate: string;
+  numberOfDays: number;
+  days: {
+    date: string;
+    dayType: "Full Day" | "First Half" | "Second Half";
+  }[];
+  type: string;
+  reason: string;
+  attachment?: string;
+}
 
 // Async Thunks for User Leave Actions
 export const submitLeaveRequest = createAsyncThunk(
   "userLeave/submitLeaveRequest",
-  async (
-    leaveData: {
-      startDate: string;
-      endDate: string;
-      numberOfDays: number;
-      leaveDayType: string;
-      type: string;
-      duration?: string;
-      reason: string;
-    },
-    { rejectWithValue }
-  ) => {
+  async (leaveData: SubmitLeaveRequestPayload, { rejectWithValue }) => {
     try {
       const response = await axios.post(
         "/api/leave/user/request/apply",
         leaveData
-      );
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response.data);
-    }
-  }
-);
-
-export const cancelLeaveRequest = createAsyncThunk(
-  "userLeave/cancelLeaveRequest",
-  async (leaveId: string, { rejectWithValue }) => {
-    try {
-      const response = await axios.delete(
-        `/api/leave/user/request/cancel/${leaveId}`
       );
       return response.data;
     } catch (error: any) {
@@ -102,6 +119,14 @@ export const fetchUserLeaveBalance = createAsyncThunk(
   }
 );
 
+export const fetchUpcomingLeaves = createAsyncThunk(
+  "userLeave/fetchUpcomingLeaves",
+  async () => {
+    const response = await axios.get("/api/leave/upcoming");
+    return response.data;
+  }
+);
+
 const userLeaveSlice = createSlice({
   name: "userLeave",
   initialState,
@@ -117,20 +142,6 @@ const userLeaveSlice = createSlice({
         state.myLeaveRequests.push(action.payload.leave);
       })
       .addCase(submitLeaveRequest.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload as string;
-      })
-      // cancelLeaveRequest
-      .addCase(cancelLeaveRequest.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(cancelLeaveRequest.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.myLeaveRequests = state.myLeaveRequests.filter(
-          (req) => req._id !== action.meta.arg
-        );
-      })
-      .addCase(cancelLeaveRequest.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       })
@@ -157,6 +168,18 @@ const userLeaveSlice = createSlice({
       .addCase(fetchUserLeaveBalance.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
+      })
+      .addCase(fetchUpcomingLeaves.pending, (state) => {
+        state.upcomingLeavesStatus = "loading";
+      })
+      .addCase(fetchUpcomingLeaves.fulfilled, (state, action) => {
+        state.upcomingLeavesStatus = "succeeded";
+        state.upcomingLeaves = action.payload;
+      })
+      .addCase(fetchUpcomingLeaves.rejected, (state, action) => {
+        state.upcomingLeavesStatus = "failed";
+        state.upcomingLeavesError =
+          action.error.message || "Failed to fetch upcoming leaves";
       });
   },
 });

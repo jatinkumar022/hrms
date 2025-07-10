@@ -40,6 +40,7 @@ export const submitWfhRequest = createAsyncThunk(
       startTime?: string;
       endTime?: string;
       reason: string;
+      attachment?: string;
     },
     { rejectWithValue }
   ) => {

@@ -40,6 +40,9 @@ const WorkFromHomeSchema = new Schema(
       type: Types.ObjectId,
       ref: "User",
     },
+    attachment: {
+      type: String, // URL to the uploaded file
+    },
   },
   { timestamps: true }
 );

@@ -16,7 +16,13 @@ export function SearchInput({ className, ...props }: SearchInputProps) {
         type="search"
         placeholder="Search employees..."
         className={cn(
-          "pl-9 pr-3 py-2 h-9 text-sm rounded-md border border-input bg-background  focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:ring-offset-0  shadow-none placeholder:text-[#8d8d8d] dark:placeholder:text-[#c9c7c7] dark:text-[white]",
+          "pl-9 pr-3 py-2 h-9 text-sm rounded-md border dark:bg-input/40 shadow-none",
+          "placeholder:text-[#8d8d8d] dark:placeholder:text-[#c9c7c7]",
+          "text-foreground dark:text-white",
+          "border border-input",
+          "focus-visible:outline outline-1 focus-visible:outline-blue-500 dark:focus-visible:outline-sidebar-primary",
+          "focus-visible:ring-0 focus-visible:ring-offset-2 ",
+          "dark:focus-visible:ring-offset-[#00000005] focus-visible:ring-offset-sidebar-primary",
           className
         )}
         {...props}

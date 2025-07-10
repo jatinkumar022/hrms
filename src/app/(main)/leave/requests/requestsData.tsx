@@ -41,15 +41,17 @@ export type LeaveRow = {
   endDate: string;
   type: string;
   numberOfDays: number;
-  leaveDayType: "Full Day" | "Half Day" | "Hourly";
-  halfDayTime?: "First Half" | "Second Half";
-  duration?: string;
+  days: {
+    date: string;
+    dayType: "Full Day" | "First Half" | "Second Half";
+  }[];
   reason: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
   userId: { _id: string; username: string; profileImage?: string };
   approvedBy?: { username: string };
+  attachment?: string;
   // actionBy is not in the model, will be handled separately if available
 };
 
@@ -115,15 +117,8 @@ export const getColumns = ({
     cell: ({ row }) => dayjs(row.original.endDate).format("ddd DD MMM, YYYY"),
   },
   {
-    header: "No. Of Days/Hours",
+    header: "No. Of Days",
     accessorKey: "numberOfDays",
-    cell: ({ row }) => {
-      const { numberOfDays, leaveDayType, halfDayTime } = row.original;
-      if (leaveDayType === "Half Day" && halfDayTime) {
-        return `${numberOfDays} (${halfDayTime})`;
-      }
-      return `${numberOfDays}`;
-    },
   },
   {
     header: "Added Date",
@@ -191,6 +186,24 @@ export const getColumns = ({
         >
           {status}
         </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "attachment",
+    header: "Attachment",
+    cell: ({ row }) => {
+      const attachmentUrl = row.original.attachment;
+      if (!attachmentUrl) return "N/A";
+      return (
+        <a
+          href={attachmentUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          View
+        </a>
       );
     },
   },

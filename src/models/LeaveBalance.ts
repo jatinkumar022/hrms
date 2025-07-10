@@ -9,18 +9,22 @@ const LeaveBalanceSchema = new Schema({
   casualLeave: {
     balance: { type: Number, default: 0 },
     booked: { type: Number, default: 0 },
+    used: { type: Number, default: 0 },
   },
   sickLeave: {
     balance: { type: Number, default: 0 },
     booked: { type: Number, default: 0 },
+    used: { type: Number, default: 0 },
   },
   earnedLeave: {
     balance: { type: Number, default: 0 },
     booked: { type: Number, default: 0 },
+    used: { type: Number, default: 0 },
   },
   leaveWithoutPay: {
     balance: { type: Number, default: 0 },
     booked: { type: Number, default: 0 },
+    used: { type: Number, default: 0 },
   },
 });
 

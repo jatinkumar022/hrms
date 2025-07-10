@@ -252,8 +252,8 @@ input[type=number] {
 }
 
 .dark :where(.css-dev-only-do-not-override-pjilya).ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector {
-  background-color: #0b0b0b !important;
-  border-color: #161616 !important;
+  background-color: color-mix(in oklab, var(--input) 40%, transparent) !important;
+  border: 1px solid var(--input) !important;
   color: #fff !important;
   transition: none !important;
 }
@@ -269,8 +269,8 @@ input[type=number] {
 }
 
 .dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-outlined {
-  background-color: #0b0b0b !important;
-  border-color: #161616 !important;
+  background-color: color-mix(in oklab, var(--input) 40%, transparent) !important;
+  border: 1px solid var(--input) !important;
   color: #fff !important;
   transition: none !important;
 }
@@ -286,13 +286,65 @@ input[type=number] {
 }
 
 
+.dark .ant-picker-input input {
+  color: white;
+}
 
 
 
+/* Optional: change placeholder color too */
+:root .ant-picker-input input::placeholder {
+  color: #9ca3af;
+  /* Tailwind's gray-400 */
+}
+
+.dark .ant-picker-input input::placeholder {
+  color: #cbd5e1;
+  /* Tailwind's gray-300 */
+}
 
 
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-decade-panel,
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-quarter-panel,
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-month-panel,
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-week-panel,
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-date-panel,
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-year-panel,
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-time-panel {
+  background-color: #141414 !important;
+}
 
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-panel-container {
+  background-color: #141414 !important;
+}
 
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-header {
+  color: #fffffff1 !important;
+}
+
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-header>button {
+  color: #fffffff1 !important;
+}
+
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-year-panel .ant-picker-cell-inner,
+:where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-quarter-panel .ant-picker-cell-inner,
+:where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-month-panel .ant-picker-cell-inner {
+
+  color: #cbd5e1;
+
+}
+
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-content th {
+  color: white !important;
+}
+
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-cell .ant-picker-cell-inner {
+  color: #cbd5e1 !important;
+}
+
+.hideFooter .ant-picker-footer {
+  display: none !important;
+}
 
 
 

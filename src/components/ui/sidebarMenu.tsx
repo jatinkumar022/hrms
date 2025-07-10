@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, ReactNode } from "react";
 import clsx from "clsx";
 import Link from "next/link";
 
-type DropdownItem =
+export type DropdownItem =
   | { label: string; onClick?: () => void; to: string }
   | "divider";
 
@@ -12,12 +12,14 @@ interface RightSideDropdownProps {
   items: DropdownItem[];
   children: ReactNode;
   className?: string;
+  pathname: string;
 }
 
 export default function RightSideDropdown({
   items,
   children,
   className,
+  pathname,
 }: RightSideDropdownProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,18 +38,30 @@ export default function RightSideDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const isActive = items.some((item) => {
+    if (typeof item === "string") return false;
+    // Exact match for root, prefix match for others.
+    if (item.to === "/") return false;
+    return pathname.startsWith(item.to);
+  });
+
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
       {/* Trigger */}
-      <button
+      <div
         onClick={() => setOpen(!open)}
         className={clsx(
-          ` ${open ? "text-sidebar-primary bg-[#39588080]" : ""} `, // optional for removing button outline
+          "p-2.5 rounded-xl cursor-pointer transition-colors duration-200",
+          {
+            "text-sidebar-primary  !bg-[#39588080] ": open || isActive,
+            "text-gray-400 hover:!text-sidebar-primary hover:!bg-[#39588080]":
+              !open && !isActive,
+          },
           className
         )}
       >
         {children}
-      </button>
+      </div>
 
       {/* Dropdown */}
       {open && (
@@ -58,13 +72,21 @@ export default function RightSideDropdown({
                 <li key={index} className="border-t my-2" />
               ) : (
                 <Link
-                  href={item?.to}
+                  href={item.to}
                   key={index}
                   onClick={() => {
                     setOpen(false);
                     item.onClick?.();
                   }}
-                  className="px-4 py-2 block hover:bg-[#f0f0f0]  dark:hover:bg-[#0c0c0c] cursor-pointer border-l-2 border-transparent hover:border-sidebar-primary"
+                  className={clsx(
+                    "px-4 py-2 block hover:bg-[#f0f0f0] dark:hover:bg-[#0c0c0c] cursor-pointer border-l-2 hover:text-sidebar-primary",
+                    {
+                      "border-sidebar-primary text-sidebar-primary":
+                        pathname === item.to,
+                      "border-transparent hover:border-sidebar-primary":
+                        pathname !== item.to,
+                    }
+                  )}
                 >
                   {item.label}
                 </Link>

@@ -1,50 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
+import { getUserFromToken } from "@/lib/getUserFromToken";
 import Leave from "@/models/Leave";
 import LeaveBalance from "@/models/LeaveBalance";
-import { getUserFromToken } from "@/lib/getUserFromToken";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import User from "@/models/userModel";
+import { NextRequest, NextResponse } from "next/server";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
-connect();
+dayjs.extend(isSameOrBefore);
 
 export async function POST(request: NextRequest) {
   try {
+    await connect();
+
     const userId = await getUserFromToken(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const reqBody = await request.json();
-    const {
-      startDate,
-      endDate,
-      leaveDayType,
-      halfDayTime,
-      type,
-      duration,
-      reason,
-    } = reqBody;
 
-    const start = dayjs(startDate);
-    const end = dayjs(endDate);
-    let calculatedDays = end.diff(start, "day") + 1;
+    const body = await request.json();
+    const { startDate, endDate, numberOfDays, days, type, reason, attachment } =
+      body;
 
-    if (leaveDayType === "Half Day") {
-      calculatedDays = 0.5;
-    }
-
-    // Validate required fields
     if (
       !startDate ||
       !endDate ||
-      !calculatedDays ||
-      !leaveDayType ||
+      !numberOfDays ||
+      !days ||
+      !Array.isArray(days) ||
+      days.length === 0 ||
       !type ||
       !reason
     ) {
@@ -54,16 +37,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if leave type is valid based on LeaveBalance model
-    const validLeaveTypes = [
-      "LWP",
-      "Casual Leave",
-      "Sick Leave",
-      "Earned Leave",
-    ];
-    if (!validLeaveTypes.includes(type)) {
+    // --- Date Consistency Validation ---
+    const expectedDates: string[] = [];
+    let currentDate = dayjs(startDate);
+    const lastDate = dayjs(endDate);
+
+    while (currentDate.isSameOrBefore(lastDate)) {
+      expectedDates.push(currentDate.format("YYYY-MM-DD"));
+      currentDate = currentDate.add(1, "day");
+    }
+
+    const providedDates = days.map((day: any) => day.date);
+
+    if (
+      expectedDates.length !== providedDates.length ||
+      !expectedDates.every(
+        (expectedDate, index) => expectedDate === providedDates[index]
+      )
+    ) {
       return NextResponse.json(
-        { error: "Invalid leave type" },
+        {
+          error:
+            "Provided dates in 'days' array do not match the 'startDate' and 'endDate' range.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // --- Backend calculation of numberOfDays for validation ---
+    const calculatedDays = days.reduce((acc: number, day: any) => {
+      if (day.dayType === "Full Day") {
+        return acc + 1;
+      }
+      if (day.dayType === "First Half" || day.dayType === "Second Half") {
+        return acc + 0.5;
+      }
+      return acc;
+    }, 0);
+
+    if (calculatedDays !== numberOfDays) {
+      return NextResponse.json(
+        { error: "The number of days does not match the selected day types." },
+        { status: 400 }
+      );
+    }
+
+    // --- Overlap Validation ---
+    const existingLeave = await Leave.findOne({
+      userId,
+      status: { $in: ["pending", "approved"] },
+      startDate: { $lte: endDate },
+      endDate: { $gte: startDate },
+    });
+
+    if (existingLeave) {
+      return NextResponse.json(
+        {
+          error:
+            "You have already applied for leave within the selected date range.",
+        },
         { status: 400 }
       );
     }
@@ -78,52 +110,58 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      let availableBalance = 0;
-      if (type === "Casual Leave")
-        availableBalance =
-          userLeaveBalance.casualLeave.balance -
-          userLeaveBalance.casualLeave.booked;
-      else if (type === "Sick Leave")
-        availableBalance =
-          userLeaveBalance.sickLeave.balance -
-          userLeaveBalance.sickLeave.booked;
-      else if (type === "Earned Leave")
-        availableBalance =
-          userLeaveBalance.earnedLeave.balance -
-          userLeaveBalance.earnedLeave.booked;
+      const balanceMap: Record<
+        string,
+        "casualLeave" | "sickLeave" | "earnedLeave"
+      > = {
+        "Casual Leave": "casualLeave",
+        "Sick Leave": "sickLeave",
+        "Earned Leave": "earnedLeave",
+      };
+      const balancePath = balanceMap[type];
 
-      if (availableBalance < calculatedDays) {
-        return NextResponse.json(
-          {
-            error: `Insufficient ${type} balance. Available: ${availableBalance}, Requested: ${calculatedDays}`,
+      if (balancePath) {
+        const leaveTypeBalance =
+          userLeaveBalance[balancePath as keyof typeof userLeaveBalance];
+
+        if (leaveTypeBalance.balance < numberOfDays) {
+          return NextResponse.json(
+            {
+              error: `Insufficient ${type} balance. Available: ${leaveTypeBalance.balance}, Requested: ${numberOfDays}`,
+            },
+            { status: 400 }
+          );
+        }
+
+        // Move balance to booked
+        await LeaveBalance.findByIdAndUpdate(userLeaveBalance._id, {
+          $inc: {
+            [`${balancePath}.balance`]: -numberOfDays,
+            [`${balancePath}.booked`]: numberOfDays,
           },
-          { status: 400 }
-        );
+        });
       }
     }
 
-    // Create new leave request
     const newLeave = new Leave({
       userId,
       startDate,
       endDate,
-      numberOfDays: calculatedDays,
-      leaveDayType,
-      halfDayTime: leaveDayType === "Half Day" ? halfDayTime : undefined,
+      numberOfDays,
+      days,
       type,
-      duration: leaveDayType === "Hourly" ? duration : undefined,
       reason,
-      status: "pending", // Default status
+      attachment,
     });
 
     const savedLeave = await newLeave.save();
 
     return NextResponse.json({
       message: "Leave request submitted successfully",
-      success: true,
       leave: savedLeave,
     });
   } catch (error: any) {
+    console.error("Error submitting leave request:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

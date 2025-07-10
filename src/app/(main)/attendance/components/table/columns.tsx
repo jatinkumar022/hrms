@@ -13,13 +13,20 @@ import {
 } from "@/components/ui/tooltip";
 import { MdDesktopMac, MdPhoneIphone } from "react-icons/md";
 import { secondsToDuration } from "@/lib/attendanceHelpers";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const DeviceIconWithTooltip = ({ device }: { device: string }) => {
   const Icon = device === "desktop" ? MdDesktopMac : MdPhoneIphone;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Icon size={16} className="text-gray-500 cursor-pointer" />
+        <Icon size={16} className="text-gray-500 cursor-pointer min-w-max" />
       </TooltipTrigger>
       <TooltipContent>
         <p>{device}</p>
@@ -65,7 +72,7 @@ export const columns: ColumnDef<AttendanceRow>[] = [
         return (
           <Badge
             variant="outline"
-            className="bg-blue-50 text-blue-500 border-none text-[11px] py-1 px-2 "
+            className="bg-blue-50 dark:bg-[#202020] dark:text-blue-400 text-blue-500 border-none text-[11px] py-1 px-2 "
           >
             Weekend
           </Badge>
@@ -74,7 +81,7 @@ export const columns: ColumnDef<AttendanceRow>[] = [
         return (
           <Badge
             variant="outline"
-            className="bg-green-50 text-[#47c947] border-none text-[11px] py-1 px-2 "
+            className="bg-green-50 dark:bg-[#202020] dark:text-green-400 text-green-500 border-none text-[11px] py-1 px-2 "
           >
             Present
           </Badge>
@@ -83,7 +90,7 @@ export const columns: ColumnDef<AttendanceRow>[] = [
         return (
           <Badge
             variant="outline"
-            className="bg-red-50 text-red-500 border-none text-[11px] py-1 px-2 "
+            className="bg-red-50 dark:bg-[#202020] dark:text-red-400 text-red-500 border-none text-[11px] py-1 px-2 "
           >
             Absent
           </Badge>
@@ -92,9 +99,18 @@ export const columns: ColumnDef<AttendanceRow>[] = [
         return (
           <Badge
             variant="outline"
-            className="bg-orange-50 text-orange-500 border-none text-[11px] py-1 px-2 "
+            className="bg-orange-50 dark:bg-[#202020] dark:text-orange-400 text-orange-500 border-none text-[11px] py-1 px-2 "
           >
             On Leave
+          </Badge>
+        );
+      if (status === "on_remote")
+        return (
+          <Badge
+            variant="outline"
+            className="bg-cyan-50 dark:bg-[#202020] dark:text-cyan-400 text-cyan-500 border-none text-[11px] py-1 px-2 "
+          >
+            On Remote
           </Badge>
         );
       return status;
@@ -289,24 +305,24 @@ export const columns: ColumnDef<AttendanceRow>[] = [
         table.options.meta as { handleView: (r: AttendanceRow) => void }
       ).handleView;
       return (
-        <div className="flex justify-end pr-3 group w-[80px]">
-          <div className="absolute group-hover:opacity-0 transition-opacity duration-200">
-            <button className="text-gray-500 hover:text-black">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
               <BsThreeDots />
-            </button>
-          </div>
-          <div className="opacity-0 group-hover:opacity-100 flex gap-2 transition-opacity duration-200">
-            <button
-              className="cursor-pointer text-sidebar-primary p-1"
-              onClick={() => view(row.original)}
-            >
-              <FaEye size={16} />
-            </button>
-            <button className="cursor-pointer text-sidebar-primary p-1">
-              <FaFileInvoice size={16} />
-            </button>
-          </div>
-        </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => view(row.original)}>
+              <FaEye size={16} className="mr-2" />
+              View
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <FaFileInvoice size={16} className="mr-2" />
+              Timesheet
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
     enableSorting: false,
