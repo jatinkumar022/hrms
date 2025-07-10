@@ -12,7 +12,7 @@ interface RightSideDropdownProps {
   items: DropdownItem[];
   children: ReactNode;
   className?: string;
-  pathname: string;
+  pathname?: string;
 }
 
 export default function RightSideDropdown({
@@ -42,7 +42,7 @@ export default function RightSideDropdown({
     if (typeof item === "string") return false;
     // Exact match for root, prefix match for others.
     if (item.to === "/") return false;
-    return pathname.startsWith(item.to);
+    return pathname?.startsWith(item.to) || false;
   });
 
   return (

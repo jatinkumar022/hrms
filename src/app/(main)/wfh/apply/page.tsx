@@ -115,7 +115,7 @@ export default function ApplyWfhPage() {
       toast.error(err.message || "Failed to submit WFH request.");
     }
   };
-
+  console.log(isUploading);
   return (
     <div className="w-full rounded-lg text-sm">
       <FullPageLoader show={status === "loading"} />

@@ -14,8 +14,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Input, Alert } from "antd";
-import { Button } from "@/components/ui/button";
+import { Alert } from "antd";
 import { LuDownload } from "react-icons/lu";
 import {
   flexRender,
@@ -25,12 +24,19 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { useEffect, useMemo, useState } from "react";
-import { getColumns, LeaveRow } from "./leaveData";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchMyLeaveRequests } from "@/redux/slices/leave/user/userLeaveSlice";
-import { updateLeaveRequestStatus } from "@/redux/slices/leave/admin/adminLeaveSlice";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import { useEffect, useMemo, useState } from "react";
+import { FaFilter } from "react-icons/fa";
+import { getColumns, LeaveRow } from "./leaveData";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
+import { fetchMyLeaveRequests } from "@/redux/slices/leave/user/userLeaveSlice";
+import { SearchInput } from "@/components/ui/searchbox";
 
 export default function LeaveHistoryTable() {
   const dispatch = useAppDispatch();
@@ -45,6 +51,7 @@ export default function LeaveHistoryTable() {
   );
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const isMobile = useMediaQuery("(max-width: 899px)");
 
   useEffect(() => {
     dispatch(fetchMyLeaveRequests());
@@ -73,14 +80,6 @@ export default function LeaveHistoryTable() {
     }
     return data;
   }, [myLeaveRequests, globalFilter, yearFilter, statusFilter, typeFilter]);
-
-  const handleApprove = (leaveId: string) => {
-    dispatch(updateLeaveRequestStatus({ leaveId, status: "approved" }));
-  };
-
-  const handleReject = (leaveId: string) => {
-    dispatch(updateLeaveRequestStatus({ leaveId, status: "rejected" }));
-  };
 
   const handleView = (row: LeaveRow) => {
     // Implement view logic, e.g., open a modal with leave details
@@ -124,80 +123,162 @@ export default function LeaveHistoryTable() {
   return (
     <>
       <FullPageLoader show={status === "loading"} />
-      <div className="flex flex-wrap gap-2 justify-between items-center p-3">
+      <div className="flex flex-wrap gap-2 justify-between items-center p-1.5 px-3 border-b">
         <h2 className="font-medium text-sm whitespace-nowrap">
           {filteredData.length}{" "}
           <span className="text-[gray]">Leaves Applied</span>
         </h2>
-        <div className="flex  items-center gap-2">
-          <Input
-            placeholder="Search"
-            className="h-8  text-xs"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-          />
-          <Select
-            value={yearFilter || "all"}
-            onValueChange={(value) =>
-              setYearFilter(value === "all" ? undefined : value)
-            }
-          >
-            <SelectTrigger className="h-8 w-24 text-xs">
-              <SelectValue placeholder="Year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Years</SelectItem>
-              {Array.from({ length: 5 }, (_, i) =>
-                String(new Date().getFullYear() - i)
-              ).map((year) => (
-                <SelectItem key={year} value={year}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={statusFilter || "all"}
-            onValueChange={(value) =>
-              setStatusFilter(value === "all" ? undefined : value)
-            }
-          >
-            <SelectTrigger className="h-8 w-24 text-xs">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={typeFilter || "all"}
-            onValueChange={(value) =>
-              setTypeFilter(value === "all" ? undefined : value)
-            }
-          >
-            <SelectTrigger className="h-8 w-28 text-xs">
-              <SelectValue placeholder="Leave Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="Casual Leave">Casual</SelectItem>
-              <SelectItem value="Sick Leave">Sick</SelectItem>
-              <SelectItem value="Earned Leave">Earned</SelectItem>
-              <SelectItem value="LWP">LWP</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button size="sm" className="h-8 px-2" onClick={handleExport}>
-            <LuDownload className="mr-1" /> CSV
-          </Button>
-          <Button size="sm" className="h-8 px-2">
-            +
-          </Button>
+        <div className="flex items-center gap-2">
+          {isMobile ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="border-none  outline-none cursor-pointer">
+                  <div className="flex h-9 items-center dark:text-[#c9c7c7] gap-2 rounded-xs border  px-2 py-1 text-xs font-medium">
+                    <FaFilter className="mr-2" /> Filters
+                  </div>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4">
+                <div className="flex flex-col gap-3">
+                  <SearchInput
+                    value={globalFilter}
+                    onChange={(e) => setGlobalFilter(e.target.value)}
+                    className="w-full"
+                  />
+                  <Select
+                    value={yearFilter || "all"}
+                    onValueChange={(value) =>
+                      setYearFilter(value === "all" ? undefined : value)
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs w-full">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent className="w-full">
+                      <SelectItem value="all">All Years</SelectItem>
+                      {Array.from({ length: 5 }, (_, i) =>
+                        String(new Date().getFullYear() - i)
+                      ).map((year) => (
+                        <SelectItem key={year} value={year}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={statusFilter || "all"}
+                    onValueChange={(value) =>
+                      setStatusFilter(value === "all" ? undefined : value)
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs w-full">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent className="w-full">
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={typeFilter || "all"}
+                    onValueChange={(value) =>
+                      setTypeFilter(value === "all" ? undefined : value)
+                    }
+                  >
+                    <SelectTrigger className="h-8 text-xs w-full">
+                      <SelectValue placeholder="Leave Type" />
+                    </SelectTrigger>
+                    <SelectContent className="w-full">
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="Casual Leave">Casual</SelectItem>
+                      <SelectItem value="Sick Leave">Sick</SelectItem>
+                      <SelectItem value="Earned Leave">Earned</SelectItem>
+                      <SelectItem value="LWP">LWP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <>
+              <SearchInput
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
+              />
+              <Select
+                value={yearFilter || "all"}
+                onValueChange={(value) =>
+                  setYearFilter(value === "all" ? undefined : value)
+                }
+              >
+                <SelectTrigger className="h-8 w-24 text-xs">
+                  <SelectValue placeholder="Year" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Years</SelectItem>
+                  {Array.from({ length: 5 }, (_, i) =>
+                    String(new Date().getFullYear() - i)
+                  ).map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={statusFilter || "all"}
+                onValueChange={(value) =>
+                  setStatusFilter(value === "all" ? undefined : value)
+                }
+              >
+                <SelectTrigger className="h-8 w-24 text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={typeFilter || "all"}
+                onValueChange={(value) =>
+                  setTypeFilter(value === "all" ? undefined : value)
+                }
+              >
+                <SelectTrigger className="h-8 w-28 text-xs">
+                  <SelectValue placeholder="Leave Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Casual Leave">Casual</SelectItem>
+                  <SelectItem value="Sick Leave">Sick</SelectItem>
+                  <SelectItem value="Earned Leave">Earned</SelectItem>
+                  <SelectItem value="LWP">LWP</SelectItem>
+                </SelectContent>
+              </Select>
+            </>
+          )}
+          {isMobile ? (
+            <button className="border-none  outline-none cursor-pointer">
+              <div className="flex h-9 items-center dark:text-[#c9c7c7] gap-2 rounded-xs border  px-2 py-1 text-xs font-medium">
+                <LuDownload className="mr-1" /> CSV
+              </div>
+            </button>
+          ) : (
+            <button onClick={handleExport}>
+              <div className="h-9 px-3 flex items-center gap-1 text-xs text-[black] dark:text-[#c9c7c7] border-input dark:hover:bg-input/30 hover:text-white cursor-pointer rounded-md border dark:bg-input/40">
+                {" "}
+                <LuDownload className="mr-1" /> CSV
+              </div>
+            </button>
+          )}
         </div>
       </div>
-      <div className="overflow-x-auto mt-1 w-screen md:w-[calc(100vw-5rem)]">
+      <div className="overflow-x-auto  w-screen md:w-[calc(100vw-5rem)]">
         <Table className="min-w-[1200px] text-xs border-b">
           <TableHeader className="bg-[#fafafb]">
             {table.getHeaderGroups().map((hg) => (

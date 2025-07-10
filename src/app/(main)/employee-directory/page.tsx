@@ -1,5 +1,4 @@
 "use client";
-import { Input } from "antd";
 import {
   Select,
   SelectTrigger,
@@ -25,7 +24,6 @@ import {
 import { SearchInput } from "@/components/ui/searchbox";
 import { useState, useMemo } from "react";
 import { useMediaQuery } from "@/hooks/use-mobile";
-import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
@@ -709,7 +707,7 @@ export default function EmployeeDirectory() {
   }, []);
 
   const filteredEmployees = useMemo(() => {
-    let employeesToFilter = employees.filter((emp) => {
+    const employeesToFilter = employees.filter((emp) => {
       const searchMatch =
         !filters.search ||
         emp.name.toLowerCase().includes(filters.search.toLowerCase());
