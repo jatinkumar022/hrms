@@ -161,7 +161,7 @@ export default function MyAttendance() {
   );
 
   return (
-    <div className="   h-[calc(100%-58px)]">
+    <div className="h-[calc(100%-109px)]">
       <FullPageLoader show={isLoading} />
       <div className="flex justify-between p-3 border-b items-center">
         <div className="font-medium ">

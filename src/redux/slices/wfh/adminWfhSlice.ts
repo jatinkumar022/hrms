@@ -1,16 +1,30 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-interface WfhRequest {
+export interface WfhDay {
+  date: string;
+  dayType: "Full Day" | "First Half" | "Second Half";
   _id: string;
-  userId: { _id: string; username: string; profileImage?: string };
+}
+export interface WfhRequest {
+  _id: string;
+  user: {
+    _id: string;
+    username: string;
+    employeeId: string;
+    profilePhoto?: string | null;
+  };
   startDate: string;
   endDate: string;
+  dayType: "Full Day" | "Half Day" | "Hourly";
   numberOfDays: number;
-  dayType: string;
+  days: WfhDay[];
   reason: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "cancelled";
+  attachment?: string;
   createdAt: string;
+  updatedAt: string;
+  approvedBy?: { username: string };
 }
 
 interface AdminWfhState {
@@ -29,22 +43,40 @@ export const fetchAllWfhRequests = createAsyncThunk(
   "adminWfh/fetchAllWfhRequests",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get("/api/wfh/admin/request/all");
-      return response.data.wfhRequests;
+      const response = await axios.get<WfhRequest[]>(
+        "/api/wfh/admin/request/all"
+      );
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
     }
   }
 );
 
-export const updateWfhRequestStatus = createAsyncThunk(
+export const fetchUserWfhRequests = createAsyncThunk<
+  WfhRequest[],
+  string,
+  { rejectValue: any }
+>("adminWfh/fetchUserWfhRequests", async (userId, { rejectWithValue }) => {
+  try {
+    const response = await axios.get<WfhRequest[]>(
+      `/api/wfh/admin/request/${userId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response.data);
+  }
+});
+
+export const updateWfhRequestStatus = createAsyncThunk<
+  WfhRequest,
+  { wfhId: string; status: "approved" | "rejected" | "cancelled" },
+  { rejectValue: any }
+>(
   "adminWfh/updateWfhRequestStatus",
-  async (
-    { wfhId, status }: { wfhId: string; status: "approved" | "rejected" },
-    { rejectWithValue }
-  ) => {
+  async ({ wfhId, status }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(
+      const response = await axios.put<{ request: WfhRequest }>(
         `/api/wfh/admin/request/status/${wfhId}`,
         { status }
       );
@@ -64,26 +96,48 @@ const adminWfhSlice = createSlice({
       .addCase(fetchAllWfhRequests.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchAllWfhRequests.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.allWfhRequests = action.payload;
-      })
+      .addCase(
+        fetchAllWfhRequests.fulfilled,
+        (state, action: PayloadAction<WfhRequest[]>) => {
+          state.status = "succeeded";
+          state.allWfhRequests = action.payload;
+        }
+      )
       .addCase(fetchAllWfhRequests.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      .addCase(
+        fetchUserWfhRequests.fulfilled,
+        (state, action: PayloadAction<WfhRequest[]>) => {
+          state.status = "succeeded";
+          // Assuming you want to replace or update the list with the fetched user requests
+          state.allWfhRequests = action.payload;
+        }
+      )
+      .addCase(fetchUserWfhRequests.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       })
       .addCase(updateWfhRequestStatus.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(updateWfhRequestStatus.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        const index = state.allWfhRequests.findIndex(
-          (req) => req._id === action.payload._id
-        );
-        if (index !== -1) {
-          state.allWfhRequests[index] = action.payload;
+      .addCase(
+        updateWfhRequestStatus.fulfilled,
+        (state, action: PayloadAction<WfhRequest>) => {
+          state.status = "succeeded";
+          const index = state.allWfhRequests.findIndex(
+            (req) => req._id === action.payload._id
+          );
+          if (index !== -1) {
+            // Preserve the existing user object while updating the rest of the request data
+            state.allWfhRequests[index] = {
+              ...state.allWfhRequests[index],
+              ...action.payload,
+            };
+          }
         }
-      })
+      )
       .addCase(updateWfhRequestStatus.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;

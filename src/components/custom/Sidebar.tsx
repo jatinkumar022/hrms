@@ -83,9 +83,9 @@ export default function Sidebar() {
     clsx(
       "text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200",
       {
-        "text-sidebar-primary bg-[#39588080]": exact
-          ? pathname === path
-          : pathname.startsWith(path),
+        "text-sidebar-primary bg-[#39588080]":
+          (exact ? pathname === path : pathname.startsWith(path)) &&
+          path !== "#",
       }
     );
 
@@ -135,7 +135,7 @@ export default function Sidebar() {
           <Link href="#" className={linkClasses("#")}>
             <Clock size={22} />
           </Link>
-          <Link href="#" className={linkClasses("#")}>
+          <Link href="#" className={"relative " + linkClasses("#")}>
             <MessageCircle size={22} />
             <div className="absolute bg-[#c84320] text-[9px] flex items-center justify-center text-white top-1 rounded-full  w-4 h-4 right-1.5 ">
               1

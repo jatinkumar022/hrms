@@ -42,6 +42,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { logoutUser } from "@/redux/slices/loginSlice";
 import { FaLaptopHouse } from "react-icons/fa";
+import clsx from "clsx";
 
 export default function Navbar() {
   const dispatch = useAppDispatch();
@@ -94,6 +95,16 @@ export default function Navbar() {
     });
   }
 
+  const linkClasses = (path: string, exact: boolean = false) =>
+    clsx(
+      "text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200",
+      {
+        "text-sidebar-primary bg-[#39588080]": exact
+          ? pathname === path
+          : pathname.startsWith(path),
+      }
+    );
+
   return (
     <>
       <div className="flex items-center justify-between p-4  bg-sidebar text-sidebar-foreground sticky top-0 left-0 border-b">
@@ -117,23 +128,21 @@ export default function Navbar() {
                       <Image src={logo} alt="Logo" className="w-12 h-12" />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <Link
-                        href="/"
-                        className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200"
-                      >
+                      <Link href="/" className={linkClasses("/", true)}>
                         <Grid size={22} />
                       </Link>
-                      <div className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200">
+                      <Link
+                        href="/employee-directory"
+                        className={linkClasses("/employee-directory")}
+                      >
                         <FileText size={22} />
-                      </div>
+                      </Link>
                       <RightSideDropdown
-                        className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200"
                         items={[
                           {
                             label: "My Attendance",
                             to: "/attendance/my-attendance",
                           },
-
                           { label: "My Late In", to: "/attendance/my-latein" },
                           {
                             label: "My Early Out",
@@ -142,49 +151,50 @@ export default function Navbar() {
                           "divider",
                           { label: "Shift Calendar", to: "/" },
                         ]}
+                        pathname={pathname}
                       >
                         <Calendar size={22} />
                       </RightSideDropdown>
                       <RightSideDropdown
-                        className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200"
                         items={leaveMenuItems}
+                        pathname={pathname}
                       >
                         <GoSignOut size={22} />
                       </RightSideDropdown>
                       <RightSideDropdown
-                        className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200"
                         items={wfhMenuItems}
+                        pathname={pathname}
                       >
                         <FaLaptopHouse size={22} />
                       </RightSideDropdown>
                       <hr className="m-2.5 border-gray-600" />
                       <Link
                         href="/my-holidays"
-                        className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200 group"
+                        className={linkClasses("/my-holidays")}
                       >
                         <HolidayIcon size={22} />
                       </Link>
-                      <div className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200">
+                      <Link href="#" className={linkClasses("#")}>
                         <Share2 size={22} />
-                      </div>
-                      <div className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200">
+                      </Link>
+                      <Link href="#" className={linkClasses("#")}>
                         <Clock size={22} />
-                      </div>
-                      <div className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200 relative">
+                      </Link>
+                      <Link href="#" className={"relative " + linkClasses("#")}>
                         <MessageCircle size={22} />
                         <div className="absolute bg-[#c84320] text-[9px] flex items-center justify-center text-white top-1 rounded-full  w-4 h-4 right-1.5 ">
                           1
                         </div>
-                      </div>
+                      </Link>
                     </div>
                   </div>
                   <div className="mt-auto flex flex-col items-center space-y-4">
-                    <div className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200">
+                    <Link href="#" className={linkClasses("#")}>
                       <Headphones size={22} />
-                    </div>
-                    <div className="text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200">
+                    </Link>
+                    <Link href="/profile" className={linkClasses("/profile")}>
                       <Settings size={22} />
-                    </div>
+                    </Link>
                     <Dialog
                       open={showLogoutModal}
                       onOpenChange={setShowLogoutModal}

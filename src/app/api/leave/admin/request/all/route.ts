@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import Leave from "@/models/Leave";
 import { getUserFromToken } from "@/lib/getUserFromToken";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import User from "@/models/userModel";
 
 export async function GET(request: NextRequest) {

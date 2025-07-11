@@ -26,6 +26,11 @@ import {
 } from "@/components/ui/select";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { IoInformationCircleOutline } from "react-icons/io5";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export interface DataTableProps<TData, TValue = unknown> {
   columns: ColumnDef<TData, TValue>[];
@@ -108,9 +113,23 @@ export function DataTable<TData, TValue>({
       </div>
       <div className="sticky bottom-0 flex items-center justify-between p-2 text-xs border-t">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <IoInformationCircleOutline size={16} />
-          <span>Information</span>
+          {" "}
+          <div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="h-7 w-7 p-0">
+                  <IoInformationCircleOutline size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <div>
+                  <span>Information</span>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
+
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span>Entries</span>
@@ -120,7 +139,7 @@ export function DataTable<TData, TValue>({
                 table.setPageSize(Number(value));
               }}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="!h-7 w-[70px]">
                 <SelectValue
                   placeholder={table.getState().pagination.pageSize}
                 />
@@ -137,19 +156,19 @@ export function DataTable<TData, TValue>({
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
               <span className="sr-only">Go to previous page</span>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="flex items-center justify-center text-sm font-medium w-8 h-8 border rounded-md">
+            <div className="flex items-center justify-center text-sm font-medium w-7 h-7 border rounded-md">
               {table.getState().pagination.pageIndex + 1}
             </div>
             <Button
               variant="outline"
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >

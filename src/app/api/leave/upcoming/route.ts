@@ -1,24 +1,19 @@
 import { connect } from "@/dbConfig/dbConfig";
-import { getUserFromToken } from "@/lib/getUserFromToken";
 import Leave from "@/models/Leave";
 import User from "@/models/userModel";
 import UserProfile from "@/models/userProfile";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import dayjs from "dayjs";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await connect();
 
-    const userId = await getUserFromToken(request);
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = dayjs().startOf("day").format("YYYY-MM-DD");
 
     const upcomingLeaves = await Leave.find({
       status: "approved",
+      startDate: { $gte: today },
     })
       .populate({
         path: "userId",

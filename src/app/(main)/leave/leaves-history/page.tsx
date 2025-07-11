@@ -20,7 +20,9 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
+  PaginationState,
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
@@ -37,6 +39,9 @@ import { getColumns, LeaveRow } from "./leaveData";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 import { fetchMyLeaveRequests } from "@/redux/slices/leave/user/userLeaveSlice";
 import { SearchInput } from "@/components/ui/searchbox";
+import { IoInformationCircleOutline } from "react-icons/io5";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function LeaveHistoryTable() {
   const dispatch = useAppDispatch();
@@ -51,6 +56,10 @@ export default function LeaveHistoryTable() {
   );
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
   const isMobile = useMediaQuery("(max-width: 899px)");
 
   useEffect(() => {
@@ -97,11 +106,13 @@ export default function LeaveHistoryTable() {
   const table = useReactTable({
     data: filteredData,
     columns,
-    state: { sorting, globalFilter },
+    state: { sorting, globalFilter, pagination },
     onSortingChange: setSorting,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const handleExport = () => {
@@ -123,10 +134,12 @@ export default function LeaveHistoryTable() {
   return (
     <>
       <FullPageLoader show={status === "loading"} />
-      <div className="flex flex-wrap gap-2 justify-between items-center p-1.5 px-3 border-b">
+      <div className="flex flex-wrap gap-2 justify-between items-center p-1.5 px-3 border-b ">
         <h2 className="font-medium text-sm whitespace-nowrap">
           {filteredData.length}{" "}
-          <span className="text-[gray]">Leaves Applied</span>
+          <span className="text-[gray] dark:text-[#c9c7c7]">
+            Leaves Applied
+          </span>
         </h2>
         <div className="flex items-center gap-2">
           {isMobile ? (
@@ -278,7 +291,7 @@ export default function LeaveHistoryTable() {
           )}
         </div>
       </div>
-      <div className="overflow-x-auto  w-screen md:w-[calc(100vw-5rem)]">
+      <div className="overflow-x-auto w-screen md:w-[calc(100vw-5rem)] h-[calc(100vh-165px)] md:h-[calc(100vh-168px)]">
         <Table className="min-w-[1200px] text-xs border-b">
           <TableHeader className="bg-[#fafafb]">
             {table.getHeaderGroups().map((hg) => (
@@ -307,7 +320,7 @@ export default function LeaveHistoryTable() {
                       key={cell.id}
                       className={`px-2 py-2 whitespace-nowrap text-muted-foreground ${
                         cell.column.id === "actions"
-                          ? "sticky right-0 bg-white z-10 shadow"
+                          ? "sticky right-0 bg-white dark:bg-[#111111] w-8  z-10 shadow"
                           : ""
                       }`}
                     >
@@ -331,6 +344,73 @@ export default function LeaveHistoryTable() {
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="sticky bottom-0 flex items-center justify-between p-2 text-xs border-t bg-white dark:bg-black">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          {" "}
+          <div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="h-7 w-7 p-0">
+                  <IoInformationCircleOutline size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <div>
+                  <span>Information</span>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span>Entries</span>
+            <Select
+              value={`${table.getState().pagination.pageSize}`}
+              onValueChange={(value) => {
+                table.setPageSize(Number(value));
+              }}
+            >
+              <SelectTrigger className="!h-7 w-[70px]">
+                <SelectValue
+                  placeholder={table.getState().pagination.pageSize}
+                />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[10, 20, 50, 100].map((pageSize) => (
+                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                    {pageSize}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="h-7 w-7 p-0"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center justify-center text-sm font-medium w-7 h-7 border rounded-md">
+              {table.getState().pagination.pageIndex + 1}
+            </div>
+            <Button
+              variant="outline"
+              className="h-7 w-7 p-0"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
     </>
   );

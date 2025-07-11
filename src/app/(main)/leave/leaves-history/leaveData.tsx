@@ -178,15 +178,18 @@ export const getColumns = ({
   },
   {
     id: "actions",
-    header: "Actions",
+    header: "",
     cell: ({ row }) => {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <button className=" cursor-pointer ">
+              <div className="flex items-center justify-center  hover:bg-[#313131] rounded-sm p-1 h-8 w-8  dark:text-[#c9c7c7] ">
+                <span className="sr-only">Open menu</span>
+
+                <MoreHorizontal className="h-4 w-4" />
+              </div>
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onView(row.original)}>

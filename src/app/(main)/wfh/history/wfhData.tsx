@@ -21,7 +21,7 @@ export type WfhRow = {
   startTime?: string;
   endTime?: string;
   reason: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "cancelled";
   createdAt: string;
   approvedBy?: { username: string };
   attachment?: string;

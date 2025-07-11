@@ -1,16 +1,38 @@
-// This file will contain the admin functionality for fetching all WFH requests.
-
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import WorkFromHome from "@/models/WorkFromHome";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import mongoose from "mongoose";
+import { getUserFromToken } from "@/lib/getUserFromToken";
 import User from "@/models/userModel";
 
-export async function GET() {
+export async function GET(request: NextRequest, { params }: any) {
   try {
     await connect();
+    const { userId } = params;
+
+    const requestingUserId = await getUserFromToken(request);
+    const requestingUser = await User.findById(requestingUserId);
+
+    if (!requestingUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (
+      requestingUser.role !== "admin" &&
+      String(requestingUserId) !== userId
+    ) {
+      return NextResponse.json(
+        { error: "Unauthorized to view other users' WFH requests" },
+        { status: 403 }
+      );
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json({ error: "Invalid User ID" }, { status: 400 });
+    }
 
     const wfhRequests = await WorkFromHome.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
       { $sort: { createdAt: -1 } },
       {
         $lookup: {

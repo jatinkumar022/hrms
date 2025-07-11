@@ -11,19 +11,21 @@ interface WfhRequest {
   type: string;
   duration?: string;
   reason: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "cancelled";
   createdAt: string;
   updatedAt: string;
 }
 
 interface UserWfhState {
   myWfhRequests: WfhRequest[];
+  upcomingWfh: WfhRequest[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
 
 const initialState: UserWfhState = {
   myWfhRequests: [],
+  upcomingWfh: [],
   status: "idle",
   error: null,
 };
@@ -57,8 +59,8 @@ export const cancelWfhRequest = createAsyncThunk(
   "userWfh/cancelWfhRequest",
   async (wfhId: string, { rejectWithValue }) => {
     try {
-      await axios.delete(`/api/wfh/user/request/cancel/${wfhId}`);
-      return wfhId;
+      const response = await axios.put(`/api/wfh/user/request/cancel/${wfhId}`);
+      return response.data.request;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
     }
@@ -70,7 +72,19 @@ export const fetchMyWfhRequests = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get("/api/wfh/user/request/my-requests");
-      return response.data.wfhRequests;
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const fetchUpcomingWfh = createAsyncThunk(
+  "userWfh/fetchUpcomingWfh",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get("/api/wfh/upcoming");
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response.data);
     }
@@ -101,8 +115,8 @@ const userWfhSlice = createSlice({
       })
       .addCase(cancelWfhRequest.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.myWfhRequests = state.myWfhRequests.filter(
-          (req) => req._id !== action.payload
+        state.myWfhRequests = state.myWfhRequests.map((req) =>
+          req._id === action.payload._id ? action.payload : req
         );
       })
       .addCase(cancelWfhRequest.rejected, (state, action) => {
@@ -118,6 +132,18 @@ const userWfhSlice = createSlice({
         state.myWfhRequests = action.payload;
       })
       .addCase(fetchMyWfhRequests.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // fetchUpcomingWfh
+      .addCase(fetchUpcomingWfh.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchUpcomingWfh.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.upcomingWfh = action.payload;
+      })
+      .addCase(fetchUpcomingWfh.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       });
