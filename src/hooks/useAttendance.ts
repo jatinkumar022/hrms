@@ -21,9 +21,9 @@ export interface AttendanceReport {
       duration?: string;
       reason?: string;
       startLocation?: string;
-      startDeviceType?: string;
+      startDeviceType?: "mobile" | "desktop";
       endLocation?: string;
-      endDeviceType?: string;
+      endDeviceType?: "mobile" | "desktop";
     }[];
     workSegments?: {
       clockIn: string;
@@ -31,9 +31,9 @@ export interface AttendanceReport {
       duration?: string;
       productiveDuration?: string;
       clockInLocation?: string;
-      clockInDeviceType?: string;
+      clockInDeviceType?: "mobile" | "desktop";
       clockOutLocation?: string;
-      clockOutDeviceType?: string;
+      clockOutDeviceType?: "mobile" | "desktop";
     }[];
     totalDuration?: string;
     productiveDuration?: string;
@@ -95,9 +95,6 @@ export function useAttendance() {
   const breakStart = useCallback(
     async ({ reason, location }: { reason?: string; location: string }) => {
       const resultAction = await dispatch(startBreak({ reason, location }));
-      if (startBreak.fulfilled.match(resultAction)) {
-        dispatch(fetchStatusReport()); // Re-fetch to sync full attendance state
-      }
       return resultAction;
     },
     [dispatch]
@@ -154,9 +151,9 @@ function useWorkTimer(
       duration?: string;
       productiveDuration?: string;
       clockInLocation?: string;
-      clockInDeviceType?: string;
+      clockInDeviceType?: "mobile" | "desktop";
       clockOutLocation?: string;
-      clockOutDeviceType?: string;
+      clockOutDeviceType?: "mobile" | "desktop";
     }[];
     breaks?: {
       start: string;
@@ -164,9 +161,9 @@ function useWorkTimer(
       duration?: string;
       reason?: string;
       startLocation?: string;
-      startDeviceType?: string;
+      startDeviceType?: "mobile" | "desktop";
       endLocation?: string;
-      endDeviceType?: string;
+      endDeviceType?: "mobile" | "desktop";
     }[];
     date: string;
   } | null

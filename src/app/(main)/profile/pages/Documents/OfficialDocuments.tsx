@@ -203,7 +203,7 @@ export default function OfficialDocuments() {
         <div className="overflow-hidden">
           <table className="w-full text-sm">
             <thead className="font-normal">
-              <tr className="bg-[#fafafa]">
+              <tr className="bg-[#fafafa] dark:bg-[#111111]">
                 <th className="px-4 py-3 text-left font-medium">
                   Document Name
                 </th>

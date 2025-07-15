@@ -5,19 +5,25 @@ import Image from "next/image";
 import { FloatingSelect } from "@/components/ui/floatingSelect";
 import { DatePickerWithLabel } from "@/components/ui/datepicker";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import weekday from "dayjs/plugin/weekday";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { submitWfhRequest } from "@/redux/slices/wfh/userWfhSlice";
+import {
+  submitWfhRequest,
+  fetchUpcomingWfh,
+} from "@/redux/slices/wfh/userWfhSlice";
 import { toast } from "sonner";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 import axios from "axios";
 import { fetchProfileImage } from "@/redux/slices/profileImageSlice";
+import { fetchUserBasicInfo } from "@/redux/slices/userBasicInfoSlice";
+import { InitialsAvatar } from "@/lib/InitialsAvatar";
 import me from "@/assets/me.jpg";
 import { X, FileText, Plus } from "lucide-react";
-import { IoBriefcaseOutline } from "react-icons/io5";
+import { IoBriefcaseOutline, IoLogOut } from "react-icons/io5";
 import { RiMenuFold2Line } from "react-icons/ri";
 import {
   Drawer,
@@ -33,6 +39,8 @@ import { Card, CardContent } from "@/components/ui/card";
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(weekday);
+
+const bgColors = ["#ffeccb", "#e8f9ff", "#fff5f5", "#e6fffa", "#f0eaff"];
 
 const RightPanelContent = ({ numberOfDays }: { numberOfDays: number }) => (
   <>
@@ -62,19 +70,23 @@ export default function ApplyWfhPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { status } = useAppSelector((state) => state.userWfh);
+  const { status, upcomingWfh } = useAppSelector((state) => state.userWfh);
   const { user } = useAppSelector((state) => state.login);
   const { profileImage, isLoading: isProfileImageLoading } = useAppSelector(
     (state) => state.profileImage
   );
+  const { info: userBasicInfo } = useAppSelector(
+    (state) => state.userBasicInfo
+  );
+  const userName = user?.username || "";
 
   useEffect(() => {
     dispatch(fetchProfileImage());
+    dispatch(fetchUserBasicInfo());
+    dispatch(fetchUpcomingWfh());
   }, [dispatch]);
 
-  const [dayType, setDayType] = useState<"Full Day" | "Half Day" | "Hourly">(
-    "Full Day"
-  );
+  const [isHourly, setIsHourly] = useState(false);
   const [fromDate, setFromDate] = useState<Date | null>(new Date());
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
   const [reason, setReason] = useState("");
@@ -123,6 +135,12 @@ export default function ApplyWfhPage() {
     };
   }, [previewUrl]);
 
+  useEffect(() => {
+    if (isHourly) {
+      setMultiDay(false);
+    }
+  }, [isHourly]);
+
   const selectedDates = useMemo(() => {
     if (!fromDate) return [];
 
@@ -142,6 +160,22 @@ export default function ApplyWfhPage() {
     return out;
   }, [fromDate, toDate, multiDay]);
 
+  const colleaguesOnWfh = useMemo(() => {
+    if (!selectedDates.length || !upcomingWfh?.length) {
+      return [];
+    }
+    const selectedDateSet = new Set(selectedDates);
+
+    return upcomingWfh.filter((wfh) => {
+      if (wfh.user?._id === user?._id) {
+        return false;
+      }
+      // This logic assumes wfh.days exists and is an array of {date: string}
+      // You might need to adjust this based on the actual structure of upcomingWfh items
+      return wfh.days?.some((day: any) => selectedDateSet.has(day.date));
+    });
+  }, [selectedDates, upcomingWfh, user?._id]);
+
   const updateSlotForDay = useCallback(
     (date: string, slot: "Full Day" | "First Half" | "Second Half") => {
       setSlotsPerDay((prev) => ({
@@ -153,6 +187,8 @@ export default function ApplyWfhPage() {
   );
 
   useEffect(() => {
+    if (isHourly) return; // Do not modify slots if it's an hourly request.
+
     setSlotsPerDay((prev) => {
       const newSlots: Record<
         string,
@@ -178,24 +214,7 @@ export default function ApplyWfhPage() {
 
       return prev;
     });
-  }, [selectedDates]);
-
-  useEffect(() => {
-    const dateStr = fromDate ? dayjs(fromDate).format("YYYY-MM-DD") : null;
-    if (!dateStr || multiDay) return;
-
-    if (dayType === "Half Day") {
-      if (slotsPerDay[dateStr] === "Full Day" || !slotsPerDay[dateStr]) {
-        updateSlotForDay(dateStr, "First Half");
-      }
-    } else if (dayType === "Full Day") {
-      if (slotsPerDay[dateStr] !== "Full Day") {
-        updateSlotForDay(dateStr, "Full Day");
-      }
-    }
-  }, [dayType, fromDate, multiDay, slotsPerDay, updateSlotForDay]);
-
-  const isHourly = dayType === "Hourly";
+  }, [selectedDates, isHourly]);
 
   const diffLabel = useMemo(() => {
     if (!isHourly || !startTime || !endTime) return "";
@@ -231,6 +250,12 @@ export default function ApplyWfhPage() {
       toast.error("Start time and end time are required for hourly requests.");
       return;
     }
+
+    const dayType = isHourly
+      ? "Hourly"
+      : Object.values(slotsPerDay).every((slot) => slot === "Full Day")
+      ? "Full Day"
+      : "Half Day";
 
     let attachmentUrl: string | undefined;
     if (file) {
@@ -287,18 +312,31 @@ export default function ApplyWfhPage() {
   return (
     <div>
       <FullPageLoader show={status === "loading" || isProfileImageLoading} />
-      <div className="flex justify-between items-center p-2 px-3 border-b">
+      <div className="flex justify-between items-center p-2 px-3 border-b dark:bg-[#0e0e0e] bg-white sticky top-0 z-20">
         <div className="flex gap-3 items-center">
-          <Image
-            src={profileImage || me}
-            alt="avatar"
-            width={36}
-            height={36}
-            className="rounded-full"
-          />
-          <div>
-            <div className="font-medium text-sm">{user?.username}</div>
-            <div className="text-xs text-muted-foreground">{user?.role}</div>
+          <div className="relative min-w-10 min-h-10 w-10 h-10 rounded-full bg-green-500 p-[2px] cursor-pointer">
+            <div className="w-full h-full dark:bg-black bg-white rounded-full p-[2px]">
+              {profileImage ? (
+                <Image
+                  src={profileImage}
+                  alt="Profile"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <InitialsAvatar name={userName} className="w-full h-full" />
+              )}
+            </div>
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 dark:border-black border-white  rounded-full"></span>
+          </div>
+          <div className="max-w-[81px] min-[400px]:max-w-full">
+            <div className="font-medium text-sm max-[400px]:truncate ">
+              {userBasicInfo?.displayName || user?.username}
+            </div>
+            <div className="text-xs text-muted-foreground max-[400px]:truncate">
+              {userBasicInfo?.jobTitle || user?.role || "Employee"}
+            </div>
           </div>
         </div>
         <div className="flex gap-3 text-xs">
@@ -349,24 +387,11 @@ export default function ApplyWfhPage() {
           </DrawerContent>
         </Drawer>
       </div>
-      <div className="flex w-full h-screen overflow-hidden flex-row ">
-        <div className="flex-1 overflow-y-auto max-lg:max-h-[calc(100vh-167px)] lg:mb-[143px]">
-          <div className="p-6 flex flex-col gap-6 ">
-            <div className="md:w-1/2 min-w-80 w-full">
-              <FloatingSelect
-                label="Select request type"
-                value={dayType}
-                options={[
-                  { label: "Full Day", value: "Full Day" },
-                  { label: "Half Day", value: "Half Day" },
-                  { label: "Hourly", value: "Hourly" },
-                ]}
-                onChange={(val) => setDayType(val as any)}
-              />
-            </div>
-
-            <div className="flex items-end gap-4 flex-wrap">
-              <div className="md:w-1/2 min-w-80 w-full">
+      <div className="flex w-full h-full overflow-hidden flex-row ">
+        <div className="flex-1 overflow-y-auto max-h-[calc(100vh-179px)]">
+          <div className="p-3 py-4 md:p-6 flex flex-col gap-6 ">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="md:w-1/2 sm:min-w-80 w-full">
                 <DatePickerWithLabel
                   label="From Date"
                   value={fromDate}
@@ -387,13 +412,28 @@ export default function ApplyWfhPage() {
               {!isHourly && (
                 <button
                   type="button"
-                  className="text-sidebar-primary text-xs font-medium mb-3"
+                  className="text-sidebar-primary text-xs font-medium mb-3 cursor-pointer"
                   onClick={() => setMultiDay((p) => !p)}
                 >
                   {multiDay ? "SINGLE DAY?" : "MORE THAN ONE DAY?"}
                 </button>
               )}
             </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="hourly-request"
+                checked={isHourly}
+                onCheckedChange={(checked) => setIsHourly(Boolean(checked))}
+              />
+              <Label
+                htmlFor="hourly-request"
+                className="text-sm ml-1.5 font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Request for specific hours only?
+              </Label>
+            </div>
+
             <Card className="rounded-sm shadow-none w-full dark:!bg-[#1f1f1f3a] mt-4 p-4">
               <CardContent>
                 {!isHourly ? (
@@ -423,34 +463,10 @@ export default function ApplyWfhPage() {
                       </div>
                     ))}
                   </div>
-                ) : !isHourly && !multiDay && dayType === "Half Day" ? (
-                  <div className="border border-gray-200 rounded flex justify-center items-center p-4 gap-8 w-full lg:w-1/2">
-                    <span className="font-medium text-gray-600">
-                      {dayjs(fromDate).format("ddd, DD MMM YYYY")}
-                    </span>
-                    <div className="w-1/2 -mt-6">
-                      <FloatingSelect
-                        label=""
-                        value={
-                          slotsPerDay[dayjs(fromDate).format("YYYY-MM-DD")]
-                        }
-                        options={[
-                          { label: "First Half", value: "First Half" },
-                          { label: "Second Half", value: "Second Half" },
-                        ]}
-                        onChange={(val) =>
-                          updateSlotForDay(
-                            dayjs(fromDate).format("YYYY-MM-DD"),
-                            val as "First Half" | "Second Half"
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                ) : isHourly ? (
-                  <div className="border border-gray-200 rounded flex justify-between items-center p-4 gap-2 text-sm lg:w-1/2 w-full">
+                ) : (
+                  <div className=" flex justify-between items-center p-4 gap-2 text-sm flex-col md:flex-row w-full xl:w-2/3">
                     <span className="font-medium text-gray-600 whitespace-nowrap mr-3">
-                      {dayjs(fromDate).format("ddd, DD MMM YYYY")}
+                      {fromDate && dayjs(fromDate).format("ddd, DD MMM YYYY")}
                     </span>
                     <div className="flex flex-col w-full">
                       <Label
@@ -488,7 +504,7 @@ export default function ApplyWfhPage() {
                       </span>
                     )}
                   </div>
-                ) : null}
+                )}
               </CardContent>
             </Card>
 
@@ -549,9 +565,54 @@ export default function ApplyWfhPage() {
                 )}
               </div>
             </div>
+
+            {/* Colleagues on WFH */}
+            <div className="space-y-2 lg:w-1/2">
+              <div className="text-sm font-medium ">
+                {colleaguesOnWfh.length > 0
+                  ? `${colleaguesOnWfh.length} colleague${
+                      colleaguesOnWfh.length > 1 ? "s are" : " is"
+                    } working from home`
+                  : ""}
+              </div>
+              {colleaguesOnWfh.length > 0 && (
+                <Card className="p-0 rounded-none shadow-none border-none">
+                  {colleaguesOnWfh.map((wfh, idx) => (
+                    <div
+                      key={wfh._id}
+                      className="flex items-center justify-between px-4 py-2 text-sm rounded-sm"
+                      style={{ background: bgColors[idx % bgColors.length] }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Image
+                          src={wfh.user?.profileImage || me}
+                          alt={wfh.user?.username || "user"}
+                          width={28}
+                          height={28}
+                          className="rounded-full"
+                        />
+                        <div>
+                          <div className="font-medium text-[13px]">
+                            {wfh.user?.username}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {`${dayjs(wfh.startDate).format("MMM D")} - ${dayjs(
+                              wfh.endDate
+                            ).format("MMM D")}`}
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <IoLogOut size={16} />
+                      </div>
+                    </div>
+                  ))}
+                </Card>
+              )}
+            </div>
           </div>
         </div>
-        <div className="hidden lg:block lg:w-1/3 border-l shrink-0 ">
+        <div className="hidden lg:block lg:w-1/3 border-l shrink-0 h-[calc(100vh-130px)]">
           <RightPanelContent numberOfDays={numberOfDays} />
         </div>
       </div>

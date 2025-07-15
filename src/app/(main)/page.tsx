@@ -200,7 +200,7 @@ export default function Dashboard() {
   const shift = report?.shift;
 
   const hasAnyClockIn =
-    attendance?.workSegments && attendance.workSegments.length > 0;
+    (attendance?.workSegments && attendance.workSegments.length > 0) || false;
   const isClockedInCurrently = attendance?.workSegments?.some(
     (segment: WorkSegmentType) => !segment.clockOut
   );
@@ -379,8 +379,9 @@ export default function Dashboard() {
       toast.error("Break already active. Please end your current break first.");
       return;
     }
-    const totalBreakSoFar =
-      attendance?.breakDuration !== undefined ? attendance.breakDuration : 0;
+    const totalBreakSoFar = attendance?.breakDuration
+      ? parseDurationToSeconds(attendance.breakDuration)
+      : 0;
     const breakLimit = 3600; // 1 hour
     const requiresReason = totalBreakSoFar >= breakLimit;
 
@@ -410,7 +411,8 @@ export default function Dashboard() {
     setIsStartBreakReasonDialogOpen(false);
   };
 
-  const hasAttendance = attendance?.workSegments?.length > 0;
+  const hasAttendance =
+    (attendance?.workSegments && attendance.workSegments.length > 0) || false;
 
   const shouldShowClockInButton =
     !hasAttendance || (!isClockedInCurrently && isClockedOutForToday);

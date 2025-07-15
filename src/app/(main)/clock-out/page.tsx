@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon } from "lucide-react";
 import { FaClipboardList } from "react-icons/fa";
-import { FiFilter } from "react-icons/fi";
-import { HiOutlineLocationMarker } from "react-icons/hi";
+import { FiFilter, FiPlus } from "react-icons/fi";
 import { IoIosArrowBack } from "react-icons/io";
 import Link from "next/link";
 import { useAttendance } from "@/hooks/useAttendance";
@@ -14,13 +13,141 @@ import {
   secondsToDuration,
   parseDurationToSeconds,
 } from "@/lib/attendanceHelpers";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AttendanceReasonDialog from "@/components/Dashboard/AttendanceReasonDialog";
 import { Toaster, toast } from "sonner";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { MdDesktopMac, MdMyLocation, MdPhoneIphone } from "react-icons/md";
+import Image from "next/image";
+import LocationIcon from "@/assets/location.svg";
+import MapModalLoader from "../attendance/components/DataSummery/MapModalLoader";
+import { useRouter } from "next/navigation";
 
 dayjs.extend(minMax);
+
+type ActivityEvent = {
+  type: "Clock In" | "Clock Out" | "Break In" | "Break Out";
+  time: string;
+  location: string;
+  device?: "mobile" | "desktop";
+  reason?: string;
+};
+
+const DeviceIconWithTooltip = ({ device }: { device?: string }) => {
+  if (!device) return null;
+  const Icon = device === "desktop" ? MdDesktopMac : MdPhoneIphone;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Icon size={16} className="text-gray-500 cursor-pointer min-w-max" />
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{device}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+export const columns: ColumnDef<ActivityEvent>[] = [
+  {
+    accessorKey: "type",
+    header: "Activity",
+    cell: ({ row }) => {
+      const type = row.original.type;
+      let badgeClass = "";
+      if (type === "Clock In" || type === "Break Out") {
+        badgeClass =
+          "bg-green-50 dark:bg-[#202020] dark:text-green-400 text-green-500";
+      } else if (type === "Clock Out" || type === "Break In") {
+        badgeClass =
+          "bg-yellow-50 dark:bg-[#202020] dark:text-yellow-400 text-yellow-500";
+      }
+      return (
+        <Badge
+          variant="outline"
+          className={`${badgeClass} border-none text-[11px] py-1 px-2`}
+        >
+          {type}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "time",
+    header: "Time",
+  },
+  {
+    accessorKey: "location",
+    header: "Location",
+    cell: ({ row, table }) => {
+      const locationStr = row.original.location;
+      let latLng: [number, number] | null = null;
+      if (locationStr && locationStr.includes(",")) {
+        const parts = locationStr.split(",").map(Number);
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          latLng = [parts[0], parts[1]];
+        }
+      }
+      const { handleOpenMap } = table.options.meta as {
+        handleOpenMap: (lat: number, lng: number, label: string) => void;
+      };
+
+      return (
+        <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
+          {latLng && (
+            <Image
+              src={LocationIcon}
+              className="w-[14px] cursor-pointer"
+              alt="Location"
+              onClick={() =>
+                handleOpenMap(
+                  latLng![0],
+                  latLng![1],
+                  `${row.original.type} Location`
+                )
+              }
+            />
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "device",
+    header: "Device",
+    cell: ({ row }) => <DeviceIconWithTooltip device={row.original.device} />,
+  },
+  {
+    accessorKey: "reason",
+    header: "Reason",
+    cell: ({ row }) => (
+      <span className="text-sm italic text-gray-500">
+        {row.original.reason || "-"}
+      </span>
+    ),
+  },
+];
 
 export default function FinalOutTimePage() {
   const {
@@ -34,6 +161,8 @@ export default function FinalOutTimePage() {
     errorMessage,
   } = useAttendance();
 
+  const router = useRouter();
+
   const {
     location,
     loading: loadingLocation,
@@ -41,14 +170,91 @@ export default function FinalOutTimePage() {
     getLocation,
   } = useGeolocation();
 
+  const [mapModalOpen, setMapModalOpen] = useState(false);
+  const [mapModalLat, setMapModalLat] = useState(0);
+  const [mapModalLng, setMapModalLng] = useState(0);
+  const [mapModalLabel, setMapModalLabel] = useState("");
+
+  const handleOpenMap = (lat: number, lng: number, label: string) => {
+    setMapModalLat(lat);
+    setMapModalLng(lng);
+    setMapModalLabel(label);
+    setMapModalOpen(true);
+  };
+
   const [isEarlyClockOutReasonDialogOpen, setIsEarlyClockOutReasonDialogOpen] =
     useState(false);
 
-  const attendance = report?.attendance;
+  useEffect(() => {
+    getLocation();
+  }, [getLocation]);
 
-  // Required work and productive time (defined at component level)
-  const requiredTotalWorkSeconds = 9 * 3600; // 9 hours
-  const requiredProductiveWorkSeconds = 8 * 3600; // 8 hours
+  const attendance = report?.attendance;
+  const isClockedInCurrently = attendance?.workSegments?.some(
+    (segment) => !segment.clockOut
+  );
+  const isBreakActive = attendance?.breaks?.some((b) => !b.end);
+
+  const requiredTotalWorkSeconds = 9 * 3600;
+  const requiredProductiveWorkSeconds = 8 * 3600;
+
+  const { totalWorkSeconds, totalBreakSeconds, firstClockIn, lastClockOut } =
+    useMemo(() => {
+      if (!attendance) {
+        return {
+          totalWorkSeconds: 0,
+          totalBreakSeconds: 0,
+          firstClockIn: null,
+          lastClockOut: null,
+        };
+      }
+
+      let workSeconds = 0;
+      if (attendance.workSegments) {
+        for (const segment of attendance.workSegments) {
+          workSeconds += parseDurationToSeconds(
+            segment.duration?.toString() || "00:00:00"
+          );
+        }
+      }
+
+      let breakSeconds = 0;
+      if (attendance.breaks) {
+        for (const brk of attendance.breaks) {
+          breakSeconds += parseDurationToSeconds(
+            brk.duration?.toString() || "00:00:00"
+          );
+        }
+      }
+
+      const clockIns =
+        attendance.workSegments?.map((ws) => ws.clockIn).filter(Boolean) || [];
+      const clockOuts =
+        attendance.workSegments?.map((ws) => ws.clockOut).filter(Boolean) || [];
+
+      const firstClockInTime = clockIns.length
+        ? clockIns.reduce((a, b) => (a! < b! ? a : b))
+        : null;
+      const lastClockOutTime = clockOuts.length
+        ? clockOuts.reduce((a, b) => (a! > b! ? a : b))
+        : null;
+
+      return {
+        totalWorkSeconds: workSeconds,
+        totalBreakSeconds: breakSeconds,
+        firstClockIn: firstClockInTime,
+        lastClockOut: lastClockOutTime,
+      };
+    }, [attendance]);
+
+  const [liveTotalWorkSeconds, setLiveTotalWorkSeconds] =
+    useState(totalWorkSeconds);
+
+  const handleOpenModal = () => {
+    console.log(
+      "Add New Entry clicked. This functionality is not implemented."
+    );
+  };
 
   const statusBarsData = [
     {
@@ -75,7 +281,9 @@ export default function FinalOutTimePage() {
 
   const onClockOutAttempt = () => {
     // First, try to get the location
-    getLocation();
+    if (!location && !locationError) {
+      getLocation();
+    }
 
     // The actual clock-out logic will be handled in a useEffect or after location is available
     // For now, we'll let the user know if location is still loading or has an error.
@@ -142,19 +350,6 @@ export default function FinalOutTimePage() {
       }
     }
 
-    // if (attendance?.breaks) {
-    //   for (const brk of attendance.breaks) {
-    //     if (brk.end) {
-    //       totalDailyBreakSeconds += parseDurationToSeconds(
-    //         brk.duration || "00:00:00"
-    //       );
-    //     } else if (brk.start) {
-    //       const breakStartTime = dayjs(`${report?.date}T${brk.start}`);
-    //       totalDailyBreakSeconds += now.diff(breakStartTime, "second");
-    //     }
-    //   }
-    // }
-
     const isEarlyClockOut =
       totalDailyWorkSeconds < requiredTotalWorkSeconds ||
       totalDailyProductiveSeconds < requiredProductiveWorkSeconds;
@@ -184,11 +379,94 @@ export default function FinalOutTimePage() {
     setIsEarlyClockOutReasonDialogOpen(false);
   };
 
+  const activityLog = useMemo(() => {
+    if (!attendance || !report?.date) return [];
+
+    const events: (ActivityEvent & { sortKey: number })[] = [];
+
+    attendance.workSegments?.forEach((seg, index) => {
+      if (seg.clockIn) {
+        events.push({
+          type: "Clock In",
+          time: dayjs(`${report.date}T${seg.clockIn}`).format("hh:mm A"),
+          location: seg.clockInLocation || "N/A",
+          device: seg.clockInDeviceType,
+          reason:
+            index === 0 && attendance.lateIn
+              ? attendance.lateInReason
+              : undefined,
+          sortKey: dayjs(`${report.date}T${seg.clockIn}`).valueOf(),
+        });
+      }
+      if (seg.clockOut) {
+        events.push({
+          type: "Clock Out",
+          time: dayjs(`${report.date}T${seg.clockOut}`).format("hh:mm A"),
+          location: seg.clockOutLocation || "N/A",
+          device: seg.clockOutDeviceType,
+          reason:
+            index === attendance.workSegments!.length - 1 && attendance.earlyOut
+              ? attendance.earlyOutReason
+              : undefined,
+          sortKey: dayjs(`${report.date}T${seg.clockOut}`).valueOf(),
+        });
+      }
+    });
+
+    attendance.breaks?.forEach((br) => {
+      if (br.start) {
+        events.push({
+          type: "Break In",
+          time: dayjs(`${report.date}T${br.start}`).format("hh:mm A"),
+          location: br.startLocation || "N/A",
+          device: br.startDeviceType,
+          reason: br.reason,
+          sortKey: dayjs(`${report.date}T${br.start}`).valueOf(),
+        });
+      }
+      if (br.end) {
+        events.push({
+          type: "Break Out",
+          time: dayjs(`${report.date}T${br.end}`).format("hh:mm A"),
+          location: br.endLocation || "N/A",
+          device: br.endDeviceType,
+          reason: br.reason,
+          sortKey: dayjs(`${report.date}T${br.end}`).valueOf(),
+        });
+      }
+    });
+
+    return events.sort((a, b) => a.sortKey - b.sortKey);
+  }, [attendance, report?.date]);
+
+  useEffect(() => {
+    setLiveTotalWorkSeconds(totalWorkSeconds);
+
+    const isActivelyWorking = isClockedInCurrently && !isBreakActive;
+
+    if (isActivelyWorking) {
+      const interval = setInterval(() => {
+        setLiveTotalWorkSeconds((prevSeconds) => prevSeconds + 1);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [totalWorkSeconds, isClockedInCurrently, isBreakActive]);
+
+  const table = useReactTable({
+    data: activityLog,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    meta: {
+      handleOpenMap,
+    },
+  });
+
   return (
-    <div className="flex flex-col h-full w-full px-5 py-4 bg-gray-50 dark:bg-zinc-950">
+    <div className="flex flex-col h-full w-full ">
       <FullPageLoader show={isLoading} />
       {/* Header */}
-      <div className="flex items-center gap-2 text-gray-700 dark:text-zinc-300 text-sm font-medium mb-4">
+      <div className="flex items-center gap-2 text-gray-700 dark:text-zinc-300 text-sm font-medium px-2 py-2.5  border-b">
         <Link href={"/"} className="cursor-pointer flex items-center gap-1">
           <IoIosArrowBack className="text-lg" />
           Dashboard
@@ -200,7 +478,7 @@ export default function FinalOutTimePage() {
       </div>
 
       {/* Status Report Header */}
-      <div className="flex items-center justify-between mb-4 p-4 bg-white dark:bg-zinc-900 rounded-md shadow-sm">
+      <div className="flex items-center justify-between border-b p-4 bg-white dark:bg-zinc-900">
         <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-zinc-300">
           <FaClipboardList className="text-blue-500" />
           <span className="font-medium">Status Report</span>
@@ -226,96 +504,143 @@ export default function FinalOutTimePage() {
           >
             <FiFilter className="mr-2 h-4 w-4" /> Filter
           </Button>
-          <Button className="h-8 bg-blue-600 hover:bg-blue-700 text-white text-sm dark:bg-blue-700 dark:hover:bg-blue-800">
-            + Add Work Log
-          </Button>
         </div>
       </div>
 
       {/* Status Bars */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-        {statusBarsData.map((item, i) => (
-          <Card
-            key={i}
-            className="p-4 border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 flex flex-col items-center justify-center shadow-md transition-all duration-200 hover:shadow-lg"
-          >
-            <div className={`font-semibold text-lg ${item.color}`}>
-              {item.time}
+      <div className="px-3 border-b pb-2">
+        <div className="flex items-center md:justify-between md:flex-row flex-col-reverse">
+          <div className="md:flex grid grid-cols-2 min-[380px]:grid-cols-4 gap-3 md:gap-6 mt-2 text-xs text-[#5e5e5e] font-normal items-center justify-evenly py-2">
+            <div className="border-l-2 border-l-sidebar-primary pl-3">
+              <div className="text-black dark:text-white">
+                {secondsToDuration(liveTotalWorkSeconds)}
+              </div>
+              <div className="text-[#5e5e5e] dark:text-[#a1a1a1]">
+                Total Hours
+              </div>
             </div>
-            <div className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
-              {item.label}
+            <div className="border-l-2 border-l-[#ffa600] pl-2">
+              <div className="text-black dark:text-white">
+                {secondsToDuration(totalBreakSeconds)}
+              </div>
+              <div className="text-[#5e5e5e] dark:text-[#a1a1a1]">
+                Total Break Time
+              </div>
             </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Table Header */}
-      <div className="grid grid-cols-9 text-xs text-gray-600 dark:text-zinc-400 font-medium py-3 border-y border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 rounded-t-md">
-        <div className="col-span-2 px-3">Project Name</div>
-        <div className="col-span-1 px-3">Section Name</div>
-        <div className="col-span-2 px-3">Task/Ticket Name</div>
-        <div className="col-span-1 px-3">Activity Type</div>
-        <div className="col-span-1 px-3">Time Slot (Start : End)</div>
-        <div className="col-span-1 px-3">Total Hours</div>
-        <div className="col-span-1 px-3">Billable</div>
-        <div className="col-span-1 px-3">Action</div>
-      </div>
-
-      {/* Empty State */}
-      <div className="flex flex-col items-center justify-center flex-grow p-10 bg-white dark:bg-zinc-900 rounded-b-md shadow-sm">
-        {isError ? (
-          <div className="text-center">
-            <p className="text-lg text-red-500 dark:text-red-400 mb-2">
-              Error: {errorMessage}
-            </p>
-            <p className="text-sm text-gray-500 dark:text-zinc-400">
-              Please try again later.
-            </p>
+            <div className="border-l-2 border-l-[#3dff2bfd] pl-2">
+              <div className="text-black dark:text-white">
+                {firstClockIn
+                  ? dayjs(`${report?.date}T${firstClockIn}`).format("hh:mm A")
+                  : "-"}
+              </div>
+              <div className="text-[#5e5e5e] dark:text-[#a1a1a1]">Clock In</div>
+            </div>
+            <div className="border-l-2 border-l-[#ff2b2bfd] pl-2">
+              <div className="text-black dark:text-white">
+                {lastClockOut
+                  ? dayjs(`${report?.date}T${lastClockOut}`).format("hh:mm A")
+                  : "-"}
+              </div>
+              <div className="text-[#5e5e5e] dark:text-[#a1a1a1]">
+                Clock Out
+              </div>
+            </div>
           </div>
-        ) : (
-          <>
-            <img
-              src="/empty-report.png"
-              alt="Status empty"
-              className="w-32 h-32 mb-3 opacity-80"
-            />
-            <p className="text-base text-gray-500 dark:text-zinc-400">
-              Status report is empty
-            </p>
-            <p className="text-xs text-gray-400 dark:text-zinc-500 mt-1">
-              No attendance records for today.
-            </p>
-          </>
-        )}
-      </div>
 
-      {/* Footer Buttons */}
-      <div className="fixed bottom-0 left-0 w-full flex items-center justify-between px-5 py-4 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 shadow-lg">
-        <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-          <HiOutlineLocationMarker className="w-4 h-4" />
-          <span>Location Retrieved</span>
-        </div>
-
-        <div className="flex gap-2">
-          <Link
-            href={"/"}
-            className="w-40 text-center py-2 border border-[#727272] text-[#727272] font-medium  cursor-pointer"
-          >
-            Cancel
-          </Link>
-          <Button
-            onClick={onClockOutAttempt}
-            className="w-full"
-            disabled={isLoading || loadingLocation}
-          >
-            {isLoading ? "Clocking Out..." : "Clock Out"}
-          </Button>
+          <div className="max-md:flex max-md:w-full justify-end max-md:mt-3">
+            <button
+              onClick={() => handleOpenModal()}
+              className="text-xs px-3 py-2 border-dashed border rounded-xs border-[#8f8f8f] hover:border-black text-black dark:text-white dark:hover:border-white cursor-pointer flex items-center gap-1 font-medium"
+            >
+              <span className="text-sidebar-primary">
+                <FiPlus />
+              </span>
+              Add New Entry
+            </button>
+          </div>
         </div>
       </div>
 
-      <Toaster />
+      <div className=" bg-white dark:bg-zinc-900 h-full overflow-y-auto">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-zinc-200 px-3 py-2">
+          Today's Activity
+        </h3>
+        <Card className="border-none rounded-none !p-0">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="!p-2">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="text-center !py-2"
+                  >
+                    No activity recorded for today.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      </div>
+      <div className="sticky bottom-0  flex justify-end  p-2 text-xs border-t bg-white dark:bg-black z-30">
+        <div className="flex flex-col gap-2 justify-center items-end w-1/3">
+          <div className="flex items-center gap-2 w-full">
+            <button onClick={() => router.back()} className="w-full">
+              <div className="w-full text-center p-2.5  text-[#333333d5] font-semibold cursor-pointer flex justify-center items-center border-2 border-[#4d4d4d75]  text-sm">
+                Cancel
+              </div>
+            </button>
+            <button
+              onClick={onClockOutAttempt}
+              disabled={loadingLocation}
+              className="cursor-pointer w-full"
+            >
+              <div className="w-full text-center p-2.5 bg-[#ff6961] dark:bg-[#f13b3b] text-white font-semibold hover:bg-[#ff5050] cursor-pointer flex justify-center items-center border-2 border-[#ff6961] dark:border-[#f13b3b] text-sm">
+                Clock Out
+              </div>
+            </button>{" "}
+          </div>
 
-      {/* Early Clock-Out Reason Dialog (using reusable component) */}
+          <div className="w-full flex items-center justify-center gap-2 p-2.5 border rounded  text-sm text-sidebar-primary bg-white dark:bg-black border-[#4d4d4d75]">
+            <MdMyLocation size={20} />
+            <span className="text-gray-700 dark:text-zinc-300">
+              Location Data Available
+            </span>
+          </div>
+        </div>
+      </div>
       <AttendanceReasonDialog
         open={isEarlyClockOutReasonDialogOpen}
         onOpenChange={setIsEarlyClockOutReasonDialogOpen}
@@ -327,6 +652,14 @@ export default function FinalOutTimePage() {
         )}). Please provide a reason.`}
         buttonText="Submit Reason and Clock Out"
         onSubmit={handleEarlyClockOutWithReason}
+      />
+      <Toaster richColors />
+      <MapModalLoader
+        open={mapModalOpen}
+        onOpenChange={setMapModalOpen}
+        lat={mapModalLat}
+        lng={mapModalLng}
+        label={mapModalLabel}
       />
     </div>
   );

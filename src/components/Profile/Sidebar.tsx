@@ -71,7 +71,7 @@ export default function Sidebar({
               </button>
             </DialogTrigger>
             <DialogContent className="w-96 p-0 gap-0">
-              <DialogTitle className="bg-[#fafbff] border-b !m-0 border-zinc-200 p-4 rounded-t-lg">
+              <DialogTitle className="bg-[#fafbff] dark:bg-[#111111] border-b !m-0 border-zinc-200 p-4 rounded-t-lg">
                 {userProfile?.displayName || "User Info"}
               </DialogTitle>
               <ul className=" p-4 !m-0 flex flex-col gap-2  text-sm">
@@ -168,7 +168,7 @@ export default function Sidebar({
               onClick={() =>
                 onSelectPage(label.toLowerCase().replace(/\s+/g, "-"))
               }
-              className={`block px-3 py-3  w-full text-left  hover:bg-zinc-100 text-zinc-700 border-l-transparent   border-l-2 border-b hover:border-l-blue-600
+              className={`block px-3 py-3  w-full text-left  hover:bg-zinc-100 dark:hover:bg-[#1e1e1e] cursor-pointer text-zinc-700 border-l-transparent   border-l-2 border-b hover:border-l-blue-600
                 `}
             >
               {label}

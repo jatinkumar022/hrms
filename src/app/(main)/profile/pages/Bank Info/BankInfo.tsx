@@ -103,7 +103,7 @@ export default function BankDetails() {
           )}
         </div>
         <div className=" bg-white dark:bg-black  max-h-screen  overflow-y-auto pb-[250px]">
-          <h2 className=" p-2 px-3 font-semibold text-lg  bg-[#f5f6fa]">
+          <h2 className=" p-2 px-3 font-semibold text-lg  bg-[#f5f6fa] dark:bg-[#111111]">
             Primary Bank Detail
           </h2>
           <section className=" py-4 px-3">
@@ -131,7 +131,7 @@ export default function BankDetails() {
 
           {/* ──────────────── Other Bank Accounts ──────────────── */}
           <section>
-            <div className="flex justify-between items-center p-2 px-3 font-semibold text-lg !mb-5 bg-[#f5f6fa] ">
+            <div className="flex justify-between items-center p-2 px-3 font-semibold text-lg !mb-5 bg-[#f5f6fa] dark:bg-[#111111]">
               <span className="font-medium text-lg">Other Bank Accounts</span>
               <button
                 className="px-4 py-1.5 text-black backdrop-blur-sm border border-black rounded-md hover:shadow-[0px_0px_4px_4px_rgba(0,0,0,0.1)] bg-white/[0.2] cursor-pointer !text-xs transition duration-200 flex items-center gap-2"
@@ -186,7 +186,7 @@ export default function BankDetails() {
 
           {/* ──────────────── UPI / Wallet Section ──────────────── */}
           <section>
-            <h2 className=" p-2 px-3 font-semibold text-lg !mb-5 bg-[#f5f6fa]">
+            <h2 className=" p-2 px-3 font-semibold text-lg !mb-5 bg-[#f5f6fa] dark:bg-[#111111]">
               UPI / Wallet
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3  gap-4 p-3">

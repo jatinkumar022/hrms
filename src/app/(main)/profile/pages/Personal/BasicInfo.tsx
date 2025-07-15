@@ -268,8 +268,8 @@ export default function BasicInfo() {
       </form>
 
       {languageModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-opacity-40 ">
+          <div className="bg-white dark:bg-[#000000] rounded-lg shadow-lg p-6 w-full max-w-md dark:border dark:border-zinc-700">
             <h3 className="text-lg font-semibold mb-4">
               {editIdx === null ? "Add Language" : "Edit Language"}
             </h3>

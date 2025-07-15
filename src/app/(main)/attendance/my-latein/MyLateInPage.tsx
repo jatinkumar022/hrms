@@ -9,7 +9,7 @@ import TimesheetDrawer from "../components/TimeSheetDrawer/TimesheetDrawer";
 const { RangePicker } = DatePicker;
 import type { DatePresetItem } from "@/lib/types";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchMonthlyAttendance } from "@/redux/slices/monthlyAttendanceSlice";
+import { fetchLateInRecords } from "@/redux/slices/attendance/lateInSlice";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -35,11 +35,13 @@ import { IoInformationCircleSharp } from "react-icons/io5";
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-export default function MyAttendance() {
+export default function MyLateInPage() {
   const dispatch = useAppDispatch();
-  const { records, isLoading, isError, errorMessage } = useAppSelector(
-    (state) => state.monthlyAttendance
-  );
+  const {
+    records,
+    loading: isLoading,
+    error: errorMessage,
+  } = useAppSelector((state) => state.lateIn);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedAttendance, setSelectedAttendance] = useState<any>(null);
   const [selectedRange, setSelectedRange] = useState<any>(null);
@@ -70,10 +72,7 @@ export default function MyAttendance() {
   };
 
   useEffect(() => {
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
-    dispatch(fetchMonthlyAttendance({ month, year }));
+    dispatch(fetchLateInRecords());
   }, [dispatch]);
 
   const filteredData = useMemo(() => {
@@ -185,7 +184,7 @@ export default function MyAttendance() {
               </DialogContent>
             </Dialog>
           ) : (
-            " My Attendance"
+            " My Late-Ins"
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -213,7 +212,7 @@ export default function MyAttendance() {
         </div>
       )}
       <div className="h-full">
-        {isError ? (
+        {errorMessage ? (
           <Alert type="error" message={errorMessage} />
         ) : (
           <DataTable

@@ -143,6 +143,7 @@ export const columns: ColumnDef<AttendanceRow>[] = [
     },
   },
   {
+    id: "clockIn",
     accessorKey: "attendance.workSegments",
     header: "Clock In",
     cell: ({ row, table }) => {
@@ -186,6 +187,7 @@ export const columns: ColumnDef<AttendanceRow>[] = [
     },
   },
   {
+    id: "clockOut",
     accessorKey: "attendance.workSegments",
     header: "Clock Out",
     cell: ({ row, table }) => {

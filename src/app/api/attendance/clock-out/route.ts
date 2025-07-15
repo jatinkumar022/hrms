@@ -147,24 +147,22 @@ export async function POST(req: NextRequest) {
       attendance: {
         ...attendance.toObject(),
         breaks: attendance.breaks.map((b: any) => ({
-          start: b.start,
-          end: b.end,
-          duration: b.duration,
-          reason: b.reason,
-          startLocation: b.startLocation,
-          startDeviceType: b.startDeviceType,
-          endLocation: b.endLocation,
-          endDeviceType: b.endDeviceType,
+          ...b,
+          duration:
+            b.duration !== undefined
+              ? secondsToDuration(b.duration)
+              : undefined,
         })),
         workSegments: attendance.workSegments.map((w: any) => ({
-          clockIn: w.clockIn,
-          clockOut: w.clockOut,
-          duration: w.duration,
-          productiveDuration: w.productiveDuration,
-          clockInLocation: w.clockInLocation,
-          clockInDeviceType: w.clockInDeviceType,
-          clockOutLocation: w.clockOutLocation,
-          clockOutDeviceType: w.clockOutDeviceType,
+          ...w,
+          duration:
+            w.duration !== undefined
+              ? secondsToDuration(w.duration)
+              : undefined,
+          productiveDuration:
+            w.productiveDuration !== undefined
+              ? secondsToDuration(w.productiveDuration)
+              : undefined,
         })),
       },
     });

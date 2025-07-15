@@ -3,6 +3,7 @@ import { connect } from "@/dbConfig/dbConfig";
 import Attendance from "@/models/Attendance";
 import { getUserFromToken } from "@/lib/getUserFromToken";
 import dayjs from "dayjs";
+import { secondsToDuration } from "@/lib/attendanceHelpers";
 
 export async function POST(req: NextRequest) {
   await connect();
@@ -54,6 +55,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    if (!attendance.breaks) {
+      attendance.breaks = [];
+    }
     const totalBreakSoFar =
       attendance.breakDuration !== undefined ? attendance.breakDuration : 0;
     const breakLimit = 3600;
@@ -76,32 +80,31 @@ export async function POST(req: NextRequest) {
     });
     attendance.markModified("breaks");
     await attendance.save();
+    const attendanceObj = attendance.toObject();
     return NextResponse.json({
       success: true,
       message: "Break started",
       breakStartTime: now.format("HH:mm:ss"),
       reasonRequired: requiresReason,
       attendance: {
-        ...attendance.toObject(),
-        breaks: attendance.breaks.map((b: any) => ({
-          start: b.start,
-          end: b.end,
-          duration: b.duration,
-          reason: b.reason,
-          startLocation: b.startLocation,
-          startDeviceType: b.startDeviceType,
-          endLocation: b.endLocation,
-          endDeviceType: b.endDeviceType,
+        ...attendanceObj,
+        breaks: attendanceObj.breaks.map((b: any) => ({
+          ...b,
+          duration:
+            b.duration !== undefined
+              ? secondsToDuration(b.duration)
+              : undefined,
         })),
-        workSegments: attendance.workSegments.map((w: any) => ({
-          clockIn: w.clockIn,
-          clockOut: w.clockOut,
-          duration: w.duration,
-          productiveDuration: w.productiveDuration,
-          clockInLocation: w.clockInLocation,
-          clockInDeviceType: w.clockInDeviceType,
-          clockOutLocation: w.clockOutLocation,
-          clockOutDeviceType: w.clockOutDeviceType,
+        workSegments: attendanceObj.workSegments.map((w: any) => ({
+          ...w,
+          duration:
+            w.duration !== undefined
+              ? secondsToDuration(w.duration)
+              : undefined,
+          productiveDuration:
+            w.productiveDuration !== undefined
+              ? secondsToDuration(w.productiveDuration)
+              : undefined,
         })),
       },
     });

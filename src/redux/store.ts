@@ -29,6 +29,8 @@ import updateUserProfileImage from "./slices/updateUserProfileImageSlice";
 import userAttendanceRequestSlice from "./slices/attendance-request/user/userAttendanceRequestSlice";
 import adminAttendanceRequestSlice from "./slices/attendance-request/admin/adminAttendanceRequestSlice";
 import userBasicInfoReducer from "./slices/userBasicInfoSlice";
+import lateInSlice from "./slices/attendance/lateInSlice";
+import earlyOutSlice from "./slices/attendance/earlyOutSlice";
 
 export const store = configureStore({
   reducer: {
@@ -61,6 +63,8 @@ export const store = configureStore({
     userAttendanceRequest: userAttendanceRequestSlice,
     adminAttendanceRequest: adminAttendanceRequestSlice,
     userBasicInfo: userBasicInfoReducer,
+    lateIn: lateInSlice,
+    earlyOut: earlyOutSlice,
   },
 });
 

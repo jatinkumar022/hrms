@@ -52,7 +52,7 @@ export interface IAttendance extends Document {
   date: string;
   shiftId: Types.ObjectId;
   workSegments: Types.DocumentArray<IWorkSegment>;
-  breakSegments: Types.DocumentArray<IBreakSegment>; // Changed from breaks
+  breaks: Types.DocumentArray<IBreakSegment>; // Changed from breaks
   lateIn: boolean;
   earlyOut: boolean;
   excessiveBreak: boolean;
@@ -72,7 +72,7 @@ const AttendanceSchema = new Schema<IAttendance>(
     shiftId: { type: Schema.Types.ObjectId, ref: "Shift", required: true },
 
     workSegments: [WorkSegmentSchema],
-    breakSegments: [BreakSchema], // Changed from breaks
+    breaks: [BreakSchema], // Changed from breaks
 
     lateIn: { type: Boolean, default: false },
     earlyOut: { type: Boolean, default: false },

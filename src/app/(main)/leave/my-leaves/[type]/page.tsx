@@ -393,11 +393,11 @@ export default function ApplyLeavePage() {
             </div>
             <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 dark:border-black border-white  rounded-full"></span>
           </div>
-          <div>
-            <div className="font-medium text-sm">
+          <div className="max-w-[81px] min-[400px]:max-w-full">
+            <div className="font-medium text-sm max-[400px]:truncate ">
               {userBasicInfo?.displayName || user?.username}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground max-[400px]:truncate">
               {userBasicInfo?.jobTitle || user?.role || "Employee"}
             </div>
           </div>

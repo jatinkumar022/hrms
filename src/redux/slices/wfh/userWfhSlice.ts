@@ -1,6 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+interface WfhDay {
+  date: string;
+  dayType: "Full Day" | "First Half" | "Second Half";
+}
+
+interface WfhUser {
+  _id: string;
+  username: string;
+  profileImage?: string;
+}
+
 interface WfhRequest {
   _id: string;
   userId: string;
@@ -14,6 +25,8 @@ interface WfhRequest {
   status: "pending" | "approved" | "rejected" | "cancelled";
   createdAt: string;
   updatedAt: string;
+  user?: WfhUser;
+  days?: WfhDay[];
 }
 
 interface UserWfhState {

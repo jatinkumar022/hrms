@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
+import { updateAttendance } from "./statusReportSlice";
 interface BreakState {
   isLoading: boolean;
   isError: boolean;
@@ -12,7 +12,6 @@ interface BreakState {
   reasonRequired: boolean;
   totalBreakTime: number | null;
 }
-
 const initialState: BreakState = {
   isLoading: false,
   isError: false,
@@ -24,18 +23,20 @@ const initialState: BreakState = {
   reasonRequired: false,
   totalBreakTime: null,
 };
-
 export const startBreak = createAsyncThunk(
   "attendance/startBreak",
   async (
     { reason, location }: { reason?: string; location: string },
-    { rejectWithValue }
+    { rejectWithValue, dispatch }
   ) => {
     try {
       const res = await axios.post("/api/attendance/start-break", {
         reason,
         location,
       });
+      if (res.data.success) {
+        dispatch(updateAttendance(res.data.attendance));
+      }
       return res.data;
     } catch (err: any) {
       return rejectWithValue(
@@ -44,7 +45,6 @@ export const startBreak = createAsyncThunk(
     }
   }
 );
-
 export const endBreak = createAsyncThunk(
   "attendance/endBreak",
   async (
@@ -62,7 +62,6 @@ export const endBreak = createAsyncThunk(
     }
   }
 );
-
 const breakSlice = createSlice({
   name: "break",
   initialState,
@@ -78,7 +77,7 @@ const breakSlice = createSlice({
       .addCase(startBreak.fulfilled, (state, action) => {
         state.isLoading = false;
         state.success = action.payload.success;
-        state.start = action.payload.start;
+        state.start = action.payload.breakStartTime;
         state.reasonRequired = action.payload.reasonRequired;
       })
       .addCase(startBreak.rejected, (state, action) => {
@@ -108,5 +107,4 @@ const breakSlice = createSlice({
       });
   },
 });
-
 export default breakSlice.reducer;
