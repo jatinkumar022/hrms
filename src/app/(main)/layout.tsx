@@ -50,11 +50,11 @@ export default function RootLayout({
               </aside>
 
               {/* Main content area with left padding for sidebar */}
-              <div className="flex-1 flex flex-col md:pl-20 h-screen">
+              <div className="flex-1 flex flex-col md:pl-20">
                 {/* Sticky navbar */}
                 <Navbar />
                 {/* Scrollable content */}
-                <main className="flex-1">{children}</main>
+                <main className="flex-1 overflow-y-auto">{children}</main>
               </div>
             </div>
 

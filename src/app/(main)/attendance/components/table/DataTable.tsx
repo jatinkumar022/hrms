@@ -111,7 +111,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="sticky bottom-0 flex items-center justify-between p-2 text-xs border-t">
+      <div className="sticky bottom-0 flex items-center justify-between p-2 text-xs border-t bg-white dark:bg-black z-30">
         <div className="flex items-center gap-2 text-muted-foreground">
           {" "}
           <div>

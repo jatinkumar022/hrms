@@ -1,6 +1,17 @@
-import { Schema, model, models, Types } from "mongoose";
+import { Schema, model, models, Types, Document } from "mongoose";
 
-const BreakSchema = new Schema({
+export interface IBreakSegment extends Document {
+  start: string;
+  end?: string;
+  duration?: number;
+  reason?: string;
+  startLocation?: string;
+  startDeviceType?: "mobile" | "desktop";
+  endLocation?: string;
+  endDeviceType?: "mobile" | "desktop";
+}
+
+const BreakSchema = new Schema<IBreakSegment>({
   start: { type: String, required: true },
   end: { type: String },
   duration: { type: Number },
@@ -11,7 +22,18 @@ const BreakSchema = new Schema({
   endDeviceType: { type: String, enum: ["mobile", "desktop"] },
 });
 
-const WorkSegmentSchema = new Schema(
+export interface IWorkSegment {
+  clockIn: string;
+  clockInLocation?: string;
+  clockInDeviceType?: "mobile" | "desktop";
+  clockOut?: string;
+  clockOutLocation?: string;
+  clockOutDeviceType?: "mobile" | "desktop";
+  duration?: number;
+  productiveDuration?: number;
+}
+
+const WorkSegmentSchema = new Schema<IWorkSegment>(
   {
     clockIn: { type: String, required: true },
     clockInLocation: { type: String },
@@ -21,20 +43,36 @@ const WorkSegmentSchema = new Schema(
     clockOutDeviceType: { type: String, enum: ["mobile", "desktop"] },
     duration: { type: Number },
     productiveDuration: { type: Number },
-    // location: { type: String },
-    // deviceType: { type: String, enum: ["mobile", "desktop"] },
   },
   { _id: false }
 );
 
-const AttendanceSchema = new Schema(
+export interface IAttendance extends Document {
+  userId: Types.ObjectId;
+  date: string;
+  shiftId: Types.ObjectId;
+  workSegments: Types.DocumentArray<IWorkSegment>;
+  breakSegments: Types.DocumentArray<IBreakSegment>; // Changed from breaks
+  lateIn: boolean;
+  earlyOut: boolean;
+  excessiveBreak: boolean;
+  requiresLateInReason: boolean;
+  lateInReason?: string;
+  requiresBreakReason: boolean;
+  breakReason?: string;
+  location?: string;
+  deviceType?: "mobile" | "desktop";
+  status: "present" | "absent" | "on_leave" | "on_remote";
+}
+
+const AttendanceSchema = new Schema<IAttendance>(
   {
-    userId: { type: Types.ObjectId, ref: "User", required: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     date: { type: String, required: true },
-    shiftId: { type: Types.ObjectId, ref: "Shift", required: true },
+    shiftId: { type: Schema.Types.ObjectId, ref: "Shift", required: true },
 
     workSegments: [WorkSegmentSchema],
-    breaks: [BreakSchema],
+    breakSegments: [BreakSchema], // Changed from breaks
 
     lateIn: { type: Boolean, default: false },
     earlyOut: { type: Boolean, default: false },
@@ -59,4 +97,7 @@ const AttendanceSchema = new Schema(
 
 AttendanceSchema.index({ userId: 1, date: 1 }, { unique: true });
 
-export default models.Attendance || model("Attendance", AttendanceSchema);
+const Attendance =
+  models.Attendance || model<IAttendance>("Attendance", AttendanceSchema);
+
+export default Attendance;

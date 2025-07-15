@@ -9,21 +9,14 @@ import { useMediaQuery } from "@/hooks/use-mobile";
 const metricLabels = [
   { key: "workingHours", label: "Working Hours" },
   { key: "actualWorkingTime", label: "Actual Working Time", hasInfo: true },
-  { key: "trackedHours", label: "Tracked Hours" },
-  { key: "timeDifference", label: "Time Difference", hasInfo: true },
+  { key: "breakHours", label: "Break Hours" },
   { key: "clockInDays", label: "Clock In Days", color: "text-green-500" },
   { key: "payrollPresentDays", label: "Payroll Present Days" },
   { key: "odRemoteDays", label: "OD/Remote work" },
   { key: "absentDays", label: "Absent", color: "text-red-500" },
-  { key: "shiftNotStartDays", label: "Shift Not Start" },
   { key: "onLeaveDays", label: "On Leave" },
   { key: "lateInDays", label: "Late IN", color: "text-orange-500" },
   { key: "earlyOutDays", label: "Early OUT", color: "text-orange-500" },
-  { key: "paidLeave", label: "Paid Leave" },
-  { key: "unpaidLeave", label: "Unpaid Leave" },
-  { key: "odHourlyRemoteWork", label: "OD/Hourly Remote work" },
-  { key: "hourlyPaidLeave", label: "Hourly Paid Leave" },
-  { key: "hourlyUnpaidLeave", label: "Hourly Unpaid Leave" },
   { key: "weekendDays", label: "Weekend" },
   { key: "holidayDays", label: "Holiday" },
 ];
@@ -78,7 +71,7 @@ function DataSummery() {
 
   return (
     <div className="flex overflow-x-auto border-b bg-white  dark:bg-black p-1 text-xs w-screen md:w-[calc(100vw-5rem)]">
-      {metricLabels.slice(0, 11).map((metric) => (
+      {metricLabels.map((metric) => (
         <div
           key={metric.key}
           className="whitespace-nowrap px-3 py-1 border-r last:border-r-0 flex flex-col"

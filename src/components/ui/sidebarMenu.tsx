@@ -53,8 +53,9 @@ export default function RightSideDropdown({
         className={clsx(
           "p-2.5 rounded-xl cursor-pointer transition-colors duration-200",
           {
-            "text-sidebar-primary  !bg-[#39588080] ": open || isActive,
-            "text-gray-400 hover:!text-sidebar-primary hover:!bg-[#39588080]":
+            "text-sidebar-primary bg-[#c9e1ff80] dark:!bg-[#39588080] ":
+              open || isActive,
+            "text-gray-400 hover:!text-sidebar-primary hover:bg-[#c9e1ff80] dark:hover:bg-[#39588080] ":
               !open && !isActive,
           },
           className

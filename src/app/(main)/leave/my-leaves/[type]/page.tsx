@@ -21,6 +21,8 @@ import {
   SubmitLeaveRequestPayload,
 } from "@/redux/slices/leave/user/userLeaveSlice";
 import { fetchProfileImage } from "@/redux/slices/profileImageSlice";
+import { fetchUserBasicInfo } from "@/redux/slices/userBasicInfoSlice";
+import { InitialsAvatar } from "@/lib/InitialsAvatar";
 import { toast } from "sonner";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 import axios from "axios";
@@ -144,10 +146,15 @@ export default function ApplyLeavePage() {
   const { profileImage, isLoading: isProfileImageLoading } = useAppSelector(
     (state) => state.profileImage
   );
+  const { info: userBasicInfo } = useAppSelector(
+    (state) => state.userBasicInfo
+  );
+  const userName = user?.username || "";
 
   useEffect(() => {
     dispatch(fetchUserLeaveBalance());
     dispatch(fetchProfileImage());
+    dispatch(fetchUserBasicInfo());
     dispatch(fetchUpcomingLeaves());
   }, [dispatch]);
 
@@ -368,18 +375,31 @@ export default function ApplyLeavePage() {
       <FullPageLoader
         show={leaveStatus === "loading" || isProfileImageLoading}
       />
-      <div className="flex justify-between items-center p-2 px-3 border-b">
+      <div className="flex justify-between items-center p-2 px-3 border-b dark:bg-[#0e0e0e] bg-white sticky top-0 z-20">
         <div className="flex gap-3 items-center">
-          <Image
-            src={profileImage || me}
-            alt="avatar"
-            width={36}
-            height={36}
-            className="rounded-full"
-          />
+          <div className="relative w-10 h-10 rounded-full bg-green-500 p-[2px] cursor-pointer">
+            <div className="w-full h-full dark:bg-black bg-white rounded-full p-[2px]">
+              {profileImage ? (
+                <Image
+                  src={profileImage}
+                  alt="Profile"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <InitialsAvatar name={userName} className="w-full h-full" />
+              )}
+            </div>
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 dark:border-black border-white  rounded-full"></span>
+          </div>
           <div>
-            <div className="font-medium text-sm">{user?.username}</div>
-            <div className="text-xs text-muted-foreground">{user?.role}</div>
+            <div className="font-medium text-sm">
+              {userBasicInfo?.displayName || user?.username}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {userBasicInfo?.jobTitle || user?.role || "Employee"}
+            </div>
           </div>
         </div>
         <div className="flex gap-3 text-xs">
@@ -435,9 +455,9 @@ export default function ApplyLeavePage() {
           </DrawerContent>
         </Drawer>
       </div>
-      <div className="flex w-full h-screen overflow-hidden flex-row ">
-        <div className="flex-1 overflow-y-auto max-lg:max-h-[calc(100vh-167px)] lg:mb-[143px]">
-          <div className="p-6 flex flex-col gap-6 ">
+      <div className="flex w-full h-full overflow-hidden flex-row ">
+        <div className="flex-1 overflow-y-auto max-h-[calc(100vh-179px)]">
+          <div className="p-6 flex flex-col gap-6 h-full">
             {/* Leave type */}
             <FloatingSelect
               label="Leave Type *"
@@ -616,7 +636,7 @@ export default function ApplyLeavePage() {
             </div>
           </div>
         </div>
-        <div className="hidden lg:block lg:w-1/3 border-l shrink-0 ">
+        <div className="hidden lg:block lg:w-1/3 border-l shrink-0 h-[calc(100vh-130px)]">
           <RightPanelContent
             dynamicLeaveCatalog={dynamicLeaveCatalog}
             leaveType={leaveType}

@@ -141,7 +141,7 @@ export default function DashboardOverview({ data }: { data: DashboardData }) {
           </CardContent>
         </Card>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+      <div className="custom-grid">
         <Card className="rounded-xl bg-white dark:bg-[#070707]">
           <CardHeader className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold text-zinc-800 dark:text-white">

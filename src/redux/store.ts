@@ -26,6 +26,9 @@ import allUsersReducer from "./slices/users/allUsersSlice";
 import userWfhReducer from "./slices/wfh/userWfhSlice";
 import adminWfhReducer from "./slices/wfh/adminWfhSlice";
 import updateUserProfileImage from "./slices/updateUserProfileImageSlice";
+import userAttendanceRequestSlice from "./slices/attendance-request/user/userAttendanceRequestSlice";
+import adminAttendanceRequestSlice from "./slices/attendance-request/admin/adminAttendanceRequestSlice";
+import userBasicInfoReducer from "./slices/userBasicInfoSlice";
 
 export const store = configureStore({
   reducer: {
@@ -55,6 +58,9 @@ export const store = configureStore({
     userWfh: userWfhReducer,
     adminWfh: adminWfhReducer,
     updateUserProfileImage: updateUserProfileImage,
+    userAttendanceRequest: userAttendanceRequestSlice,
+    adminAttendanceRequest: adminAttendanceRequestSlice,
+    userBasicInfo: userBasicInfoReducer,
   },
 });
 

@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { toast } from "sonner";
 
 interface GeolocationPosition {
   coords: {
@@ -44,7 +43,6 @@ export const useGeolocation = (): UseGeolocationResult => {
         const errMsg = "Geolocation is not supported by your browser.";
         setError(errMsg);
         setLoading(false);
-        toast.error(errMsg);
         resolve(null);
         return;
       }
@@ -55,7 +53,6 @@ export const useGeolocation = (): UseGeolocationResult => {
           const newLocation = `${latitude},${longitude}`;
           setLocation(newLocation);
           setLoading(false);
-          toast.success("Location obtained successfully!");
           resolve(newLocation);
         },
         (geoError: GeolocationError) => {
@@ -80,7 +77,6 @@ export const useGeolocation = (): UseGeolocationResult => {
               break;
           }
           setError(errorMessage);
-          toast.error(errorMessage);
           console.error("Geolocation Error:", geoError);
           resolve(null);
         },
@@ -95,4 +91,3 @@ export const useGeolocation = (): UseGeolocationResult => {
 
   return { location, loading, error, getLocation };
 };
- 

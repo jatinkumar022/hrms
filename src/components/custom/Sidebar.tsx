@@ -64,6 +64,7 @@ export default function Sidebar() {
     { label: "My Attendance", to: "/attendance/my-attendance" },
     { label: "My Late In", to: "/attendance/my-latein" },
     { label: "My Early Out", to: "/attendance/my-earlyout" },
+    { label: "Correction Request", to: "/attendance/correction-request" },
     "divider",
     { label: "Shift Calendar", to: "/" },
   ];
@@ -77,13 +78,17 @@ export default function Sidebar() {
       label: "Admin WFH Requests",
       to: "/wfh/requests",
     });
+    attendanceMenuItems.splice(4, 0, {
+      label: "Correction Requests",
+      to: "/attendance/correction-requests",
+    });
   }
 
   const linkClasses = (path: string, exact: boolean = false) =>
     clsx(
-      "text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200",
+      "text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#c9e1ff80] dark:hover:bg-[#39588080] cursor-pointer transition-colors duration-200",
       {
-        "text-sidebar-primary bg-[#39588080]":
+        "text-sidebar-primary bg-[#c9e1ff80] dark:bg-[#39588080]":
           (exact ? pathname === path : pathname.startsWith(path)) &&
           path !== "#",
       }
@@ -152,7 +157,7 @@ export default function Sidebar() {
 
           <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
             <DialogTrigger asChild>
-              <div className="text-[#db3125] p-2.5 pl-3 rounded-xl hover:bg-[#80393980] cursor-pointer transition-colors duration-200 mb-2">
+              <div className="text-[#db3125] p-2.5 pl-3 rounded-xl hover:bg-[#ffe2e280] dark:hover:bg-[#80393980]  cursor-pointer transition-colors duration-200 mb-2">
                 <LogOut size={21} />
               </div>
             </DialogTrigger>

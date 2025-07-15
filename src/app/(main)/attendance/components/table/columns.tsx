@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import Location from "@/assets/location.svg";
 import Image from "next/image";
 import { BsThreeDots } from "react-icons/bs";
-import { FaEye, FaFileInvoice } from "react-icons/fa6";
+import { FaEye } from "react-icons/fa6";
 import dayjs from "dayjs";
 import {
   Tooltip,
@@ -299,11 +299,11 @@ export const columns: ColumnDef<AttendanceRow>[] = [
   },
   {
     id: "actions",
-    header: "",
+    header: "Actions",
     cell: ({ row, table }) => {
-      const view = (
-        table.options.meta as { handleView: (r: AttendanceRow) => void }
-      ).handleView;
+      const { handleView } = table.options.meta as {
+        handleView: (row: any) => void;
+      };
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -313,19 +313,12 @@ export const columns: ColumnDef<AttendanceRow>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => view(row.original)}>
-              <FaEye size={16} className="mr-2" />
-              View
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <FaFileInvoice size={16} className="mr-2" />
-              Timesheet
+            <DropdownMenuItem onClick={() => handleView(row)}>
+              <FaEye className="mr-2" /> View Details
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
     },
-    enableSorting: false,
-    enableHiding: false,
   },
 ];

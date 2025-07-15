@@ -391,3 +391,39 @@ input:-webkit-autofill {
   -webkit-text-fill-color: #000 !important;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+
+.custom-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  /* equivalent to Tailwind's gap-4 */
+}
+
+/* ≥700px */
+@media (min-width: 700px) {
+  .custom-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ≥768px (md) — override back to 1 column */
+@media (min-width: 768px) {
+  .custom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ≥1200px AND <1280px (your custom min-[1200px]:max-xl:grid-cols-2) */
+@media (min-width: 1200px) {
+  .custom-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ≥1536px (2xl) */
+@media (min-width: 1536px) {
+  .custom-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

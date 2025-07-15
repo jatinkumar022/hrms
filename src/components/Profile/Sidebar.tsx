@@ -19,6 +19,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchUserProfile } from "@/redux/slices/userProfileSlice";
 import { useEffect } from "react";
+import { fetchUserBasicInfo } from "@/redux/slices/userBasicInfoSlice";
 export const menus: Record<string, { label: string; slug: string }[] | null> = {
   Personal: [
     { label: "Basic Info", slug: "basic" },
@@ -44,14 +45,21 @@ export default function Sidebar({
 }) {
   const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.userProfile.profile);
+  const { user } = useAppSelector((state) => state.login);
+  const { info: userBasicInfo } = useAppSelector(
+    (state) => state.userBasicInfo
+  );
+
+  const userName = user?.username || "";
 
   useEffect(() => {
     dispatch(fetchUserProfile());
+    dispatch(fetchUserBasicInfo());
   }, [dispatch]);
   return (
     <aside className="md:w-[280px] flex-shrink-0  bg-white dark:bg-black border-r overflow-y-auto">
       {/* Profile header */}
-      <div className="p-4 border-b  sticky top-0 z-30 bg-white dark:bg-black">
+      <div className="p-4 border-b  sticky top-0 z-20 bg-white dark:bg-black">
         <div className="bg-[#1e2538] w-full absolute left-0 top-0">
           <Image src={ProfileBg} alt="" className="w-full h-[108px]" />
         </div>
@@ -106,10 +114,12 @@ export default function Sidebar({
           </Dialog>
         </div>
         <div className="flex flex-col items-center mt-10 ">
-          <ProfileImageCropper userName="Jatin Ramani" />
-          <h2 className="font-semibold text-xl text-zinc-800">Jatin Ramani</h2>
-          <span className="text-xs text-zinc-500">
-            Software Engineer | React Developer
+          <ProfileImageCropper userName={userName} />
+          <h2 className="font-semibold text-xl dark:text-zinc-200 text-zinc-800 ">
+            {userBasicInfo?.displayName || user?.username}
+          </h2>
+          <span className="text-xs dark:text-zinc-500 text-zinc-500">
+            {userBasicInfo?.jobTitle || user?.role || "Employee"}
           </span>
         </div>
       </div>
@@ -124,7 +134,7 @@ export default function Sidebar({
               className=" border-b overflow-hidden"
             >
               <AccordionTrigger
-                className="px-3 py-3 rounded-none text-left hover:bg-zinc-100 
+                className="px-3 py-3 rounded-none text-left hover:bg-zinc-100 dark:hover:bg-[#1e1e1e]
             data-[state=open]:text-blue-600 data-[state=open]:border-l-2 data-[state=open]:border-blue-600 border-l-2 border-transparent hover:border-blue-600"
               >
                 {label}
@@ -140,8 +150,8 @@ export default function Sidebar({
                           onClick={() => onSelectPage(item.slug)}
                           className={`block text-start cursor-pointer px-3 py-2 w-full  text-zinc-700  hover:text-blue-600 border-l-2  hover:border-blue-600  ${
                             isActive
-                              ? "text-blue-600 bg-zinc-100 border-blue-600 font-medium"
-                              : "text-zinc-700 border-transparent hover:text-blue-600 hover:bg-zinc-100 hover:border-blue-600"
+                              ? "text-blue-600 bg-zinc-100 dark:bg-[#1e1e1e] border-blue-600 font-medium"
+                              : "text-zinc-700 border-transparent hover:text-blue-600 hover:bg-zinc-100 dark:hover:bg-[#1e1e1e] hover:border-blue-600"
                           } `}
                         >
                           {item.label}

@@ -83,6 +83,12 @@ export default function Navbar() {
     { label: "Apply for WFH", to: "/wfh/apply" },
     { label: "WFH History", to: "/wfh/history" },
   ];
+  const attendanceMenuItems = [
+    { label: "My Attendance", to: "/attendance/my-attendance" },
+    { label: "My Late In", to: "/attendance/my-latein" },
+    { label: "My Early Out", to: "/attendance/my-earlyout" },
+    { label: "Correction Request", to: "/attendance/correction-request" },
+  ];
 
   if (user?.role === "admin") {
     leaveMenuItems.push({
@@ -93,13 +99,17 @@ export default function Navbar() {
       label: "Admin WFH Requests",
       to: "/wfh/requests",
     });
+    attendanceMenuItems.splice(4, 0, {
+      label: "Correction Requests",
+      to: "/attendance/correction-requests",
+    });
   }
 
   const linkClasses = (path: string, exact: boolean = false) =>
     clsx(
-      "text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#39588080] cursor-pointer transition-colors duration-200",
+      "text-gray-400 hover:text-sidebar-primary p-2.5 rounded-xl hover:bg-[#c9e1ff80] dark:hover:bg-[#39588080] cursor-pointer transition-colors duration-200",
       {
-        "text-sidebar-primary bg-[#39588080]": exact
+        "text-sidebar-primary bg-[#c9e1ff80] dark:bg-[#39588080]": exact
           ? pathname === path
           : pathname.startsWith(path),
       }
@@ -138,19 +148,7 @@ export default function Navbar() {
                         <FileText size={22} />
                       </Link>
                       <RightSideDropdown
-                        items={[
-                          {
-                            label: "My Attendance",
-                            to: "/attendance/my-attendance",
-                          },
-                          { label: "My Late In", to: "/attendance/my-latein" },
-                          {
-                            label: "My Early Out",
-                            to: "/attendance/my-earlyout",
-                          },
-                          "divider",
-                          { label: "Shift Calendar", to: "/" },
-                        ]}
+                        items={attendanceMenuItems}
                         pathname={pathname}
                       >
                         <Calendar size={22} />
@@ -200,7 +198,7 @@ export default function Navbar() {
                       onOpenChange={setShowLogoutModal}
                     >
                       <DialogTrigger asChild>
-                        <div className="text-[#db3125] p-2.5 pl-3 rounded-xl hover:bg-[#80393980] cursor-pointer transition-colors duration-200 mb-2">
+                        <div className="text-[#db3125] p-2.5 pl-3 rounded-xl hover:bg-[#ffe2e280] dark:hover:bg-[#80393980] cursor-pointer transition-colors duration-200 mb-2">
                           <LogOut size={21} />
                         </div>
                       </DialogTrigger>
