@@ -54,7 +54,12 @@ export default function MyEarlyOutPage() {
   const [mapModalLat, setMapModalLat] = useState(0);
   const [mapModalLng, setMapModalLng] = useState(0);
   const [mapModalLabel, setMapModalLabel] = useState("");
-  const isMobile = useMediaQuery("(max-width: 899px)");
+  const [isMobile, setIsMobile] = useState(false);
+  const isMobileQuery = useMediaQuery("(max-width: 899px)");
+
+  useEffect(() => {
+    setIsMobile(isMobileQuery);
+  }, [isMobileQuery]);
 
   const handleOpenMap = (lat: number, lng: number, label: string) => {
     setMapModalLat(lat);

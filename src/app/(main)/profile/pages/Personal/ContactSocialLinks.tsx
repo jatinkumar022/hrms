@@ -104,10 +104,10 @@ export default function ContactSocialLinks() {
             </button>
           )}
         </div>
-        <div className="font-medium bg-white dark:bg-black  max-h-screen  overflow-y-auto pb-[250px]">
+        <div className="font-medium bg-white dark:bg-black max-h-[calc(100vh-197px)] max-md:h-[calc(100vh-259px)] pb-10  overflow-y-auto">
           {/* ─────────────── Contact Info ─────────────── */}
           <section>
-            <h2 className=" p-3 bg-[#f5f6fa] font-medium ">
+            <h2 className=" p-3 bg-[#f5f6fa] dark:bg-[#111111] font-medium ">
               Contact Information
             </h2>
             <div className="p-3 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -136,7 +136,7 @@ export default function ContactSocialLinks() {
 
           {/* ─────────────── Address Summary ─────────────── */}
           <section>
-            <h2 className="!mt-5  p-3 bg-[#f5f6fa] font-medium">
+            <h2 className="!mt-5  p-3 bg-[#f5f6fa] dark:bg-[#111111] font-medium">
               Address Summary
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-5">
@@ -150,7 +150,7 @@ export default function ContactSocialLinks() {
 
           {/* ─────────────── Social Links ─────────────── */}
           <section>
-            <h2 className="!mt-5 p-3 bg-[#f5f6fa] font-medium">
+            <h2 className="!mt-5 p-3 bg-[#f5f6fa] dark:bg-[#111111] font-medium">
               Social Media Links
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-5">

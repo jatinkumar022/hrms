@@ -1,4 +1,5 @@
 "use client";
+
 import * as React from "react";
 
 export function useMediaQuery(query: string) {
@@ -9,11 +10,13 @@ export function useMediaQuery(query: string) {
       setValue(event.matches);
     }
 
-    const result = window.matchMedia(query);
-    result.addEventListener("change", onChange);
-    setValue(result.matches);
-
-    return () => result.removeEventListener("change", onChange);
+    // This check ensures the code only runs on the client
+    if (typeof window !== "undefined") {
+      const result = window.matchMedia(query);
+      setValue(result.matches); // Set initial value
+      result.addEventListener("change", onChange);
+      return () => result.removeEventListener("change", onChange);
+    }
   }, [query]);
 
   return value;

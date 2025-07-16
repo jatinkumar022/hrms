@@ -83,8 +83,29 @@ export async function POST(req: NextRequest) {
       totalSecondsForSegment - breaksDuringSegmentSeconds
     );
 
+    // Aggregate total work and productive seconds for the whole day
+    let totalDailyWorkSeconds = 0;
+    for (const segment of attendance.workSegments) {
+      if (segment.duration) {
+        totalDailyWorkSeconds += segment.duration;
+      }
+    }
+    totalDailyWorkSeconds += totalSecondsForSegment; // Add current active segment
+
+    let totalDailyProductiveSeconds = 0;
+    for (const segment of attendance.workSegments) {
+      if (segment.productiveDuration) {
+        totalDailyProductiveSeconds += segment.productiveDuration;
+      }
+    }
+    totalDailyProductiveSeconds += productiveSecondsForSegment; // Add current active segment
+
+    const requiredWorkSeconds = 9 * 3600; // 9 hours
+    const requiredProductiveSeconds = 8 * 3600; // 8 hours
+
     const isEarly =
-      totalSecondsForSegment < 32400 || productiveSecondsForSegment < 28800;
+      totalDailyWorkSeconds < requiredWorkSeconds ||
+      totalDailyProductiveSeconds < requiredProductiveSeconds;
 
     if (isEarly && (!reason || reason.trim().length < 3)) {
       return NextResponse.json(
@@ -107,33 +128,8 @@ export async function POST(req: NextRequest) {
     attendance.earlyOutReason = isEarly ? reason : undefined;
     await attendance.save();
 
-    let totalDailyWorkSeconds = 0;
-
-    for (const segment of attendance.workSegments) {
-      if (segment.duration !== undefined) {
-        totalDailyWorkSeconds += segment.duration;
-      } else {
-        const segmentStartTime = dayjs(`${today}T${segment.clockIn}`);
-        totalDailyWorkSeconds += now.diff(segmentStartTime, "second");
-      }
-    }
-
-    let totalDailyBreakSeconds = 0;
-    if (attendance.breaks && attendance.breaks.length > 0) {
-      for (const brk of attendance.breaks) {
-        if (brk.duration !== undefined) {
-          totalDailyBreakSeconds += brk.duration;
-        } else if (brk.start && !brk.end) {
-          const breakStartTime = dayjs(`${today}T${brk.start}`);
-          totalDailyBreakSeconds += now.diff(breakStartTime, "second");
-        }
-      }
-    }
-
     const finalTotalHours = secondsToDuration(totalDailyWorkSeconds);
-    const finalProductiveHours = secondsToDuration(
-      Math.max(0, totalDailyWorkSeconds - totalDailyBreakSeconds)
-    );
+    const finalProductiveHours = secondsToDuration(totalDailyProductiveSeconds);
 
     return NextResponse.json({
       success: true,

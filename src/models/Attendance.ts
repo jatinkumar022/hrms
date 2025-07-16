@@ -55,6 +55,7 @@ export interface IAttendance extends Document {
   breaks: Types.DocumentArray<IBreakSegment>; // Changed from breaks
   lateIn: boolean;
   earlyOut: boolean;
+  earlyOutReason?: string;
   excessiveBreak: boolean;
   requiresLateInReason: boolean;
   lateInReason?: string;
@@ -76,6 +77,7 @@ const AttendanceSchema = new Schema<IAttendance>(
 
     lateIn: { type: Boolean, default: false },
     earlyOut: { type: Boolean, default: false },
+    earlyOutReason: { type: String },
     excessiveBreak: { type: Boolean, default: false },
 
     requiresLateInReason: { type: Boolean, default: false },

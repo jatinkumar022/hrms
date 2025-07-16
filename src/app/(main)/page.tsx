@@ -467,7 +467,7 @@ export default function Dashboard() {
               )}
 
               <div className="relative z-10 flex flex-col items-center pt-10 md:h-full">
-                <div className="max-w-24 max-h-24 min-h-max rounded-full overflow-hidden border-4 border-white ">
+                <div className="max-w-24 w-24 h-24 max-h-24 min-h-max rounded-full overflow-hidden border-4 border-white ">
                   {profileImage ? (
                     <Image
                       src={profileImage}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import Input from "@/components/ui/meterialInput";
 import { Label } from "@/components/ui/label";
-import { FaPaperclip, FaEdit } from "react-icons/fa";
 import FileUpload from "@/components/ui/FileUpload";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -21,11 +20,12 @@ import {
 } from "@/redux/slices/personalDocumentsSlice";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 import { toast } from "sonner";
-import Link from "next/link";
 import { CgMathPlus } from "react-icons/cg";
 import { uploadImage } from "@/redux/slices/imageUploadSlice";
 import ButtonLoader from "@/components/loaders/ButtonLoader";
 import { FloatingSelect } from "@/components/ui/floatingSelect";
+import { DataTable } from "@/components/custom/DataTable";
+import { getColumns } from "./personalColumns";
 
 type PersonalDocumentsFormData = {
   documents: PersonalDocumentType[];
@@ -175,12 +175,26 @@ export default function PersonalDocuments() {
     setLoading(false);
   };
 
+  const tableData = useMemo(
+    () => fields.map((field, index) => ({ ...field, index })),
+    [fields]
+  );
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        handleEdit,
+        handleDelete: (index) => remove(index),
+      }),
+    [handleEdit, remove]
+  );
+
   return (
     <div>
       <FullPageLoader show={isLoading || loading || fileUploading} />
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="p-4 border font-medium flex justify-between items-center">
+        <div className="p-4 border-b font-medium flex justify-between items-center">
           <div>Personal Documents</div>
           <div className="flex items-center gap-2">
             {isDirty && (
@@ -201,77 +215,7 @@ export default function PersonalDocuments() {
           </div>
         </div>
         {/* ====== table ====== */}
-        <div className="overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="font-normal">
-              <tr className="bg-[#fafafa] dark:bg-[#111111]">
-                <th className="px-4 py-3 text-left font-medium">
-                  Document Name
-                </th>
-                <th className="px-4 py-3 text-left font-medium">Number</th>
-                <th className="px-4 py-3 text-left font-medium">Attachment</th>
-                <th className="px-4 py-3 text-left font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fields.map((d, i) => (
-                <tr key={d.id} className="border-y">
-                  <td className="px-4 py-3">{d.name}</td>
-                  <td className="px-4 py-3">{d.number}</td>
-                  <td className="px-4 py-3">
-                    {d.fileUrl ? (
-                      <div className="flex items-center gap-2">
-                        {d.fileUrl.match(/\.(jpg|jpeg|png)$/i) ? (
-                          <Link
-                            href={d.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-10 h-10 p-1 border rounded-sm"
-                          >
-                            <img
-                              src={d.fileUrl}
-                              alt={d.name}
-                              className="object-cover  hover:scale-105 transition-transform duration-200"
-                            />
-                          </Link>
-                        ) : (
-                          <a
-                            href={d.fileUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 underline text-blue-600"
-                          >
-                            <FaPaperclip />
-                            {d.fileUrl.split("/").pop()}
-                          </a>
-                        )}
-                      </div>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
-                  <td className=" px-3 py-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        onClick={() => handleEdit(i)}
-                        className="text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <FaEdit size={14} />
-                        Edit
-                      </div>
-                      <div
-                        onClick={() => remove(i)}
-                        className="ml-2 text-red-500 hover:underline cursor-pointer"
-                      >
-                        Delete
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable columns={columns} data={tableData} />
       </form>
       {/* ====== dialog ====== */}
       <Dialog

@@ -169,7 +169,7 @@ export async function GET(req: NextRequest) {
           lateIn: attendanceObj.lateIn || false, // Use from attendanceObj
           lateInReason: attendanceObj.lateInReason || undefined, // Use from attendanceObj
           earlyOut: attendanceObj.earlyOut || false, // Use from attendanceObj
-          // These cumulative durations are for display in the report, frontend timer will re-calculate from raw segments
+          earlyOutReason: attendanceObj.earlyOutReason || undefined,
           totalDuration: secondsToDuration(cumulativeWorkDurationSeconds),
           productiveDuration: secondsToDuration(finalProductiveSeconds),
           breakDuration: secondsToDuration(cumulativeBreakDurationSeconds),

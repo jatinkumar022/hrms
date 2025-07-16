@@ -143,7 +143,7 @@ export default function BasicInfo() {
             </button>
           )}
         </div>
-        <div className="space-y-6 py-4 bg-white dark:bg-black px-3 max-h-screen  overflow-y-auto pb-[250px]">
+        <div className="space-y-6 py-4 bg-white dark:bg-black px-3 max-h-[calc(100vh-197px)] max-md:h-[calc(100vh-259px)] pb-10  overflow-y-auto ">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5 space-y-2">
             <Input label="Company Name" {...register("companyName")} />
             <Input

@@ -20,7 +20,7 @@ export const fetchEarlyOutRecords = createAsyncThunk(
       const response = await axios.get("/api/attendance/my-early-out");
       return response.data.data;
     } catch (error: any) {
-      return rejectWithValue("Failed to fetch early out records");
+      return rejectWithValue(error.response.data.message);
     }
   }
 );

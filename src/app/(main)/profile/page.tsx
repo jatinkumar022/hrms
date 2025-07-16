@@ -52,18 +52,24 @@ export default function ProfilePage() {
 
   const dispatch = useAppDispatch();
   const userProfile = useAppSelector((state) => state.userProfile.profile);
+  const { user } = useAppSelector((state) => state.login);
+  const { info: userBasicInfo } = useAppSelector(
+    (state) => state.userBasicInfo
+  );
+
+  const userName = userBasicInfo?.displayName || user?.username || "";
 
   useEffect(() => {
     dispatch(fetchUserProfile());
   }, [dispatch]);
   return (
-    <div className="md:flex h-screen overflow-hidden ">
+    <div className="md:flex h-[calc(100vh-73px)] overflow-hidden ">
       <div className="hidden md:block">
         <Sidebar onSelectPage={setSelectedPage} selectedPage={selectedPage} />
       </div>
       <div className="md:hidden">
         {" "}
-        <div className="  bg-white dark:bg-black border-r overflow-y-auto">
+        <div className="  bg-white  dark:bg-black border-r overflow-hidden">
           {/* Profile header */}
           <div className=" border-b  sticky top-0 z-30 bg-white dark:bg-black">
             <div className="bg-[#1e2538] w-full absolute left-0 top-0">
@@ -147,13 +153,13 @@ export default function ProfilePage() {
               className="relative h-[108px] flex items-center z-10 px-1"
               style={{ minHeight: "108px" }}
             >
-              <ProfileImageCropper userName="Jatin Ramani" />
+              <ProfileImageCropper userName={userName} />
               <div className="ml-3 flex flex-col justify-center ">
                 <h2 className="font-semibold text-base text-zinc-200 leading-tight">
-                  Jatin Ramani
+                  {userBasicInfo?.displayName || user?.username || ""}
                 </h2>
                 <span className="text-xs text-zinc-400 leading-tight">
-                  Software Engineer | React Developer
+                  {userBasicInfo?.jobTitle || user?.role || "Employee"}
                 </span>
               </div>
             </div>
@@ -227,9 +233,9 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <main className="w-full pb-10 ">
-        <div className="hidden md:block sticky top-0 bg-white dark:bg-black z-20 ">
-          <div className="flex min-[1420px]:justify-between max-[1420px]:justify-end items-center p-5 border ">
+      <main className="w-full pb-10 relative ">
+        <div className="hidden md:sticky md:block top-0 bg-white dark:bg-black z-20 ">
+          <div className="flex min-[1420px]:justify-between max-[1420px]:justify-end items-center p-5 border-b ">
             <div className="hidden min-[1420px]:flex items-center  gap-3 ">
               <div className="hover:bg-[#5096db66] text-sidebar-primary p-1.5 rounded-full cursor-pointer">
                 <FaEye />

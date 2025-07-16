@@ -121,7 +121,22 @@ export function ProfileImageCropper({
             className="md:w-24 md:h-24 w-16 h-16 rounded-full object-cover transition duration-200 cursor-pointer"
           />
         ) : (
-          <InitialsAvatar name={userName} size={96} />
+          <>
+            <div className="hidden md:block">
+              <InitialsAvatar
+                name={userName}
+                size={96}
+                className="md:w-24 md:h-24 w-16 h-16 rounded-full object-cover transition duration-200 cursor-pointer"
+              />
+            </div>
+            <div className="block md:hidden">
+              <InitialsAvatar
+                name={userName}
+                size={64}
+                className="md:w-24 md:h-24 w-16 h-16 rounded-full object-cover transition duration-200 cursor-pointer"
+              />
+            </div>
+          </>
         )}
 
         {/* Pencil icon, only on hover */}
@@ -154,18 +169,22 @@ export function ProfileImageCropper({
               </div>
             </div>
             {/* Large profile image */}
-            <div className="flex flex-col items-center justify-center py-6 px-4">
-              <div className="relative">
+            <div className="flex flex-col items-center justify-center py-6 px-4 ">
+              <div className="relative ">
                 {displayImage ? (
                   <Image
                     src={displayImage}
                     alt="Profile Large"
                     width={350}
                     height={350}
-                    className="rounded-full object-cover border-4 border-white dark:border-zinc-800 shadow"
+                    className="rounded-full object-cover border-4 border-white  shadow"
                   />
                 ) : (
-                  <InitialsAvatar name={userName} size={350} />
+                  <InitialsAvatar
+                    name={userName}
+                    size={350}
+                    className="rounded-full object-cover border-4 border-white  shadow"
+                  />
                 )}
               </div>
             </div>

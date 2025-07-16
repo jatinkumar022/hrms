@@ -50,14 +50,13 @@ export default function Sidebar({
     (state) => state.userBasicInfo
   );
 
-  const userName = user?.username || "";
-
+  const userName = userBasicInfo?.displayName || user?.username || "";
   useEffect(() => {
     dispatch(fetchUserProfile());
     dispatch(fetchUserBasicInfo());
   }, [dispatch]);
   return (
-    <aside className="md:w-[280px] flex-shrink-0  bg-white dark:bg-black border-r overflow-y-auto">
+    <aside className="md:w-[280px] h-full flex-shrink-0  bg-white dark:bg-black border-r overflow-y-auto">
       {/* Profile header */}
       <div className="p-4 border-b  sticky top-0 z-20 bg-white dark:bg-black">
         <div className="bg-[#1e2538] w-full absolute left-0 top-0">

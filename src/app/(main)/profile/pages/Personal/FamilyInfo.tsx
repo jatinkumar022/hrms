@@ -142,7 +142,9 @@ export default function FamilyInfo() {
         </div>
         <div className="space-y-6 bg-white dark:bg-black max-h-screen  overflow-y-auto pb-[250px]">
           <section>
-            <h2 className="p-3 bg-[#f5f6fa] font-medium ">Parents Detail</h2>
+            <h2 className="p-3 bg-[#f5f6fa] dark:bg-[#111111] font-medium ">
+              Parents Detail
+            </h2>
 
             <div className=" space-y-6 p-3">
               <div className="flex items-center gap-4 mb-6">
@@ -309,7 +311,7 @@ export default function FamilyInfo() {
           </section>
 
           {/* ─────────────── Other Members Detail ─────────────── */}
-          <section className="p-3 bg-[#f5f6fa] flex justify-between items-center">
+          <section className="p-3 bg-[#f5f6fa] dark:bg-[#111111] flex justify-between items-center">
             <span className=" !font-medium !m-0">Other Members Detail</span>
 
             <button
@@ -408,7 +410,7 @@ export default function FamilyInfo() {
 
       {showModal && removeIdx !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/25">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+          <div className="bg-white dark:bg-[#111111] rounded-lg shadow-lg p-6 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-4">Remove Member</h3>
             <p className="mb-6">
               Are you sure you want to remove this family member?

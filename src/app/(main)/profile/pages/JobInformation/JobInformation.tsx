@@ -109,7 +109,7 @@ export default function JobInformation() {
             </button>
           )}
         </div>
-        <div className="space-y-6 py-4 bg-white dark:bg-black px-3 max-h-screen  overflow-y-auto pb-[250px]">
+        <div className="space-y-6 py-4 bg-white dark:bg-black px-3  max-h-[calc(100vh-197px)] max-md:h-[calc(100vh-259px)] pb-10  overflow-y-auto">
           {/* Current Job Section */}
           <section className="border p-4 rounded-md relative mb-8">
             <div className="text-base font-semibold mb-2">Current Job</div>
@@ -252,7 +252,7 @@ export default function JobInformation() {
               </div>
               {fields.length > 1 && (
                 <button
-                  className="absolute top-0.5 right-0.5 text-sm p-2 text-red-400 hover:bg-red-50 rounded-full  cursor-pointer"
+                  className="absolute top-0.5 right-0.5 text-sm p-2 text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded-full  cursor-pointer"
                   type="button"
                   onClick={() => remove(index)}
                 >

@@ -3,9 +3,10 @@ import dynamic from "next/dynamic";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 
 const MyLateInPage = dynamic(() => import("./MyLateInPage"), {
-  loading: () => <FullPageLoader show />,
+  ssr: false,
+  loading: () => <FullPageLoader />,
 });
 
-export default function Page() {
+export default function page() {
   return <MyLateInPage />;
 }

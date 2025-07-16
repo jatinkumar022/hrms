@@ -107,9 +107,11 @@ export default function Address() {
           )}
         </div>
         {/* ─────────────── Current Address ─────────────── */}
-        <div className="space-y-6  bg-white dark:bg-black max-h-screen  overflow-y-auto pb-[250px]">
+        <div className="space-y-6  bg-white dark:bg-black max-h-[calc(100vh-197px)] max-md:h-[calc(100vh-259px)] pb-10  overflow-y-auto ">
           <section>
-            <h2 className="p-3 bg-[#f5f6fa] font-medium ">Current Address</h2>
+            <h2 className="p-3 bg-[#f5f6fa] dark:bg-[#111111] font-medium ">
+              Current Address
+            </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-4">
               <Input
                 label="Address Line 1"
@@ -128,7 +130,9 @@ export default function Address() {
 
           {/* ─────────────── Permanent Address ─────────────── */}
           <section>
-            <h2 className="p-3 bg-[#f5f6fa] font-medium ">Permanent Address</h2>
+            <h2 className="p-3 bg-[#f5f6fa] dark:bg-[#111111] font-medium ">
+              Permanent Address
+            </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 p-3 xl:grid-cols-3 gap-4">
               <Input
                 label="Address Line 1"
@@ -153,7 +157,7 @@ export default function Address() {
 
           {/* ─────────────── Other Address (Optional) ─────────────── */}
           <section>
-            <div className="flex justify-between items-center p-2 bg-[#f5f6fa] font-medium ">
+            <div className="flex justify-between items-center p-2 bg-[#f5f6fa] dark:bg-[#111111] font-medium ">
               <div className="">Other Address</div>
               <button
                 type="button"

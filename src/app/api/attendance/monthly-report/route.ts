@@ -202,6 +202,7 @@ export async function GET(req: NextRequest) {
             lateIn: attendanceObj.lateIn || false,
             lateInReason: attendanceObj.lateInReason || undefined,
             earlyOut: attendanceObj.earlyOut || false,
+            earlyOutReason: attendanceObj.earlyOutReason || undefined,
             totalDuration: secondsToDuration(cumulativeWorkDurationSeconds),
             productiveDuration: secondsToDuration(
               cumulativeProductiveDurationSeconds

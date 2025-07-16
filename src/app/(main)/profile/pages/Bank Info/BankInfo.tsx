@@ -102,7 +102,7 @@ export default function BankDetails() {
             </button>
           )}
         </div>
-        <div className=" bg-white dark:bg-black  max-h-screen  overflow-y-auto pb-[250px]">
+        <div className=" bg-white dark:bg-black  max-h-[calc(100vh-197px)] max-md:h-[calc(100vh-259px)] pb-10  overflow-y-auto">
           <h2 className=" p-2 px-3 font-semibold text-lg  bg-[#f5f6fa] dark:bg-[#111111]">
             Primary Bank Detail
           </h2>

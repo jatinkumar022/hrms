@@ -1,9 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CalendarIcon } from "lucide-react";
 import { FaClipboardList } from "react-icons/fa";
-import { FiFilter, FiPlus } from "react-icons/fi";
 import { IoIosArrowBack } from "react-icons/io";
 import Link from "next/link";
 import { useAttendance } from "@/hooks/useAttendance";
@@ -43,7 +41,7 @@ import Image from "next/image";
 import LocationIcon from "@/assets/location.svg";
 import MapModalLoader from "../attendance/components/DataSummery/MapModalLoader";
 import { useRouter } from "next/navigation";
-
+import NoActivity from "@/assets/no-increment.svg";
 dayjs.extend(minMax);
 
 type ActivityEvent = {
@@ -69,7 +67,7 @@ const DeviceIconWithTooltip = ({ device }: { device?: string }) => {
   );
 };
 
-export const columns: ColumnDef<ActivityEvent>[] = [
+const columns: ColumnDef<ActivityEvent>[] = [
   {
     accessorKey: "type",
     header: "Activity",
@@ -150,16 +148,7 @@ export const columns: ColumnDef<ActivityEvent>[] = [
 ];
 
 export default function FinalOutTimePage() {
-  const {
-    report,
-    workTime: totalWorkTime,
-    breakTime: totalBreakTime,
-    netTime: productiveTime,
-    clockOut,
-    isLoading,
-    isError,
-    errorMessage,
-  } = useAttendance();
+  const { report, clockOut, isLoading } = useAttendance();
 
   const router = useRouter();
 
@@ -250,26 +239,6 @@ export default function FinalOutTimePage() {
   const [liveTotalWorkSeconds, setLiveTotalWorkSeconds] =
     useState(totalWorkSeconds);
 
-  const handleOpenModal = () => {
-    console.log(
-      "Add New Entry clicked. This functionality is not implemented."
-    );
-  };
-
-  const statusBarsData = [
-    {
-      label: "Total Time",
-      time: totalWorkTime,
-      color: "text-green-600",
-    },
-    {
-      label: "Productive Time",
-      time: productiveTime,
-      color: "text-orange-500",
-    },
-    { label: "Break Time", time: totalBreakTime, color: "text-yellow-500" },
-  ];
-
   const handleAction = async (action: () => Promise<any>) => {
     const result = await action();
     if (result.meta.requestStatus === "fulfilled") {
@@ -280,13 +249,10 @@ export default function FinalOutTimePage() {
   };
 
   const onClockOutAttempt = () => {
-    // First, try to get the location
     if (!location && !locationError) {
       getLocation();
     }
 
-    // The actual clock-out logic will be handled in a useEffect or after location is available
-    // For now, we'll let the user know if location is still loading or has an error.
     if (loadingLocation) {
       toast.info("Getting your current location...");
       return;
@@ -303,7 +269,6 @@ export default function FinalOutTimePage() {
     const now = dayjs();
     let totalDailyWorkSeconds = 0;
     let totalDailyProductiveSeconds = 0;
-    // let totalDailyBreakSeconds = 0;
 
     if (attendance?.workSegments) {
       for (const segment of attendance.workSegments) {
@@ -357,7 +322,6 @@ export default function FinalOutTimePage() {
     if (isEarlyClockOut) {
       setIsEarlyClockOutReasonDialogOpen(true);
     } else {
-      // Pass the location along with the reason (empty string for non-early clock out)
       handleAction(() => clockOut({ reason: "", location }));
     }
   };
@@ -374,7 +338,7 @@ export default function FinalOutTimePage() {
       );
       return;
     }
-    // Pass the location along with the reason
+
     await handleAction(() => clockOut({ reason, location }));
     setIsEarlyClockOutReasonDialogOpen(false);
   };
@@ -478,7 +442,7 @@ export default function FinalOutTimePage() {
       </div>
 
       {/* Status Report Header */}
-      <div className="flex items-center justify-between border-b p-4 bg-white dark:bg-zinc-900">
+      <div className="flex items-center justify-between border-b p-4 bg-white dark:bg-black">
         <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-zinc-300">
           <FaClipboardList className="text-blue-500" />
           <span className="font-medium">Status Report</span>
@@ -489,28 +453,13 @@ export default function FinalOutTimePage() {
               {report?.date && dayjs(report.date).format("MMM DD, YYYY")}
             </span>
           </div>
-          <Button
-            variant="outline"
-            className="text-blue-500 border-blue-500 px-2 py-1 text-xs dark:text-blue-400 dark:border-blue-400"
-          >
-            Copy Report
-          </Button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            className="h-8 text-sm text-gray-700 dark:text-zinc-300 dark:border-zinc-700"
-          >
-            <FiFilter className="mr-2 h-4 w-4" /> Filter
-          </Button>
         </div>
       </div>
 
       {/* Status Bars */}
       <div className="px-3 border-b pb-2">
         <div className="flex items-center md:justify-between md:flex-row flex-col-reverse">
-          <div className="md:flex grid grid-cols-2 min-[380px]:grid-cols-4 gap-3 md:gap-6 mt-2 text-xs text-[#5e5e5e] font-normal items-center justify-evenly py-2">
+          <div className="max-md:w-full md:flex grid grid-cols-2 min-[380px]:grid-cols-4 gap-3 md:gap-6 mt-2 text-xs text-[#5e5e5e] font-normal items-center justify-evenly py-2">
             <div className="border-l-2 border-l-sidebar-primary pl-3">
               <div className="text-black dark:text-white">
                 {secondsToDuration(liveTotalWorkSeconds)}
@@ -546,26 +495,14 @@ export default function FinalOutTimePage() {
               </div>
             </div>
           </div>
-
-          <div className="max-md:flex max-md:w-full justify-end max-md:mt-3">
-            <button
-              onClick={() => handleOpenModal()}
-              className="text-xs px-3 py-2 border-dashed border rounded-xs border-[#8f8f8f] hover:border-black text-black dark:text-white dark:hover:border-white cursor-pointer flex items-center gap-1 font-medium"
-            >
-              <span className="text-sidebar-primary">
-                <FiPlus />
-              </span>
-              Add New Entry
-            </button>
-          </div>
         </div>
       </div>
 
-      <div className=" bg-white dark:bg-zinc-900 h-full overflow-y-auto">
+      <div className=" bg-white dark:bg-black h-full">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-zinc-200 px-3 py-2">
           Today's Activity
         </h3>
-        <Card className="border-none rounded-none !p-0">
+        <Card className="border-none rounded-none !p-0 shadow-none">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -584,41 +521,47 @@ export default function FinalOutTimePage() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="!p-2">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="text-center !py-2"
-                  >
-                    No activity recorded for today.
-                  </TableCell>
-                </TableRow>
-              )}
+              {/* {table.getRowModel().rows?.length */}
+              {false
+                ? table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="!p-2.5">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                : ""}
             </TableBody>
           </Table>
         </Card>
+        <div className="w-full h-full flex items-center justify-center">
+          {/* {table.getRowModel().rows?.length ? ( */}
+          {false ? (
+            ""
+          ) : (
+            <>
+              <Image
+                src={NoActivity}
+                alt="No activity recorded for today"
+                className="md:w-2xs w-32 -mt-16  h-full"
+              />
+            </>
+          )}
+        </div>
       </div>
-      <div className="sticky bottom-0  flex justify-end  p-2 text-xs border-t bg-white dark:bg-black z-30">
-        <div className="flex flex-col gap-2 justify-center items-end w-1/3">
+      <div className="sticky bottom-0  flex justify-end  p-2 px-5 text-xs border-t bg-white dark:bg-black z-30">
+        <div className="flex flex-col gap-2 justify-center items-end w-full md:w-1/2 lg:w-1/3 ">
           <div className="flex items-center gap-2 w-full">
             <button onClick={() => router.back()} className="w-full">
-              <div className="w-full text-center p-2.5  text-[#333333d5] font-semibold cursor-pointer flex justify-center items-center border-2 border-[#4d4d4d75]  text-sm">
+              <div className="w-full text-center p-2.5  text-[#333333d5] dark:text-[#a1a1a1] font-semibold cursor-pointer flex justify-center items-center border-2 border-[#4d4d4d75]  text-sm">
                 Cancel
               </div>
             </button>

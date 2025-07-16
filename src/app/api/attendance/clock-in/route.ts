@@ -85,43 +85,33 @@ export async function POST(req: NextRequest) {
     }
 
     if (!attendance) {
-      // First clock-in of the day, create new attendance record
-      attendance = await Attendance.create({
+      // First clock-in of the day, create a new attendance record.
+      attendance = new Attendance({
         userId,
-        shiftId: shift._id,
+        shiftId: user.shiftId._id,
         date: today,
-        workSegments: [
-          {
-            clockIn: now.format("HH:mm:ss"),
-            clockInLocation: location,
-            clockInDeviceType: deviceType,
-          },
-        ],
+        status: "present",
         lateIn: isLate,
-        requiresLateInReason: requiresReason,
-        lateInReason: requiresReason ? reason : undefined,
-        breaks: [], // Initialize breaks array
-        status: "present", // Set status to present on first clock-in
+        lateInReason: isLate ? reason : undefined,
+        workSegments: [],
+        breaks: [],
       });
-      attendance.markModified("workSegments"); // Explicitly mark workSegments array as modified
-    } else {
-      // Subsequent clock-in for the day (after a clock-out)
-      // Ensure workSegments array exists for older documents before pushing
-      if (!attendance.workSegments) {
-        attendance.workSegments = [];
-      }
-      attendance.workSegments.push({
-        clockIn: now.format("HH:mm:ss"),
-        clockInLocation: location,
-        clockInDeviceType: deviceType,
-      });
-      attendance.markModified("workSegments"); // Explicitly mark workSegments array as modified
-      // Update status to present if it was previously absent/on_leave (e.g., if it was manually set)
-      attendance.status = "present";
-      // No need to reset lateIn/reason here, as it's for the first clock-in.
+    } else if (attendance.workSegments.length === 0) {
+      // An attendance record exists (e.g., for leave), but this is the first clock-in.
+      // Update the late-in status.
+      attendance.lateIn = isLate;
+      attendance.lateInReason = isLate ? reason : undefined;
     }
 
-    await attendance.save();
+    // Always set status to 'present' and add the new work segment.
+    attendance.status = "present";
+    attendance.workSegments.push({
+      clockIn: now.format("HH:mm:ss"),
+      clockInLocation: location,
+      clockInDeviceType: deviceType,
+    });
+
+    const savedAttendance = await attendance.save();
 
     // Build response with clockInLocation and clockInDeviceType
     return NextResponse.json({
@@ -131,8 +121,8 @@ export async function POST(req: NextRequest) {
       isLate,
       reasonRequired: requiresReason,
       attendance: {
-        ...attendance.toObject(),
-        breaks: attendance.breaks.map((b: any) => ({
+        ...savedAttendance.toObject(),
+        breaks: savedAttendance.breaks.map((b: any) => ({
           start: b.start,
           end: b.end,
           duration: b.duration,
@@ -142,7 +132,7 @@ export async function POST(req: NextRequest) {
           endLocation: b.endLocation,
           endDeviceType: b.endDeviceType,
         })),
-        workSegments: attendance.workSegments.map((w: any) => ({
+        workSegments: savedAttendance.workSegments.map((w: any) => ({
           clockIn: w.clockIn,
           clockOut: w.clockOut,
           duration: w.duration,

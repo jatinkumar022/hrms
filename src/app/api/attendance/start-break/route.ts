@@ -58,8 +58,10 @@ export async function POST(req: NextRequest) {
     if (!attendance.breaks) {
       attendance.breaks = [];
     }
-    const totalBreakSoFar =
-      attendance.breakDuration !== undefined ? attendance.breakDuration : 0;
+    const totalBreakSoFar = attendance.breaks.reduce(
+      (acc: number, b: any) => acc + (b.duration || 0),
+      0
+    );
     const breakLimit = 3600;
     const requiresReason = totalBreakSoFar >= breakLimit;
     if (requiresReason && (!reason || reason.trim().length < 3)) {
