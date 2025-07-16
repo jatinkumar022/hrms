@@ -117,7 +117,7 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="flex items-center justify-between p-4  bg-sidebar text-sidebar-foreground sticky top-0 left-0 border-b">
+      <div className="flex items-center justify-between p-4  bg-sidebar text-sidebar-foreground sticky top-0 left-0 border-b ">
         <div className="flex gap-1.5 items-center ">
           <div className="md:hidden">
             <Drawer
@@ -130,7 +130,7 @@ export default function Navbar() {
                   <CgMenuLeft size={20} />
                 </span>
               </DrawerTrigger>
-              <DrawerContent className="p-0 px-5 !w-fit bg-sidebar h-full flex flex-col">
+              <DrawerContent className="p-0 px-5 !w-fit bg-sidebar h-full flex flex-col max-h-screen overflow-y-auto  !pb-6">
                 <DrawerTitle />
                 <div className="flex flex-col  items-center py-4 justify-between h-full">
                   <div className="flex flex-col  items-center py-4 space-y-6">

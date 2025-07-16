@@ -96,7 +96,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="w-20 bg-sidebar flex flex-col items-center py-4 space-y-6 border-r border-zinc-00 fixed left-0 top-0 h-screen z-30">
+      <aside className="w-20 bg-sidebar flex flex-col items-center py-4 space-y-6 border-r border-zinc-00 fixed left-0 top-0 h-screen z-10 max-h-screen overflow-y-auto">
         <div className="">
           <Image src={logo} alt="Logo" className="w-12 h-12 " />
         </div>

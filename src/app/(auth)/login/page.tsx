@@ -65,7 +65,7 @@ export default function LoginPage() {
 
   return (
     <div className=" min-h-screen w-full flex flex-col lg:flex-row">
-      <div className="relative w-full lg:w-[40%] lg:min-w-md  text-white flex flex-col justify-between p-10 lg:p-4 ">
+      <div className="relative w-full lg:w-[40%] lg:min-w-md  text-white flex flex-col justify-between p-10 lg:p-4 z-30 max-lg:h-[240px]">
         <Image
           src={backgroundImage}
           alt=""
@@ -79,9 +79,11 @@ export default function LoginPage() {
             height={50}
             className="mx-auto mb-2"
           />
-          <h1 className="text-2xl font-bold">Welcome to Superworks</h1>
-          <div className="w-7 h-1 bg-orange-400 mx-auto my-3 rounded" />
-          <p className="text-sm">
+          <h1 className="text-lg sm:text-2xl font-bold ">
+            Welcome to Superworks
+          </h1>
+          <div className=" w-7 h-1 bg-orange-400 mx-auto my-3 rounded" />
+          <p className="text-xs sm:text-sm">
             Connecting People. Optimizing Process. Enhancing Performance.
           </p>
         </div>
@@ -272,7 +274,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-[60%] bg-white flex flex-col justify-center px-8 lg:px-20 py-12  lg:mt-0">
+      <div className="w-full lg:w-[60%] bg-white flex flex-col justify-center px-8 lg:px-20 py-12  lg:mt-0 max-lg:h-[calc(100vh-293px)] overflow-y-auto">
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="w-full max-w-md mx-auto space-y-6"

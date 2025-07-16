@@ -234,7 +234,7 @@ export default function ProfilePage() {
       </div>
 
       <main className="w-full pb-10 relative ">
-        <div className="hidden md:sticky md:block top-0 bg-white dark:bg-black z-20 ">
+        <div className="hidden md:sticky md:block top-0 bg-white dark:bg-black z-10 ">
           <div className="flex min-[1420px]:justify-between max-[1420px]:justify-end items-center p-5 border-b ">
             <div className="hidden min-[1420px]:flex items-center  gap-3 ">
               <div className="hover:bg-[#5096db66] text-sidebar-primary p-1.5 rounded-full cursor-pointer">

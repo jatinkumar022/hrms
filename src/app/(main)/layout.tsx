@@ -45,7 +45,7 @@ export default function RootLayout({
             {/* Full height flex layout */}
             <div className="flex h-screen overflow-hidden">
               {/* Fixed sidebar */}
-              <aside className="hidden md:block w-20 fixed top-0 left-0 h-screen z-30">
+              <aside className="hidden md:block w-20 fixed top-0 left-0 h-screen z-20">
                 <Sidebar />
               </aside>
 
