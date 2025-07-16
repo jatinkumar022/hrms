@@ -31,6 +31,7 @@ import adminAttendanceRequestSlice from "./slices/attendance-request/admin/admin
 import userBasicInfoReducer from "./slices/userBasicInfoSlice";
 import lateInSlice from "./slices/attendance/lateInSlice";
 import earlyOutSlice from "./slices/attendance/earlyOutSlice";
+import employeeDirectoryReducer from "./slices/users/employeeDirectorySlice";
 
 export const store = configureStore({
   reducer: {
@@ -65,6 +66,7 @@ export const store = configureStore({
     userBasicInfo: userBasicInfoReducer,
     lateIn: lateInSlice,
     earlyOut: earlyOutSlice,
+    employeeDirectory: employeeDirectoryReducer,
   },
 });
 

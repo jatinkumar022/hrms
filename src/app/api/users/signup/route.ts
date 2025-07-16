@@ -1,6 +1,7 @@
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import UserProfile from "@/models/userProfile";
+import Shift from "@/models/Shift"; // Import Shift model
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 
@@ -20,12 +21,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Find the default shift
+    const defaultShift = await Shift.findOne({ name: "Default" });
+    if (!defaultShift) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Default shift not found. Please create a 'Default' shift.",
+        },
+        { status: 500 }
+      );
+    }
+    console.log("defaultShift", defaultShift);
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
+      shiftId: defaultShift._id, // Assign default shift
     });
 
     const savedUser = await newUser.save();
@@ -39,11 +53,16 @@ export async function POST(request: NextRequest) {
       contactSocialLinks: {
         officialEmail: savedUser.email,
       },
+      jobInformation: {
+        joiningDate: new Date(),
+        workEmail: savedUser.email,
+        shift: defaultShift._id, // Assign default shift
+      },
       firstName: savedUser.username,
     });
 
     await newUserProfile.save();
-
+    console.log("newUserProfile", newUserProfile);
     return NextResponse.json({
       success: true,
       message: "User created successfully",

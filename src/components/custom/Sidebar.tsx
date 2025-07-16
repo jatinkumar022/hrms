@@ -161,7 +161,7 @@ export default function Sidebar() {
                 <LogOut size={21} />
               </div>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white dark:bg-[#1a1a1a]">
               <DialogHeader>
                 <DialogTitle>Confirm Logout</DialogTitle>
                 <DialogDescription>
@@ -169,13 +169,21 @@ export default function Sidebar() {
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowLogoutModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleLogout}>Logout</Button>
+                <div className="flex max-sm:flex-col gap-2 min-sm:w-1/2 max-sm:w-full">
+                  <button
+                    onClick={() => setShowLogoutModal(false)}
+                    className="w-full"
+                  >
+                    <div className="border border-[#dbdbdb] dark:border-[#3f3f3f] dark:text-white text-black px-4 py-2 rounded-xs cursor-pointer text-sm w-full">
+                      Cancel
+                    </div>
+                  </button>
+                  <button onClick={handleLogout} className="w-full">
+                    <div className="bg-[#fc5f57] border text-white px-4 py-2 rounded-xs cursor-pointer text-sm w-full">
+                      Logout
+                    </div>
+                  </button>
+                </div>
               </DialogFooter>
             </DialogContent>
           </Dialog>
