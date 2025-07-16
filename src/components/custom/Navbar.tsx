@@ -39,7 +39,6 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { logoutUser } from "@/redux/slices/loginSlice";
 import { FaLaptopHouse } from "react-icons/fa";
 import clsx from "clsx";

@@ -7,7 +7,7 @@ import duration from "dayjs/plugin/duration";
 
 dayjs.extend(duration);
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   await connect();
   try {
     const users = await User.find({}).select("-password");
