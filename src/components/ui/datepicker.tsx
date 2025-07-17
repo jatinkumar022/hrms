@@ -4,6 +4,7 @@ import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import type { DatePickerProps } from "antd";
 import "antd/dist/reset.css";
+import { cn } from "@/lib/utils";
 
 interface DatePickerWithLabelProps {
   label: string;
@@ -37,9 +38,9 @@ export function DatePickerWithLabel({
     onChange?.(selected); // <-- call passed prop directly
   };
   const isActive = focused;
-  const isDate = date !== undefined || null || "";
+  const isDate = date instanceof Date && !isNaN(date.getTime());
   return (
-    <div className={`relative !m-0 mt-2.5  w-full ${className}`}>
+    <div className={cn("relative !m-0 mt-2.5  w-full", className)}>
       <DatePicker
         open={open}
         onOpenChange={setOpen}
@@ -51,29 +52,31 @@ export function DatePickerWithLabel({
         format="DD/MM/YYYY"
         placeholder=" "
         allowClear={true} // disable default clear button
-        className={`w-full h-[44.6px] !bg-transparent rounded-[5px] border pl-3 pr-10  font-medium
-          ${
-            isActive
-              ? "!border-sidebar-primary !text-sidebar-primary"
-              : "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700"
+        className={cn(
+          "w-full h-[44.6px] !bg-transparent rounded-[5px] border pl-3 pr-10 font-medium",
+          {
+            "!border-sidebar-primary !text-sidebar-primary": isActive,
+            "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700":
+              !isActive,
           }
-         
-          `}
-        dropdownClassName={`${showFooter ? "" : "hideFooter"}`}
+        )}
+        dropdownClassName={cn({ hideFooter: !showFooter })}
         style={{ background: "transparent" }}
       />
 
       {/* Floating label */}
       <label
-        className={`absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200
-        ${
-          isActive || isDate
-            ? "-translate-y-6 scale-75"
-            : "translate-y-0 scale-100 -ml-2"
-        }
-        ${
-          isActive ? "text-sidebar-primary" : "text-zinc-500 dark:text-zinc-400"
-        }`}
+        className={cn(
+          "absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200",
+          {
+            "-translate-y-6 scale-75": isActive || isDate,
+            "translate-y-0 scale-100 -ml-2": !(isActive || isDate),
+          },
+          {
+            "text-sidebar-primary": isActive,
+            "text-zinc-500 dark:text-zinc-400": !isActive,
+          }
+        )}
       >
         <span className="bg-white px-2 dark:bg-black">{label}</span>
       </label>

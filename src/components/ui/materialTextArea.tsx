@@ -7,6 +7,7 @@ import React, {
   forwardRef,
   TextareaHTMLAttributes,
 } from "react";
+import { cn } from "@/lib/utils";
 
 interface MaterialTextAreaProps
   extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -60,36 +61,37 @@ const MaterialTextArea = forwardRef<HTMLTextAreaElement, MaterialTextAreaProps>(
           onBlur={readOnly ? undefined : handleBlur}
           onChange={handleChange}
           rows={rows}
-          className={`
-            block w-full border rounded-[5px] bg-transparent p-3 text-base
-            transition-colors duration-200 resize-none 
-            ${
-              readOnly
-                ? "cursor-default text-zinc-500 dark:text-[#838383]"
-                : "text-zinc-900 dark:text-white"
+          className={cn(
+            "block w-full border rounded-[5px] bg-transparent p-3 text-base transition-colors duration-200 resize-none focus:outline-none",
+            {
+              "cursor-default text-zinc-500 dark:text-[#838383]": readOnly,
+              "text-zinc-900 dark:text-white": !readOnly,
+            },
+            {
+              "border-sidebar-primary": active,
+              "border-zinc-300 dark:border-zinc-700": !active,
             }
-            ${
-              active
-                ? "border-sidebar-primary"
-                : "border-zinc-300 dark:border-zinc-700"
-            }
-            focus:outline-none
-          `}
+          )}
         />
         <label
           htmlFor={id}
-          className={`
-            absolute left-3 top-3 pointer-events-none origin-left
-            transition-all duration-200
-            ${
-              active || hasValue || placeholder
-                ? "-translate-y-6 scale-75"
-                : "translate-y-0 scale-100 text-zinc-500 dark:text-zinc-400"
+          className={cn(
+            "absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200",
+            {
+              "-translate-y-6 scale-75": active || hasValue || placeholder,
+              "translate-y-0 scale-100 text-zinc-500 dark:text-zinc-400": !(
+                active ||
+                hasValue ||
+                placeholder
+              ),
+            },
+            {
+              "text-sidebar-primary": active,
+              "text-zinc-500": !active,
             }
-            ${active ? "text-sidebar-primary" : "text-zinc-500"}
-          `}
+          )}
         >
-          <span className={label ? "bg-white px-2 dark:bg-black" : ""}>
+          <span className={cn({ "bg-white px-2 dark:bg-black": label })}>
             {label}
           </span>
         </label>

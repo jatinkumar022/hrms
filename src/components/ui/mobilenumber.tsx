@@ -7,6 +7,7 @@ import React, {
   forwardRef,
   InputHTMLAttributes,
 } from "react";
+import { cn } from "@/lib/utils";
 
 interface MobileInputProps extends InputHTMLAttributes<HTMLInputElement> {
   id: string;
@@ -38,9 +39,10 @@ const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
       <div className="relative !m-0 mt-2.5 ">
         {/* +91 Prefix */}
         <span
-          className={`absolute inset-y-0 left-0 flex items-center pl-3 text-sm select-none ${
-            active ? "" : " text-muted-foreground"
-          }`}
+          className={cn(
+            "absolute inset-y-0 left-0 flex items-center pl-3 text-sm select-none",
+            !active && "text-muted-foreground"
+          )}
         >
           <span className="text-lg mb-0.5">🇮🇳</span> +91
         </span>
@@ -67,35 +69,26 @@ const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
           onChange={(e) => {
             props.onChange?.(e);
           }}
-          className={`
-            block w-full border font-normal rounded-[5px] bg-transparent p-3 text-base text-zinc-900 dark:text-white pl-18
-            transition-colors duration-200
-            ${
-              active
-                ? "border-sidebar-primary"
-                : "border-zinc-300 dark:border-zinc-700"
+          className={cn(
+            "block w-full border font-normal rounded-[5px] bg-transparent p-3 text-base text-zinc-900 dark:text-white pl-18 transition-colors duration-200 focus:outline-none appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [mozappearance:textfield]",
+            {
+              "border-sidebar-primary": active,
+              "border-zinc-300 dark:border-zinc-700": !active,
             }
-            focus:outline-none appearance-none
-            [&::-webkit-outer-spin-button]:appearance-none
-            [&::-webkit-inner-spin-button]:appearance-none
-            [mozappearance:textfield]
-          `}
+          )}
           maxLength={11}
         />
 
         {/* Label */}
         <label
           htmlFor={id}
-          className={`
-            absolute left-3 top-3 pointer-events-none origin-left
-            transition-all duration-200
-            ${
-              active || hasValue
-                ? "-translate-y-6 scale-75"
-                : "translate-y-0 scale-100 text-zinc-500 dark:text-zinc-400 -ml-2"
+          className={cn(
+            "absolute left-3  top-3 pointer-events-none origin-left transition-all duration-200 -translate-y-6 scale-75",
+            {
+              "text-sidebar-primary": active,
+              "text-zinc-500 dark:text-zinc-400": !active,
             }
-            ${active ? "text-sidebar-primary" : "text-zinc-500"}
-          `}
+          )}
         >
           <span className="bg-white px-2 dark:bg-black">{label}</span>
         </label>

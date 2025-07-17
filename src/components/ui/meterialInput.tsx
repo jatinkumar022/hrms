@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, forwardRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface MaterialTextFieldProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -57,22 +58,18 @@ const MaterialTextField = forwardRef<HTMLInputElement, MaterialTextFieldProps>(
           onFocus={readOnly ? undefined : handleFocus}
           onBlur={readOnly ? undefined : handleBlur}
           onChange={handleChange}
-          className={`
-            block w-full border rounded-[5px] bg-transparent p-3 text-base
-            transition-colors duration-200
-            ${
-              readOnly
-                ? "cursor-default text-zinc-500 dark:text-[#838383]"
-                : "text-zinc-900 dark:text-white"
-            }
-            ${
-              active
-                ? "border-sidebar-primary"
-                : "border-zinc-300 dark:border-zinc-700"
-            }
-            focus:outline-none
-            ${icon ? "pl-10" : ""}
-          `}
+          className={cn(
+            "block w-full border rounded-[5px] bg-transparent p-3 text-base transition-colors duration-200 focus:outline-none",
+            {
+              "cursor-default text-zinc-500 dark:text-[#838383]": readOnly,
+              "text-zinc-900 dark:text-white": !readOnly,
+            },
+            {
+              "border-sidebar-primary": active,
+              "border-zinc-300 dark:border-zinc-700": !active,
+            },
+            icon && "pl-10"
+          )}
         />
         {icon && (
           <>
@@ -83,18 +80,20 @@ const MaterialTextField = forwardRef<HTMLInputElement, MaterialTextFieldProps>(
 
         <label
           htmlFor={id}
-          className={`
-            absolute left-3 top-3 pointer-events-none origin-left
-            transition-all duration-200
-            ${
-              active || hasValue || placeholder
-                ? "-translate-y-6 scale-75"
-                : "translate-y-0 scale-100 text-zinc-500 dark:text-zinc-400 -ml-2"
+          className={cn(
+            "absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200",
+            {
+              "-translate-y-6 scale-75": active || hasValue || placeholder,
+              "translate-y-0 scale-100 text-zinc-500 dark:text-zinc-400 -ml-2":
+                !(active || hasValue || placeholder),
+            },
+            {
+              "text-sidebar-primary": active,
+              "text-zinc-500": !active,
             }
-            ${active ? "text-sidebar-primary" : "text-zinc-500"}
-          `}
+          )}
         >
-          <span className={label ? "bg-white px-2 dark:bg-black" : ""}>
+          <span className={cn({ "bg-white px-2 dark:bg-black": label })}>
             {label}
           </span>
         </label>

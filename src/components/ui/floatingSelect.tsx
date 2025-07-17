@@ -9,6 +9,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FloatingSelectProps {
   label: string;
@@ -48,7 +49,7 @@ export function FloatingSelect({
   const isActive = open;
 
   return (
-    <div className={`relative !m-0  mt-2.5  w-full  ${className}`} key={key}>
+    <div className={cn("relative !m-0  mt-2.5  w-full", className)} key={key}>
       <Select
         value={selected}
         onValueChange={handleValueChange}
@@ -56,15 +57,15 @@ export function FloatingSelect({
         onOpenChange={setOpen}
       >
         <SelectTrigger
-          className={`w-full !h-[43.73px] rounded-[5px] !bg-transparent border text-left
-            appearance-none transition-colors duration-200
-            ${
-              isActive
-                ? "border-sidebar-primary text-sidebar-primary"
-                : "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700"
-            }
-            ${selected ? " [&>svg]:hidden" : ""}
-          `}
+          className={cn(
+            "w-full !h-[43.73px] rounded-[5px] !bg-transparent border text-left appearance-none transition-colors duration-200",
+            {
+              "border-sidebar-primary text-sidebar-primary": isActive,
+              "border-zinc-300 text-zinc-900 dark:text-white dark:border-zinc-700":
+                !isActive,
+            },
+            selected && "[&>svg]:hidden"
+          )}
         >
           <SelectValue placeholder=" " />
         </SelectTrigger>
@@ -83,20 +84,23 @@ export function FloatingSelect({
       </Select>
 
       <label
-        className={`absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200
-    ${
-      isActive || selected
-        ? "-translate-y-6 scale-75"
-        : "translate-y-0 scale-100 -ml-2"
-    }
-    ${isActive ? "text-sidebar-primary" : "text-zinc-500 dark:text-zinc-400"}
-`}
+        className={cn(
+          "absolute left-3 top-3 pointer-events-none origin-left transition-all duration-200",
+          {
+            "-translate-y-6 scale-75": isActive || selected,
+            "translate-y-0 scale-100 -ml-2": !(isActive || selected),
+          },
+          {
+            "text-sidebar-primary": isActive,
+            "text-zinc-500 dark:text-zinc-400": !isActive,
+          }
+        )}
       >
         <span
-          className={`${
-            !label ? "bg-transparent" : "bg-white px-2 dark:bg-black"
-          }  
-          `}
+          className={cn("px-2", {
+            "bg-white dark:bg-black": label,
+            "bg-transparent": !label,
+          })}
         >
           {label}
         </span>

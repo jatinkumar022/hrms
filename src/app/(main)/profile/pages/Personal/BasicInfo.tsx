@@ -274,111 +274,92 @@ export default function BasicInfo() {
               {editIdx === null ? "Add Language" : "Edit Language"}
             </h3>
             <div className="space-y-3">
-              <Input
-                label="Language"
-                value={languageDraft.language}
-                onChange={(e) =>
-                  setLanguageDraft({
-                    ...languageDraft,
-                    language: e.target.value,
-                  })
-                }
-              />
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Reading
-                </label>
-                <select
-                  className="w-full border rounded px-3 py-2"
+                <Input
+                  label="Language"
+                  value={languageDraft.language}
+                  onChange={(e) =>
+                    setLanguageDraft({
+                      ...languageDraft,
+                      language: e.target.value,
+                    })
+                  }
+                />{" "}
+              </div>
+              <div>
+                <FloatingSelect
+                  label="Reading"
                   value={languageDraft.skill.reading}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     setLanguageDraft({
                       ...languageDraft,
-                      skill: {
-                        ...languageDraft.skill,
-                        reading: e.target.value,
-                      },
+                      skill: { ...languageDraft.skill, reading: value || "" },
                     })
                   }
-                >
-                  <option value="">Select</option>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Average">Average</option>
-                  <option value="Poor">Poor</option>
-                </select>
+                  options={[
+                    { label: "Excellent", value: "Excellent" },
+                    { label: "Good", value: "Good" },
+                    { label: "Average", value: "Average" },
+                    { label: "Poor", value: "Poor" },
+                  ]}
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Speaking
-                </label>
-                <select
-                  className="w-full border rounded px-3 py-2"
+                <FloatingSelect
+                  label="Speaking"
                   value={languageDraft.skill.speaking}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     setLanguageDraft({
                       ...languageDraft,
-                      skill: {
-                        ...languageDraft.skill,
-                        speaking: e.target.value,
-                      },
+                      skill: { ...languageDraft.skill, speaking: value || "" },
                     })
                   }
-                >
-                  <option value="">Select</option>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Average">Average</option>
-                  <option value="Poor">Poor</option>
-                </select>
+                  options={[
+                    { label: "Excellent", value: "Excellent" },
+                    { label: "Good", value: "Good" },
+                    { label: "Average", value: "Average" },
+                    { label: "Poor", value: "Poor" },
+                  ]}
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Writing
-                </label>
-                <select
-                  className="w-full border rounded px-3 py-2"
+                <FloatingSelect
+                  label="Writing"
                   value={languageDraft.skill.writing}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     setLanguageDraft({
                       ...languageDraft,
-                      skill: {
-                        ...languageDraft.skill,
-                        writing: e.target.value,
-                      },
+                      skill: { ...languageDraft.skill, writing: value || "" },
                     })
                   }
-                >
-                  <option value="">Select</option>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Average">Average</option>
-                  <option value="Poor">Poor</option>
-                </select>
+                  options={[
+                    { label: "Excellent", value: "Excellent" },
+                    { label: "Good", value: "Good" },
+                    { label: "Average", value: "Average" },
+                    { label: "Poor", value: "Poor" },
+                  ]}
+                />{" "}
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  Understanding
-                </label>
-                <select
-                  className="w-full border rounded px-3 py-2"
+                <FloatingSelect
+                  label="Understanding"
                   value={languageDraft.skill.understanding}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     setLanguageDraft({
                       ...languageDraft,
                       skill: {
                         ...languageDraft.skill,
-                        understanding: e.target.value,
+                        understanding: value || "",
                       },
                     })
                   }
-                >
-                  <option value="">Select</option>
-                  <option value="Excellent">Excellent</option>
-                  <option value="Good">Good</option>
-                  <option value="Average">Average</option>
-                  <option value="Poor">Poor</option>
-                </select>
+                  options={[
+                    { label: "Excellent", value: "Excellent" },
+                    { label: "Good", value: "Good" },
+                    { label: "Average", value: "Average" },
+                    { label: "Poor", value: "Poor" },
+                  ]}
+                />{" "}
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">
