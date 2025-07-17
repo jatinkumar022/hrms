@@ -11,12 +11,13 @@ export async function POST(req: NextRequest) {
     const userId = await getUserFromToken(req);
     if (!userId)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // ... (device type logic remains the same)
     const userAgent = req.headers.get("user-agent");
     let deviceType = "desktop";
     if (userAgent && /Mobi|Android/i.test(userAgent)) {
       deviceType = "mobile";
     }
-
     if (deviceType === "mobile") {
       return NextResponse.json(
         { error: "Actions are not allowed from mobile devices." },
@@ -29,7 +30,6 @@ export async function POST(req: NextRequest) {
     const location = body?.location;
     const now = dayjs();
 
-    // Find the latest attendance record with an unclosed work segment
     const attendance = await Attendance.findOne({
       userId,
       "workSegments.clockOut": null,
@@ -41,19 +41,21 @@ export async function POST(req: NextRequest) {
       attendance.workSegments.length === 0
     ) {
       return NextResponse.json(
-        { error: "No clock-in found for today." },
+        { error: "No active clock-in found." },
         { status: 400 }
       );
     }
-    const attendanceDate = dayjs(attendance.date).format("YYYY-MM-DD");
+
     const lastSegment =
       attendance.workSegments[attendance.workSegments.length - 1];
     if (lastSegment.clockOut) {
+      // Should be redundant due to query, but for safety
       return NextResponse.json(
-        { error: "Please clock in before ending a break." },
+        { error: "Cannot end break when clocked out." },
         { status: 400 }
       );
     }
+
     const activeBreak = attendance.breaks?.find((b: any) => !b.end);
     if (!activeBreak) {
       return NextResponse.json(
@@ -61,51 +63,66 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const breakStartTime = dayjs(`${attendanceDate}T${activeBreak.start}`);
-    const breakDurationSeconds = now.diff(breakStartTime, "second");
+
+    const attendanceDate = dayjs(attendance.date);
+
+    const clockInTimeParts = lastSegment.clockIn.split(":").map(Number);
+    const lastClockInTime = attendanceDate
+      .hour(clockInTimeParts[0])
+      .minute(clockInTimeParts[1])
+      .second(clockInTimeParts[2]);
+
+    const breakStartParts = activeBreak.start.split(":").map(Number);
+    let breakStartTime = attendanceDate
+      .hour(breakStartParts[0])
+      .minute(breakStartParts[1])
+      .second(breakStartParts[2]);
+
+    if (breakStartTime.isBefore(lastClockInTime)) {
+      breakStartTime = breakStartTime.add(1, "day");
+    }
+
+    const breakEndTime = now;
+    const breakDurationSeconds = breakEndTime.diff(breakStartTime, "second");
+
+    if (isNaN(breakDurationSeconds) || breakDurationSeconds < 0) {
+      console.error("FATAL: Calculated invalid break duration.", {
+        start: breakStartTime.toISOString(),
+        end: breakEndTime.toISOString(),
+        duration: breakDurationSeconds,
+      });
+      return NextResponse.json(
+        {
+          error: "Failed to calculate break duration due to an internal error.",
+        },
+        { status: 500 }
+      );
+    }
 
     activeBreak.end = now.format("HH:mm:ss");
     activeBreak.duration = breakDurationSeconds;
     activeBreak.reason = reason || undefined;
     activeBreak.endLocation = location;
     activeBreak.endDeviceType = deviceType;
+
     attendance.markModified("breaks");
+
+    await attendance.save();
+
     let totalDailyBreakSeconds = 0;
     for (const brk of attendance.breaks) {
       if (brk.duration !== undefined) {
         totalDailyBreakSeconds += brk.duration;
       }
     }
-    attendance.breakDuration = totalDailyBreakSeconds;
-    await attendance.save();
-    const attendanceObj = attendance.toObject();
+
     return NextResponse.json({
       success: true,
       message: "Break ended",
       breakEndTime: now.format("HH:mm:ss"),
       breakDuration: secondsToDuration(breakDurationSeconds),
       totalBreakDurationToday: secondsToDuration(totalDailyBreakSeconds),
-      attendance: {
-        ...attendanceObj,
-        breaks: attendanceObj.breaks.map((b: any) => ({
-          ...b,
-          duration:
-            b.duration !== undefined
-              ? secondsToDuration(b.duration)
-              : undefined,
-        })),
-        workSegments: attendanceObj.workSegments.map((w: any) => ({
-          ...w,
-          duration:
-            w.duration !== undefined
-              ? secondsToDuration(w.duration)
-              : undefined,
-          productiveDuration:
-            w.productiveDuration !== undefined
-              ? secondsToDuration(w.productiveDuration)
-              : undefined,
-        })),
-      },
+      attendance: attendance.toObject(),
     });
   } catch (error) {
     console.error("End break error:", error);

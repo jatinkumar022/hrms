@@ -9,17 +9,23 @@ import dayjs from "dayjs";
 
 async function handleForgottenClockOut(userId: string) {
   const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-  const attendance = await Attendance.findOne({ userId, date: yesterday });
 
-  if (attendance && attendance.workSegments.some((seg: any) => !seg.clockOut)) {
-    const completedSegments = attendance.workSegments.filter(
+  // Find any attendance from yesterday that still has an active (un-clocked-out) segment.
+  const attendance = await Attendance.findOne({
+    userId,
+    date: yesterday,
+    "workSegments.clockOut": null,
+  });
+
+  if (attendance && attendance.workSegments.length > 0) {
+    // There's a forgotten clock-out. We should clean it up.
+    // This example just marks it as absent. A more sophisticated approach
+    // might try to auto-close it based on shift end times.
+    attendance.status = "absent";
+    // Remove the incomplete segment to avoid calculation errors.
+    attendance.workSegments = attendance.workSegments.filter(
       (segment: any) => segment.clockOut
     );
-    attendance.workSegments = completedSegments;
-
-    if (completedSegments.length === 0) {
-      attendance.status = "absent";
-    }
     await attendance.save();
   }
 }

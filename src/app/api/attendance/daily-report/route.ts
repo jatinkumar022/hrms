@@ -29,20 +29,17 @@ export async function GET(req: NextRequest) {
         ? queryUserId
         : currentUser._id;
 
-    // Find attendance for the specified date
     let attendance = await Attendance.findOne({
       userId: userIdToQuery,
       date,
     });
 
-    // If no record for the specific date, check for an active one from a previous day (overnight case)
     if (!attendance) {
       const latestActive = await Attendance.findOne({
         userId: userIdToQuery,
         "workSegments.clockOut": null,
       }).sort({ date: -1 });
 
-      // If the active record's date is the day before the query date, use it
       if (
         latestActive &&
         dayjs(date).isSame(dayjs(latestActive.date).add(1, "day"), "day")
@@ -54,7 +51,6 @@ export async function GET(req: NextRequest) {
     const user = await User.findById(userIdToQuery).populate("shiftId");
 
     if (!attendance || !user) {
-      // Return absent report if no relevant attendance or user found
       const targetUser =
         user || (await User.findById(userIdToQuery).populate("shiftId"));
       return NextResponse.json({
@@ -92,6 +88,7 @@ export async function GET(req: NextRequest) {
 
     const attendanceObj = attendance.toObject({ virtuals: true });
     const attendanceDate = dayjs(attendance.date);
+    const now = dayjs();
 
     let totalWorkSeconds = 0;
     let totalProductiveSeconds = 0;
@@ -99,6 +96,11 @@ export async function GET(req: NextRequest) {
 
     const processedWorkSegments = (attendanceObj.workSegments || []).map(
       (segment: any) => {
+        const clockInTime = dayjs(segment.clockIn, "HH:mm:ss")
+          .year(attendanceDate.year())
+          .month(attendanceDate.month())
+          .date(attendanceDate.date());
+
         let segmentDurationSeconds: number;
         let segmentProductiveDurationSeconds: number;
 
@@ -107,31 +109,20 @@ export async function GET(req: NextRequest) {
           typeof segment.duration === "number" &&
           typeof segment.productiveDuration === "number"
         ) {
-          // For completed segments, use the stored numeric values directly.
           segmentDurationSeconds = segment.duration;
           segmentProductiveDurationSeconds = segment.productiveDuration;
         } else {
-          // For active segments, calculate duration on the fly.
-          const segmentStartTime = dayjs(segment.clockIn, "HH:mm:ss")
-            .year(attendanceDate.year())
-            .month(attendanceDate.month())
-            .date(attendanceDate.date());
-          const now = dayjs();
-          let segmentEndTime = now;
-
-          if (segment.clockOut) {
-            // Should not happen with the check above, but for safety
-            segmentEndTime = dayjs(segment.clockOut, "HH:mm:ss")
-              .year(attendanceDate.year())
-              .month(attendanceDate.month())
-              .date(attendanceDate.date());
-            if (segmentEndTime.isBefore(segmentStartTime)) {
-              segmentEndTime = segmentEndTime.add(1, "day");
-            }
-          }
-
-          segmentDurationSeconds = segmentEndTime.diff(
-            segmentStartTime,
+          const segmentEndTime = segment.clockOut
+            ? dayjs(segment.clockOut, "HH:mm:ss")
+                .year(attendanceDate.year())
+                .month(attendanceDate.month())
+                .date(attendanceDate.date())
+            : now;
+          const finalSegmentEndTime = segmentEndTime.isBefore(clockInTime)
+            ? segmentEndTime.add(1, "day")
+            : segmentEndTime;
+          segmentDurationSeconds = finalSegmentEndTime.diff(
+            clockInTime,
             "second"
           );
 
@@ -141,25 +132,20 @@ export async function GET(req: NextRequest) {
               .year(attendanceDate.year())
               .month(attendanceDate.month())
               .date(attendanceDate.date());
-            if (breakStartTime.isBefore(segmentStartTime)) {
+            if (breakStartTime.isBefore(clockInTime))
               breakStartTime = breakStartTime.add(1, "day");
-            }
 
-            let breakEndTime;
-            if (brk.end) {
-              breakEndTime = dayjs(brk.end, "HH:mm:ss")
-                .year(attendanceDate.year())
-                .month(attendanceDate.month())
-                .date(attendanceDate.date());
-              if (breakEndTime.isBefore(breakStartTime)) {
-                breakEndTime = breakEndTime.add(1, "day");
-              }
-            } else {
-              breakEndTime = now;
-            }
+            let breakEndTime = brk.end
+              ? dayjs(brk.end, "HH:mm:ss")
+                  .year(attendanceDate.year())
+                  .month(attendanceDate.month())
+                  .date(attendanceDate.date())
+              : now;
+            if (breakEndTime.isBefore(breakStartTime))
+              breakEndTime = breakEndTime.add(1, "day");
 
-            const overlapStart = dayjs.max(segmentStartTime, breakStartTime);
-            const overlapEnd = dayjs.min(segmentEndTime, breakEndTime);
+            const overlapStart = dayjs.max(clockInTime, breakStartTime);
+            const overlapEnd = dayjs.min(finalSegmentEndTime, breakEndTime);
 
             if (overlapStart.isBefore(overlapEnd)) {
               breaksInSegmentSeconds += overlapEnd.diff(overlapStart, "second");
@@ -174,11 +160,6 @@ export async function GET(req: NextRequest) {
         totalWorkSeconds += segmentDurationSeconds;
         totalProductiveSeconds += segmentProductiveDurationSeconds;
 
-        // Sum total breaks from their stored duration for accuracy
-        if (segment.clockOut) {
-          // Logic to sum breaks within this completed segment
-        }
-
         return {
           ...segment,
           duration: secondsToDuration(segmentDurationSeconds),
@@ -189,7 +170,6 @@ export async function GET(req: NextRequest) {
       }
     );
 
-    // Recalculate total break duration from all break objects for the summary
     totalBreakSeconds = (attendanceObj.breaks || []).reduce(
       (acc: number, brk: any) => acc + (brk.duration || 0),
       0
@@ -221,16 +201,7 @@ export async function GET(req: NextRequest) {
           workSegments: processedWorkSegments,
           breaks: (attendanceObj.breaks || []).map((b: any) => ({
             ...b,
-            duration: b.duration
-              ? secondsToDuration(b.duration)
-              : b.end
-              ? secondsToDuration(
-                  dayjs(b.end, "HH:mm:ss").diff(
-                    dayjs(b.start, "HH:mm:ss"),
-                    "second"
-                  )
-                )
-              : "Active",
+            duration: b.duration ? secondsToDuration(b.duration) : "Active",
           })),
         },
       },

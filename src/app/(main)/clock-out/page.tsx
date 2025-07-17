@@ -239,10 +239,15 @@ export default function FinalOutTimePage() {
   const [liveTotalWorkSeconds, setLiveTotalWorkSeconds] =
     useState(totalWorkSeconds);
 
+  useEffect(() => {
+    setLiveTotalWorkSeconds(totalWorkSeconds);
+  }, [totalWorkSeconds]);
+
   const handleAction = async (action: () => Promise<any>) => {
     const result = await action();
     if (result.meta.requestStatus === "fulfilled") {
       toast.success(result.payload.message || "Action successful!");
+      router.push("/");
     } else {
       toast.error(result.payload || "An error occurred.");
     }
@@ -341,6 +346,7 @@ export default function FinalOutTimePage() {
 
     await handleAction(() => clockOut({ reason, location }));
     setIsEarlyClockOutReasonDialogOpen(false);
+    router.push("/");
   };
 
   const activityLog = useMemo(() => {

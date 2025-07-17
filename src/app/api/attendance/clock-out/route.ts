@@ -66,22 +66,55 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const attendanceDate = dayjs(attendance.date).format("YYYY-MM-DD");
-    const clockInTimeOfSegment = dayjs(
-      `${attendanceDate}T${lastSegment.clockIn}`
-    );
 
-    const totalSecondsForSegment = now.diff(clockInTimeOfSegment, "second");
+    const attendanceDate = dayjs(attendance.date);
+
+    // This is a robust way to construct the clock-in time.
+    const clockInTimeParts = lastSegment.clockIn.split(":").map(Number);
+    const clockInTimeOfSegment = attendanceDate
+      .hour(clockInTimeParts[0])
+      .minute(clockInTimeParts[1])
+      .second(clockInTimeParts[2]);
+
+    // The clock-out time is now.
+    const clockOutTime = now;
+
+    // This is the definitive calculation for the segment's total duration in seconds.
+    const totalSecondsForSegment = clockOutTime.diff(
+      clockInTimeOfSegment,
+      "second"
+    );
 
     let breaksDuringSegmentSeconds = 0;
     for (const brk of attendance.breaks || []) {
-      const breakStartTime = dayjs(`${attendanceDate}T${brk.start}`);
-      const breakEndTime = brk.end
-        ? dayjs(`${attendanceDate}T${brk.end}`)
-        : now;
+      // Reconstruct break start and end times with full date context to handle overnight cases.
+      const breakStartParts = brk.start.split(":").map(Number);
+      let breakStartTime = attendanceDate
+        .hour(breakStartParts[0])
+        .minute(breakStartParts[1])
+        .second(breakStartParts[2]);
 
+      if (breakStartTime.isBefore(clockInTimeOfSegment)) {
+        breakStartTime = breakStartTime.add(1, "day");
+      }
+
+      let breakEndTime;
+      if (brk.end) {
+        const breakEndParts = brk.end.split(":").map(Number);
+        breakEndTime = attendanceDate
+          .hour(breakEndParts[0])
+          .minute(breakEndParts[1])
+          .second(breakEndParts[2]);
+        if (breakEndTime.isBefore(breakStartTime)) {
+          breakEndTime = breakEndTime.add(1, "day");
+        }
+      } else {
+        breakEndTime = clockOutTime;
+      }
+
+      // Calculate the overlap of the break with the current work segment.
       const overlapStart = dayjs.max(clockInTimeOfSegment, breakStartTime);
-      const overlapEnd = dayjs.min(now, breakEndTime);
+      const overlapEnd = dayjs.min(clockOutTime, breakEndTime);
 
       if (overlapStart.isBefore(overlapEnd)) {
         breaksDuringSegmentSeconds += overlapEnd.diff(overlapStart, "second");
@@ -93,9 +126,12 @@ export async function POST(req: NextRequest) {
       totalSecondsForSegment - breaksDuringSegmentSeconds
     );
 
+    // Aggregate total work and productive seconds for the whole day
+    // Initialize with the values from the segment we are currently closing.
     let totalDailyWorkSeconds = totalSecondsForSegment;
     let totalDailyProductiveSeconds = productiveSecondsForSegment;
 
+    // Add the durations of previously completed segments.
     for (let i = 0; i < attendance.workSegments.length - 1; i++) {
       const segment = attendance.workSegments[i];
       if (segment.duration) {
