@@ -27,9 +27,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const reason = body?.reason;
     const location = body?.location;
-    const today = dayjs().format("YYYY-MM-DD");
     const now = dayjs();
-    const attendance = await Attendance.findOne({ userId, date: today });
+
+    // Find the latest attendance record with an unclosed work segment
+    const attendance = await Attendance.findOne({
+      userId,
+      "workSegments.clockOut": null,
+    }).sort({ date: -1 });
+
     if (
       !attendance ||
       !attendance.workSegments ||
@@ -40,6 +45,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    const attendanceDate = dayjs(attendance.date).format("YYYY-MM-DD");
     const lastSegment =
       attendance.workSegments[attendance.workSegments.length - 1];
     if (lastSegment.clockOut) {
@@ -55,7 +61,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const breakStartTime = dayjs(`${today}T${activeBreak.start}`);
+    const breakStartTime = dayjs(`${attendanceDate}T${activeBreak.start}`);
     const breakDurationSeconds = now.diff(breakStartTime, "second");
 
     activeBreak.end = now.format("HH:mm:ss");

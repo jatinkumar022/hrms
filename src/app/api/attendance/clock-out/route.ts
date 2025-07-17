@@ -93,22 +93,18 @@ export async function POST(req: NextRequest) {
       totalSecondsForSegment - breaksDuringSegmentSeconds
     );
 
-    // Aggregate total work and productive seconds for the whole day
-    let totalDailyWorkSeconds = 0;
-    for (const segment of attendance.workSegments) {
+    let totalDailyWorkSeconds = totalSecondsForSegment;
+    let totalDailyProductiveSeconds = productiveSecondsForSegment;
+
+    for (let i = 0; i < attendance.workSegments.length - 1; i++) {
+      const segment = attendance.workSegments[i];
       if (segment.duration) {
         totalDailyWorkSeconds += segment.duration;
       }
-    }
-    totalDailyWorkSeconds += totalSecondsForSegment; // Add current active segment
-
-    let totalDailyProductiveSeconds = 0;
-    for (const segment of attendance.workSegments) {
       if (segment.productiveDuration) {
         totalDailyProductiveSeconds += segment.productiveDuration;
       }
     }
-    totalDailyProductiveSeconds += productiveSecondsForSegment; // Add current active segment
 
     const requiredWorkSeconds = 9 * 3600; // 9 hours
     const requiredProductiveSeconds = 8 * 3600; // 8 hours
