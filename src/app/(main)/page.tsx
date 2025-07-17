@@ -527,13 +527,14 @@ export default function Dashboard() {
                   {shouldShowClockInButton ? (
                     // {true ? (
                     <button
-                      className="w-full py-2 bg-[#25bb3e] border-2 border-[#25bb3e] text-white font-medium hover:bg-[#25bb3ef1] cursor-pointer mb-4 flex justify-center items-center"
                       onClick={onClockInAttempt}
                       disabled={
                         isLoading || isClockedInCurrently || loadingLocation
                       }
                     >
-                      {isLoading ? <ButtonLoader /> : "CLOCK IN"}
+                      <div className="w-full py-2 bg-[#25bb3e] border-2 border-[#25bb3e] text-white font-medium hover:bg-[#25bb3ef1] cursor-pointer mb-4 flex justify-center items-center">
+                        {isLoading ? <ButtonLoader /> : "CLOCK IN"}
+                      </div>
                     </button>
                   ) : (
                     <div className="grid grid-cols-2 gap-3 mb-4">

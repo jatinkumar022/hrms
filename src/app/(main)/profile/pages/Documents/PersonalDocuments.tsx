@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,11 +20,11 @@ import {
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 import { toast } from "sonner";
 import { CgMathPlus } from "react-icons/cg";
-import { uploadImage } from "@/redux/slices/imageUploadSlice";
 import ButtonLoader from "@/components/loaders/ButtonLoader";
 import { FloatingSelect } from "@/components/ui/floatingSelect";
 import { DataTable } from "@/components/custom/DataTable";
 import { getColumns } from "./personalColumns";
+import { useUploader } from "@/hooks/useUploader";
 
 type PersonalDocumentsFormData = {
   documents: PersonalDocumentType[];
@@ -45,9 +44,7 @@ export default function PersonalDocuments() {
   const { data: fetchedData, isLoading } = useAppSelector(
     (state) => state.personalDocuments
   );
-  const { isLoading: fileUploading } = useAppSelector(
-    (state) => state.imageUpload
-  );
+  const { isUploading, uploadFile } = useUploader();
   const [loading, setLoading] = useState(true);
   const [dialogErrors, setDialogErrors] = useState<{
     docType?: string;
@@ -135,13 +132,11 @@ export default function PersonalDocuments() {
 
     let fileUrl = "";
     if (docFile) {
-      try {
-        fileUrl = await dispatch(uploadImage(docFile)).unwrap();
-      } catch (error) {
-        toast.error("File upload failed");
-        console.log(error);
-        return;
+      const uploadResult = await uploadFile(docFile, "personal-documents");
+      if (!uploadResult) {
+        return; // Hook handles error toasts
       }
+      fileUrl = uploadResult.secure_url;
     }
 
     const newDoc: PersonalDocumentType = {
@@ -191,7 +186,7 @@ export default function PersonalDocuments() {
 
   return (
     <div>
-      <FullPageLoader show={isLoading || loading || fileUploading} />
+      <FullPageLoader show={isLoading || loading || isUploading} />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-4 border-b font-medium flex justify-between items-center">
@@ -300,9 +295,9 @@ export default function PersonalDocuments() {
                 variant={"default"}
                 type="submit"
                 className="bg-sidebar-primary !text-white border border-transparent  hover:!text-sidebar-primary cursor-pointer hover:bg-transparent hover:border-sidebar-primary !font-normal"
-                disabled={fileUploading}
+                disabled={isUploading}
               >
-                {fileUploading ? (
+                {isUploading ? (
                   <ButtonLoader />
                 ) : editIndex !== null ? (
                   "Update"

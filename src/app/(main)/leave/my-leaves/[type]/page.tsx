@@ -25,7 +25,6 @@ import { fetchUserBasicInfo } from "@/redux/slices/userBasicInfoSlice";
 import { InitialsAvatar } from "@/lib/InitialsAvatar";
 import { toast } from "sonner";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
-import axios from "axios";
 import { X, FileText, Plus } from "lucide-react";
 import { RiMenuFold2Line } from "react-icons/ri";
 import {
@@ -36,6 +35,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import MaterialTextArea from "@/components/ui/materialTextArea";
+import { useUploader } from "@/hooks/useUploader";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
@@ -135,6 +135,7 @@ export default function ApplyLeavePage() {
   const router = useRouter();
   const params = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isUploading, uploadFile } = useUploader();
 
   const dispatch = useAppDispatch();
   const {
@@ -170,7 +171,6 @@ export default function ApplyLeavePage() {
     Record<string, "Full Day" | "First Half" | "Second Half">
   >({});
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -291,22 +291,12 @@ export default function ApplyLeavePage() {
     let attachmentUrl: string | undefined;
 
     if (file) {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "leave-attachments");
-
-      try {
-        const response = await axios.post("/api/upload", formData);
-        attachmentUrl = response.data.url;
-      } catch (error) {
-        toast.error("File upload failed. Please try again.");
-        console.error(error);
-        setIsUploading(false);
+      const uploadResult = await uploadFile(file, "leave-attachments");
+      if (!uploadResult) {
+        // The hook handles error toasts, so just exit here.
         return;
-      } finally {
-        setIsUploading(false);
       }
+      attachmentUrl = uploadResult.secure_url;
     }
 
     const typeMap = {

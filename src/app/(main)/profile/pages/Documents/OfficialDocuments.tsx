@@ -20,11 +20,12 @@ import {
 } from "@/redux/slices/officialDocumentsSlice";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
 import { toast } from "sonner";
-import { uploadImage } from "@/redux/slices/imageUploadSlice";
+
 import ButtonLoader from "@/components/loaders/ButtonLoader";
 import { FloatingSelect } from "@/components/ui/floatingSelect";
 import { DataTable } from "@/components/custom/DataTable";
 import { getColumns } from "./columns";
+import { useUploader } from "@/hooks/useUploader";
 
 type OfficialDocumentsFormData = {
   documents: OfficialDocumentType[];
@@ -46,8 +47,8 @@ export default function OfficialDocuments() {
   const { data: fetchedData, isLoading } = useAppSelector(
     (state) => state.officialDocuments
   );
+  const { isUploading, uploadFile } = useUploader();
   const [loading, setLoading] = useState(true);
-  const [fileUploading, setFileUploading] = useState(false);
   const [dialogErrors, setDialogErrors] = useState<{
     docType?: string;
     docNumber?: string;
@@ -131,16 +132,11 @@ export default function OfficialDocuments() {
 
     let fileUrl = "";
     if (docFile) {
-      setFileUploading(true);
-      try {
-        fileUrl = await dispatch(uploadImage(docFile)).unwrap();
-      } catch (error) {
-        toast.error("File upload failed");
-        setFileUploading(false);
-        console.log(error);
-        return;
+      const uploadResult = await uploadFile(docFile, "official-documents");
+      if (!uploadResult) {
+        return; // Hook handles error toasts
       }
-      setFileUploading(false);
+      fileUrl = uploadResult.secure_url;
     }
 
     const newDoc: OfficialDocumentType = {
@@ -191,7 +187,7 @@ export default function OfficialDocuments() {
 
   return (
     <div>
-      <FullPageLoader show={isLoading || loading || fileUploading} />
+      <FullPageLoader show={isLoading || loading || isUploading} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-4 border-b font-medium flex justify-between items-center">
           <div>Official Documents</div>
@@ -296,9 +292,9 @@ export default function OfficialDocuments() {
                 variant={"default"}
                 type="submit"
                 className="bg-sidebar-primary !text-white border border-transparent  hover:!text-sidebar-primary cursor-pointer hover:bg-transparent hover:border-sidebar-primary !font-normal"
-                disabled={fileUploading}
+                disabled={isUploading}
               >
-                {fileUploading ? (
+                {isUploading ? (
                   <ButtonLoader />
                 ) : editIndex !== null ? (
                   "Update"

@@ -1,68 +1,27 @@
 import { NextResponse } from "next/server";
-import {
-  v2 as cloudinary,
-  UploadApiResponse,
-  UploadApiErrorResponse,
-} from "cloudinary";
 import { getUserFromToken } from "@/lib/getUserFromToken";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import User from "@/models/userModel";
 import { NextRequest } from "next/server";
-const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-  process.env;
 
-if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
-  throw new Error("Missing Cloudinary environment variables");
-}
-
-cloudinary.config({
-  cloud_name: CLOUDINARY_CLOUD_NAME,
-  api_key: CLOUDINARY_API_KEY,
-  api_secret: CLOUDINARY_API_SECRET,
-});
-
-export async function POST(req: Request): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
   try {
-    // Cast req to NextRequest to use getUserFromToken
-    const nextReq = req as NextRequest;
-    const userId = await getUserFromToken(nextReq);
+    const userId = await getUserFromToken(req);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const formData = await nextReq.formData();
-    const file = formData.get("file");
+    // This route can be used for post-upload logic, like saving the URL to a database.
+    // For now, it will just confirm the user is authenticated.
+    const body = await req.json();
+    const { secure_url } = body;
 
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-    }
+    console.log("Received uploaded file URL:", secure_url);
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    // TODO: Add logic here to save the secure_url to your user's profile or a relevant document model.
 
-    // Upload buffer to Cloudinary using upload_stream
-    const uploadResult: UploadApiResponse = await new Promise(
-      (resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "uploads" },
-          (
-            error: UploadApiErrorResponse | undefined,
-            result: UploadApiResponse | undefined
-          ) => {
-            if (error) return reject(error);
-            if (!result) return reject(new Error("No result from Cloudinary"));
-            resolve(result);
-          }
-        );
-
-        stream.end(buffer);
-      }
-    );
-
-    return NextResponse.json({ url: uploadResult.secure_url });
+    return NextResponse.json({ success: true, message: "Upload confirmed." });
   } catch (error: any) {
     return NextResponse.json(
-      { error: "Upload failed", details: error.message },
+      { error: "Upload confirmation failed", details: error.message },
       { status: 500 }
     );
   }

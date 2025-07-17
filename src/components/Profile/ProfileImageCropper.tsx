@@ -7,13 +7,14 @@ import {
   fetchProfileImage,
   deleteProfileImage,
 } from "@/redux/slices/profileImageSlice";
-import { uploadImage } from "@/redux/slices/imageUploadSlice";
+
 import { getCroppedImg } from "@/lib/utils";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import { LuPencil } from "react-icons/lu";
 import { RxCross2 } from "react-icons/rx";
 import { InitialsAvatar } from "@/lib/InitialsAvatar";
+import { useUploader } from "@/hooks/useUploader";
 
 interface ProfileImageCropperProps {
   profileImage?: string;
@@ -25,6 +26,7 @@ export function ProfileImageCropper({
   userName,
 }: ProfileImageCropperProps) {
   const dispatch = useAppDispatch();
+  const { isUploading, uploadFile } = useUploader();
   const {
     isLoading,
     error,
@@ -38,7 +40,6 @@ export function ProfileImageCropper({
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProfileImage());
@@ -64,7 +65,6 @@ export function ProfileImageCropper({
   };
 
   const handleRemovePhoto = async () => {
-    setUploading(true);
     setLocalError(null);
     try {
       await dispatch(deleteProfileImage()).unwrap();
@@ -73,7 +73,6 @@ export function ProfileImageCropper({
       setLocalError("Failed to remove profile image.");
       console.log(err);
     }
-    setUploading(false);
   };
 
   const onCropComplete = (_: any, croppedAreaPixels: any) =>
@@ -81,7 +80,6 @@ export function ProfileImageCropper({
 
   const handleSave = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
-    setUploading(true);
     setLocalError(null);
     try {
       const croppedBlob = (await getCroppedImg(
@@ -92,16 +90,21 @@ export function ProfileImageCropper({
         type: "image/jpeg",
       });
 
-      const url = await dispatch(uploadImage(croppedFile)).unwrap();
+      const uploadResult = await uploadFile(croppedFile, "profile-images");
+      if (!uploadResult) {
+        setLocalError("Failed to upload image.");
+        return;
+      }
 
-      await dispatch(updateProfileImage({ profileImage: url }));
+      await dispatch(
+        updateProfileImage({ profileImage: uploadResult.secure_url })
+      );
       setShowCropper(false);
       setShowModal(false);
     } catch (err: any) {
       setLocalError("Failed to upload or update profile image.");
       console.log(err);
     }
-    setUploading(false);
   };
 
   const displayImage = reduxProfileImage || profileImage;
@@ -206,16 +209,16 @@ export function ProfileImageCropper({
                     <Button
                       onClick={() => setShowCropper(false)}
                       type="button"
-                      disabled={uploading}
+                      disabled={isUploading}
                     >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSave}
                       type="button"
-                      disabled={uploading}
+                      disabled={isUploading}
                     >
-                      {uploading ? "Saving..." : "Save"}
+                      {isUploading ? "Saving..." : "Save"}
                     </Button>
                   </div>
                   {(localError || error) && (
@@ -231,7 +234,7 @@ export function ProfileImageCropper({
                 <button
                   className="flex flex-col items-center gap-1 mx-1  cursor-pointer  p-2 py-3 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700"
                   onClick={handleUploadClick}
-                  disabled={uploading}
+                  disabled={isUploading}
                 >
                   <FaUpload className="text-lg mb-1" />
                   <span className="text-xs">Change photo</span>
@@ -246,7 +249,7 @@ export function ProfileImageCropper({
                 <button
                   className="flex flex-col items-center gap-1 mx-1  cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700 p-2 py-3 rounded-md"
                   onClick={handleTakePhoto}
-                  disabled={uploading}
+                  disabled={isUploading}
                 >
                   <FaCamera className="text-lg mb-1" />
                   <span className="text-xs">Take photo</span>
@@ -255,7 +258,7 @@ export function ProfileImageCropper({
               <button
                 className="flex flex-col items-center gap-1 mx-1  cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700 p-2 py-3 rounded-md"
                 onClick={handleRemovePhoto}
-                disabled={uploading}
+                disabled={isUploading}
               >
                 <FaTrash className="text-lg mb-1 text-red-400" />
                 <span className="text-xs text-red-400">Remove photo</span>

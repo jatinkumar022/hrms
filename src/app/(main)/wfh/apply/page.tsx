@@ -17,7 +17,6 @@ import {
 } from "@/redux/slices/wfh/userWfhSlice";
 import { toast } from "sonner";
 import FullPageLoader from "@/components/loaders/FullPageLoader";
-import axios from "axios";
 import { fetchProfileImage } from "@/redux/slices/profileImageSlice";
 import { fetchUserBasicInfo } from "@/redux/slices/userBasicInfoSlice";
 import { InitialsAvatar } from "@/lib/InitialsAvatar";
@@ -35,6 +34,7 @@ import {
 } from "@/components/ui/drawer";
 import MaterialTextArea from "@/components/ui/materialTextArea";
 import { Card, CardContent } from "@/components/ui/card";
+import { useUploader } from "@/hooks/useUploader";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrBefore);
@@ -79,6 +79,7 @@ export default function ApplyWfhPage() {
     (state) => state.userBasicInfo
   );
   const userName = user?.username || "";
+  const { isUploading, uploadFile } = useUploader();
 
   useEffect(() => {
     dispatch(fetchProfileImage());
@@ -97,7 +98,6 @@ export default function ApplyWfhPage() {
   const [endTime, setEndTime] = useState<string>("00:00");
   const [multiDay, setMultiDay] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -251,31 +251,20 @@ export default function ApplyWfhPage() {
       return;
     }
 
+    let attachmentUrl: string | undefined;
+    if (file) {
+      const uploadResult = await uploadFile(file, "wfh-attachments");
+      if (!uploadResult) {
+        return; // Hook handles error toasts
+      }
+      attachmentUrl = uploadResult.secure_url;
+    }
+
     const dayType = isHourly
       ? "Hourly"
       : Object.values(slotsPerDay).every((slot) => slot === "Full Day")
       ? "Full Day"
       : "Half Day";
-
-    let attachmentUrl: string | undefined;
-    if (file) {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", "wfh-attachments");
-
-      try {
-        const response = await axios.post("/api/upload", formData);
-        attachmentUrl = response.data.url;
-      } catch (error) {
-        toast.error("File upload failed. Please try again.");
-        console.error(error);
-        setIsUploading(false);
-        return;
-      } finally {
-        setIsUploading(false);
-      }
-    }
 
     const days = selectedDates.map((date) => ({
       date,
