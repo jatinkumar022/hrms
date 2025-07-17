@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
       jobInformation: {
         joiningDate: new Date(),
         workEmail: savedUser.email,
-        shift: defaultShift._id, // Assign default shift
       },
+      joiningDate: new Date(),
       firstName: savedUser.username,
     });
 

@@ -31,9 +31,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const reason = body?.reason;
     const location = body?.location;
-    const today = dayjs().format("YYYY-MM-DD");
     const now = dayjs();
-    const attendance = await Attendance.findOne({ userId, date: today });
+
+    // Find the latest attendance record with an unclosed work segment
+    const attendance = await Attendance.findOne({
+      userId,
+      "workSegments.clockOut": null,
+    }).sort({ date: -1 });
+
     if (
       !attendance ||
       !attendance.workSegments ||
@@ -61,14 +66,19 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const clockInTimeOfSegment = dayjs(`${today}T${lastSegment.clockIn}`);
+    const attendanceDate = dayjs(attendance.date).format("YYYY-MM-DD");
+    const clockInTimeOfSegment = dayjs(
+      `${attendanceDate}T${lastSegment.clockIn}`
+    );
 
     const totalSecondsForSegment = now.diff(clockInTimeOfSegment, "second");
 
     let breaksDuringSegmentSeconds = 0;
     for (const brk of attendance.breaks || []) {
-      const breakStartTime = dayjs(`${today}T${brk.start}`);
-      const breakEndTime = brk.end ? dayjs(`${today}T${brk.end}`) : now;
+      const breakStartTime = dayjs(`${attendanceDate}T${brk.start}`);
+      const breakEndTime = brk.end
+        ? dayjs(`${attendanceDate}T${brk.end}`)
+        : now;
 
       const overlapStart = dayjs.max(clockInTimeOfSegment, breakStartTime);
       const overlapEnd = dayjs.min(now, breakEndTime);

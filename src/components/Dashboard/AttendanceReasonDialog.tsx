@@ -72,7 +72,7 @@ export default function AttendanceReasonDialog({
             onChange={handleChange}
             placeholder={placeholder}
             rows={4}
-            className={error ? "!border-red-500" : ""}
+            className={error ? "!border-red-500 dark:!bg-[#111111]" : ""}
           />
           {error && <div className="text-xs text-red-500 mt-0.5">{error}</div>}
           <div className="text-end mt-2">

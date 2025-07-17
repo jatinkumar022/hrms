@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import UserProfile from "@/models/userProfile";
@@ -57,8 +57,7 @@ export async function GET() {
         const previousExperience = `${prevExpYears} Year${
           prevExpYears !== 1 ? "s" : ""
         } ${prevExpMonths} Month${prevExpMonths !== 1 ? "s" : ""}`;
-        console.log("=================================================");
-        console.log("profile", profile.contactSocialLinks);
+
         return {
           id: user._id,
           // Correct paths for all fields

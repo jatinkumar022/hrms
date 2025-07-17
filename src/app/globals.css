@@ -346,9 +346,19 @@ input[type=number] {
   display: none !important;
 }
 
+.dark textarea:where(.css-dev-only-do-not-override-pjilya).ant-input {
+  background-color: #111111 !important;
+  color: white !important;
+}
 
+.dark :where(.css-dev-only-do-not-override-pjilya).ant-input:placeholder-shown {
+  color: #cbd5e1 !important;
+}
 
-
+.dark textarea::placeholder {
+  color: #888888 !important;
+  opacity: 1;
+}
 
 
 

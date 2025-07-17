@@ -7,6 +7,23 @@ import User from "@/models/userModel";
 import Shift from "@/models/Shift";
 import dayjs from "dayjs";
 
+async function handleForgottenClockOut(userId: string) {
+  const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+  const attendance = await Attendance.findOne({ userId, date: yesterday });
+
+  if (attendance && attendance.workSegments.some((seg: any) => !seg.clockOut)) {
+    const completedSegments = attendance.workSegments.filter(
+      (segment: any) => segment.clockOut
+    );
+    attendance.workSegments = completedSegments;
+
+    if (completedSegments.length === 0) {
+      attendance.status = "absent";
+    }
+    await attendance.save();
+  }
+}
+
 export async function POST(req: NextRequest) {
   await connect();
   try {
@@ -14,6 +31,9 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Handle forgotten clock-out from the previous day
+    await handleForgottenClockOut(userId);
 
     const userAgent = req.headers.get("user-agent");
     let deviceType = "desktop";
