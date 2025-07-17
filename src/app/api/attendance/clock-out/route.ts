@@ -4,8 +4,16 @@ import Attendance from "@/models/Attendance";
 import { getUserFromToken } from "@/lib/getUserFromToken";
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
-dayjs.extend(minMax);
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { secondsToDuration } from "@/lib/attendanceHelpers";
+
+dayjs.extend(minMax);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const antd_timezone = "Asia/Kolkata";
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Shift from "@/models/Shift";
 
@@ -31,7 +39,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const reason = body?.reason;
     const location = body?.location;
-    const now = dayjs();
+    const now = dayjs().tz(antd_timezone);
 
     // Find the latest attendance record with an unclosed work segment
     const attendance = await Attendance.findOne({
@@ -67,7 +75,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const attendanceDate = dayjs(attendance.date);
+    const attendanceDate = dayjs(attendance.date).tz(antd_timezone);
 
     // This is a robust way to construct the clock-in time.
     const clockInTimeParts = lastSegment.clockIn.split(":").map(Number);

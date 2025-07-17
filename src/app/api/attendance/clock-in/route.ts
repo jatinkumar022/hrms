@@ -6,9 +6,19 @@ import User from "@/models/userModel";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Shift from "@/models/Shift";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const antd_timezone = "Asia/Kolkata";
 
 async function handleForgottenClockOut(userId: string) {
-  const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+  const yesterday = dayjs()
+    .tz(antd_timezone)
+    .subtract(1, "day")
+    .format("YYYY-MM-DD");
 
   // Find any attendance from yesterday that still has an active (un-clocked-out) segment.
   const attendance = await Attendance.findOne({
@@ -58,8 +68,8 @@ export async function POST(req: NextRequest) {
       .json()
       .catch(() => ({ reason: null, location: null }));
 
-    const today = dayjs().format("YYYY-MM-DD");
-    const now = dayjs();
+    const now = dayjs().tz(antd_timezone);
+    const today = now.format("YYYY-MM-DD");
     console.log(location);
     const user = await User.findById(userId).populate("shiftId");
     if (!user || !user.shiftId) {
@@ -70,8 +80,8 @@ export async function POST(req: NextRequest) {
     }
 
     const shift = user.shiftId;
-    const shiftStart = dayjs(`${today}T${shift.startTime}`);
-    const maxClockIn = dayjs(`${today}T${shift.maxClockIn}`);
+    const shiftStart = dayjs.tz(`${today}T${shift.startTime}`, antd_timezone);
+    const maxClockIn = dayjs.tz(`${today}T${shift.maxClockIn}`, antd_timezone);
 
     let attendance = await Attendance.findOne({ userId, date: today });
 

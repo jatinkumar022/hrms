@@ -3,7 +3,14 @@ import { connect } from "@/dbConfig/dbConfig";
 import Attendance from "@/models/Attendance";
 import { getUserFromToken } from "@/lib/getUserFromToken";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import { secondsToDuration } from "@/lib/attendanceHelpers";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const antd_timezone = "Asia/Kolkata";
 
 export async function POST(req: NextRequest) {
   await connect();
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const reason = body?.reason;
     const location = body?.location;
-    const now = dayjs();
+    const now = dayjs().tz(antd_timezone);
 
     // Find the latest attendance record with an unclosed work segment
     const attendance = await Attendance.findOne({
@@ -80,8 +87,8 @@ export async function POST(req: NextRequest) {
       );
     }
     attendance.breaks.push({
-      start: now.format("HH:mm:ss"),
-      reason: requiresReason ? reason : undefined,
+      start: now.format("HH:mm:ss"), // Use timezone-aware 'now'
+      reason: reason || undefined,
       startLocation: location,
       startDeviceType: deviceType,
     });
