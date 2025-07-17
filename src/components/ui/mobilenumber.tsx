@@ -30,11 +30,6 @@ const MobileInput = forwardRef<HTMLInputElement, MobileInputProps>(
       }
     }, [ref]);
 
-    const hasValue =
-      props.value !== undefined
-        ? props.value !== ""
-        : localRef.current?.value !== "";
-
     return (
       <div className="relative !m-0 mt-2.5 ">
         {/* +91 Prefix */}
