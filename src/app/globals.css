@@ -185,11 +185,11 @@ input[type=number] {
   flex-direction: row-reverse;
 }
 
-:where(.css-dev-only-do-not-override-36gkoj).ant-picker-dropdown .ant-picker-panel-container .ant-picker-presets ul li+li {
+:where(.css-dev-only-do-not-override-36gkoj).ant-picker-dropdown .ant-picker-presets ul li+li {
   margin-top: 0px;
 }
 
-:where(.css-dev-only-do-not-override-36gkoj).ant-picker-dropdown .ant-picker-panel-container .ant-picker-presets ul li {
+:where(.css-dev-only-do-not-override-36gkoj).ant-picker-dropdown .ant-picker-presets ul li {
   padding-block: 0px;
 }
 
@@ -251,34 +251,34 @@ input[type=number] {
   font-size: 15px !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector {
+/* Correct, stable selectors for Ant Design components */
+.dark .ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector {
   background-color: color-mix(in oklab, var(--input) 40%, transparent) !important;
   border: 1px solid var(--input) !important;
   color: #fff !important;
   transition: none !important;
 }
 
-.dark .ant-select-show-search:where(.css-dev-only-do-not-override-pjilya).ant-select:not(.ant-select-customize-input) .ant-select-selector input {
+.dark .ant-select-show-search.ant-select:not(.ant-select-customize-input) .ant-select-selector input {
   color: #fff !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-select-single.ant-select-show-arrow .ant-select-selection-item,
-:where(.css-dev-only-do-not-override-pjilya).ant-select-single.ant-select-show-arrow .ant-select-selection-search,
-:where(.css-dev-only-do-not-override-pjilya).ant-select-single.ant-select-show-arrow .ant-select-selection-placeholder {
+.dark .ant-select-single.ant-select-show-arrow .ant-select-selection-item,
+.dark .ant-select-single.ant-select-show-arrow .ant-select-selection-search,
+.dark .ant-select-single.ant-select-show-arrow .ant-select-selection-placeholder {
   color: #c9c7c7 !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-outlined {
+.dark .ant-picker-outlined {
   background-color: color-mix(in oklab, var(--input) 40%, transparent) !important;
   border: 1px solid var(--input) !important;
   color: #fff !important;
   transition: none !important;
 }
 
-:where(.css-dev-only-do-not-override-pjilya).ant-picker .ant-picker-input>input:placeholder-shown {
+.dark .ant-picker .ant-picker-input>input:placeholder-shown {
   color: #c9c7c7 !important;
 }
-
 
 .dark .custom-range-picker .ant-picker-input input::placeholder {
   color: #c9c7c7 !important;
@@ -304,41 +304,39 @@ input[type=number] {
 }
 
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-decade-panel,
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-quarter-panel,
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-month-panel,
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-week-panel,
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-date-panel,
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-year-panel,
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-time-panel {
+.dark .ant-picker-dropdown .ant-picker-decade-panel,
+.dark .ant-picker-dropdown .ant-picker-quarter-panel,
+.dark .ant-picker-dropdown .ant-picker-month-panel,
+.dark .ant-picker-dropdown .ant-picker-week-panel,
+.dark .ant-picker-dropdown .ant-picker-date-panel,
+.dark .ant-picker-dropdown .ant-picker-year-panel,
+.dark .ant-picker-dropdown .ant-picker-time-panel {
   background-color: #141414 !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-panel-container {
+.dark .ant-picker-dropdown .ant-picker-panel-container {
   background-color: #141414 !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-header {
+.dark .ant-picker-dropdown .ant-picker-header {
   color: #fffffff1 !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-header>button {
+.dark .ant-picker-dropdown .ant-picker-header>button {
   color: #fffffff1 !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-year-panel .ant-picker-cell-inner,
-:where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-quarter-panel .ant-picker-cell-inner,
-:where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-month-panel .ant-picker-cell-inner {
-
+.dark .ant-picker-dropdown .ant-picker-year-panel .ant-picker-cell-inner,
+.dark .ant-picker-dropdown .ant-picker-quarter-panel .ant-picker-cell-inner,
+.dark .ant-picker-dropdown .ant-picker-month-panel .ant-picker-cell-inner {
   color: #cbd5e1;
-
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-content th {
+.dark .ant-picker-dropdown .ant-picker-content th {
   color: white !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-picker-dropdown .ant-picker-cell .ant-picker-cell-inner {
+.dark .ant-picker-dropdown .ant-picker-cell .ant-picker-cell-inner {
   color: #cbd5e1 !important;
 }
 
@@ -346,12 +344,12 @@ input[type=number] {
   display: none !important;
 }
 
-.dark textarea:where(.css-dev-only-do-not-override-pjilya).ant-input {
+.dark textarea.ant-input {
   background-color: #111111 !important;
   color: white !important;
 }
 
-.dark :where(.css-dev-only-do-not-override-pjilya).ant-input:placeholder-shown {
+.dark .ant-input:placeholder-shown {
   color: #cbd5e1 !important;
 }
 
