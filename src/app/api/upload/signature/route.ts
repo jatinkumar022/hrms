@@ -15,6 +15,22 @@ cloudinary.config({
 });
 
 export async function POST(request: Request) {
+  // --- Start of Debugging Logs ---
+  console.log("--- Cloudinary Signature Request ---");
+  console.log(
+    "CLOUDINARY_CLOUD_NAME available:",
+    !!process.env.CLOUDINARY_CLOUD_NAME
+  );
+  console.log(
+    "CLOUDINARY_API_KEY available:",
+    !!process.env.CLOUDINARY_API_KEY
+  );
+  console.log(
+    "CLOUDINARY_API_SECRET available:",
+    !!process.env.CLOUDINARY_API_SECRET
+  );
+  // --- End of Debugging Logs ---
+
   const body = await request.json();
   const { paramsToSign } = body;
 
